@@ -1,0 +1,13 @@
+# Team docs are shared separately, never pushed
+docs/
+*.docx
+
+# macOS / editors
+.DS_Store
+.idea/
+*.iml
+.vscode/
+
+# Flutter build output (each project also has its own .gitignore)
+build/
+.dart_tool/
