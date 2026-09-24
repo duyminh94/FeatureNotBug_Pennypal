@@ -1,6 +1,10 @@
 # Team docs are shared separately, never pushed
 docs/
 *.docx
+# Exception: team task sheet is tracked
+!PennyPal_Timeline_WorksSheet.docx
+# Word lock files (created while a .docx is open)
+~$*
 
 # macOS / editors
 .DS_Store
