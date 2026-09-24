@@ -1,30 +1,96 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pennypal_student/utils/app_theme.dart';
+import 'package:pennypal_student/widgets/app_progress_bar.dart';
+import 'package:pennypal_student/widgets/category_icon.dart';
+import 'package:pennypal_student/widgets/confirm_dialog.dart';
+import 'package:pennypal_student/widgets/empty_state.dart';
+import 'package:pennypal_student/widgets/error_state.dart';
+import 'package:pennypal_student/widgets/month_picker.dart';
 
-import 'package:pennypal_student/main.dart';
+/// Wraps a widget with the app theme and localizations for testing.
+Widget buildTestApp(Widget child, {Locale locale = const Locale('en')}) {
+  return MaterialApp(
+    theme: AppTheme.light(),
+    locale: locale,
+    supportedLocales: const [Locale('en'), Locale('vi')],
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    home: Scaffold(body: child),
+  );
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('ErrorState shows Vietnamese text and calls onRetry',
+      (tester) async {
+    int retryCount = 0;
+    await tester.pumpWidget(buildTestApp(
+      ErrorState(onRetry: () => retryCount++),
+      locale: const Locale('vi'),
+    ));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('Đã có lỗi, vui lòng thử lại'), findsOneWidget);
+    await tester.tap(find.text('Thử lại'));
+    expect(retryCount, 1);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('EmptyState hides the button when there is no action',
+      (tester) async {
+    await tester.pumpWidget(buildTestApp(
+      const EmptyState(icon: Icons.inbox, message: 'No data yet'),
+    ));
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('No data yet'), findsOneWidget);
+    expect(find.byType(FilledButton), findsNothing);
+  });
+
+  testWidgets('ConfirmDialog returns true on confirm and false on cancel',
+      (tester) async {
+    bool? result;
+    await tester.pumpWidget(buildTestApp(Builder(
+      builder: (context) => TextButton(
+        onPressed: () async {
+          result = await showConfirmDialog(context, message: 'Delete?');
+        },
+        child: const Text('open'),
+      ),
+    )));
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(result, isTrue);
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(result, isFalse);
+  });
+
+  testWidgets('MonthPicker moves to the previous month across the year',
+      (tester) async {
+    DateTime? picked;
+    await tester.pumpWidget(buildTestApp(
+      MonthPicker(
+          month: DateTime(2026, 1), onChanged: (value) => picked = value),
+    ));
+
+    await tester.tap(find.byTooltip('Previous month'));
+    expect(picked, DateTime(2025, 12));
+  });
+
+  testWidgets('AppProgressBar clamps values above 100%', (tester) async {
+    await tester.pumpWidget(buildTestApp(const AppProgressBar(value: 1.5)));
+
+    final bar = tester
+        .widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator));
+    expect(bar.value, 1.0);
+  });
+
+  test('Unknown icon name falls back to the generic category icon', () {
+    expect(categoryIconData('restaurant'), Icons.restaurant);
+    expect(categoryIconData('not_a_real_icon'), Icons.category);
   });
 }

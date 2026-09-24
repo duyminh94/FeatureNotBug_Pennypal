@@ -1,0 +1,24 @@
+{
+  "categories": {
+    "food": { "type": "expense", "icon": "restaurant", "isSelectable": true, "sortOrder": 1 },
+    "transport": { "type": "expense", "icon": "directions_bus", "isSelectable": true, "sortOrder": 2 },
+    "education": { "type": "expense", "icon": "school", "isSelectable": true, "sortOrder": 3 },
+    "shopping": { "type": "expense", "icon": "shopping_bag", "isSelectable": true, "sortOrder": 4 },
+    "entertainment": { "type": "expense", "icon": "movie", "isSelectable": true, "sortOrder": 5 },
+    "bills": { "type": "expense", "icon": "receipt_long", "isSelectable": true, "sortOrder": 6 },
+    "savings": { "type": "expense", "icon": "savings", "isSelectable": false, "sortOrder": 7 },
+    "miscellaneous": { "type": "expense", "icon": "more_horiz", "isSelectable": true, "sortOrder": 8 },
+    "allowance": { "type": "income", "icon": "family_restroom", "isSelectable": true, "sortOrder": 1 },
+    "scholarship": { "type": "income", "icon": "emoji_events", "isSelectable": true, "sortOrder": 2 },
+    "part_time": { "type": "income", "icon": "work", "isSelectable": true, "sortOrder": 3 },
+    "internship": { "type": "income", "icon": "badge", "isSelectable": true, "sortOrder": 4 },
+    "other_income": { "type": "income", "icon": "attach_money", "isSelectable": true, "sortOrder": 5 }
+  },
+  "app_settings": {
+    "defaultAlertThreshold": 80,
+    "supportEmail": "lenguyen.minh1830@gmail.com",
+    "announcement_en": "",
+    "announcement_vi": "",
+    "announcementActive": false
+  }
+}
