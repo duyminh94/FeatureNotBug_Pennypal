@@ -1,0 +1,150 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'app_theme.dart';
+import 'constants.dart';
+
+/// Translated name of a payment mode.
+class PaymentModeDisplay {
+  static String name(AppLocalizations l10n, String? mode) {
+    return switch (mode) {
+      PaymentModes.cash => l10n.paymentCash,
+      PaymentModes.bankTransfer => l10n.paymentBankTransfer,
+      PaymentModes.eWallet => l10n.paymentEWallet,
+      _ => l10n.paymentOther,
+    };
+  }
+}
+
+class LearningDisplay {
+  static String topicName(AppLocalizations l10n, String topic) {
+    return switch (topic) {
+      LearningTopics.budgeting => l10n.topicBudgeting,
+      LearningTopics.saving => l10n.topicSaving,
+      LearningTopics.income => l10n.topicIncome,
+      LearningTopics.needsVsWants => l10n.topicNeedsVsWants,
+      _ => l10n.topicSmartSpending,
+    };
+  }
+
+  static IconData topicIcon(String topic) {
+    return switch (topic) {
+      LearningTopics.budgeting => Icons.pie_chart_outline,
+      LearningTopics.saving => Icons.savings_outlined,
+      LearningTopics.income => Icons.work_outline,
+      LearningTopics.needsVsWants => Icons.shopping_bag_outlined,
+      _ => Icons.lightbulb_outline,
+    };
+  }
+
+  static Color topicColor(String topic) {
+    return switch (topic) {
+      LearningTopics.budgeting => AppColors.honeyText,
+      LearningTopics.saving => AppColors.primary,
+      LearningTopics.income => AppColors.info,
+      LearningTopics.needsVsWants => AppColors.expense,
+      _ => AppColors.purple,
+    };
+  }
+
+  static Color topicSoftColor(String topic) {
+    return switch (topic) {
+      LearningTopics.budgeting => AppColors.honeySoft,
+      LearningTopics.saving => AppColors.mintSoft,
+      LearningTopics.income => AppColors.infoSoft,
+      LearningTopics.needsVsWants => AppColors.expenseSoft,
+      _ => AppColors.purpleSoft,
+    };
+  }
+
+  static String levelName(AppLocalizations l10n, String level) {
+    return level == LearningLevels.intermediate ? l10n.levelIntermediate : l10n.levelBeginner;
+  }
+}
+
+class StudentStatusDisplay {
+  static String name(AppLocalizations l10n, String? status) {
+    return switch (status) {
+      StudentStatuses.highSchool => l10n.studentStatusHighSchool,
+      StudentStatuses.undergraduate => l10n.studentStatusUndergraduate,
+      StudentStatuses.postgraduate => l10n.studentStatusPostgraduate,
+      _ => l10n.studentStatusOther,
+    };
+  }
+}
+
+/// Name, icon and colors of a default category, used by lists and cards.
+class CategoryDisplay {
+  static String name(AppLocalizations l10n, String categoryId) {
+    return switch (categoryId) {
+      CategoryKeys.food => l10n.categoryFood,
+      CategoryKeys.transport => l10n.categoryTransport,
+      CategoryKeys.education => l10n.categoryEducation,
+      CategoryKeys.shopping => l10n.categoryShopping,
+      CategoryKeys.entertainment => l10n.categoryEntertainment,
+      CategoryKeys.bills => l10n.categoryBills,
+      CategoryKeys.savings => l10n.categorySavings,
+      CategoryKeys.allowance => l10n.categoryAllowance,
+      CategoryKeys.scholarship => l10n.categoryScholarship,
+      CategoryKeys.partTime => l10n.categoryPartTime,
+      CategoryKeys.internship => l10n.categoryInternship,
+      CategoryKeys.otherIncome => l10n.categoryOtherIncome,
+      _ => l10n.categoryMiscellaneous,
+    };
+  }
+
+  static String iconName(String categoryId) {
+    return switch (categoryId) {
+      CategoryKeys.food => 'restaurant',
+      CategoryKeys.transport => 'directions_bus',
+      CategoryKeys.education => 'school',
+      CategoryKeys.shopping => 'shopping_bag',
+      CategoryKeys.entertainment => 'movie',
+      CategoryKeys.bills => 'receipt_long',
+      CategoryKeys.savings => 'savings',
+      CategoryKeys.allowance => 'family_restroom',
+      CategoryKeys.scholarship => 'emoji_events',
+      CategoryKeys.partTime => 'work',
+      CategoryKeys.internship => 'badge',
+      CategoryKeys.otherIncome => 'attach_money',
+      _ => 'more_horiz',
+    };
+  }
+
+  /// Icon color of the category; the tile background uses [softColor].
+  static Color color(String categoryId) {
+    return switch (categoryId) {
+      CategoryKeys.food => AppColors.orange,
+      CategoryKeys.transport => AppColors.info,
+      CategoryKeys.education => AppColors.purple,
+      CategoryKeys.shopping => AppColors.expense,
+      CategoryKeys.entertainment => AppColors.honeyText,
+      CategoryKeys.bills || CategoryKeys.miscellaneous => AppColors.teal,
+      _ => AppColors.primary,
+    };
+  }
+
+  static Color chartColor(String categoryId) {
+    return switch (categoryId) {
+      CategoryKeys.food => const Color(0xFFFF9A52),
+      CategoryKeys.entertainment => const Color(0xFFFFC53D),
+      CategoryKeys.transport => const Color(0xFF4DA3FF),
+      CategoryKeys.shopping => const Color(0xFFFF8FAB),
+      CategoryKeys.education => const Color(0xFF8B7CF6),
+      CategoryKeys.bills => const Color(0xFF3BB4A1),
+      _ => const Color(0xFFA39BA8),
+    };
+  }
+
+  static Color softColor(String categoryId) {
+    return switch (categoryId) {
+      CategoryKeys.food => AppColors.orangeSoft,
+      CategoryKeys.transport => AppColors.infoSoft,
+      CategoryKeys.education => AppColors.purpleSoft,
+      CategoryKeys.shopping => AppColors.expenseSoft,
+      CategoryKeys.entertainment => AppColors.honeySoft,
+      CategoryKeys.bills || CategoryKeys.miscellaneous => AppColors.tealSoft,
+      _ => AppColors.mintSoft,
+    };
+  }
+}
