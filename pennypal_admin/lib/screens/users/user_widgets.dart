@@ -8,6 +8,7 @@ import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/confirm_dialog.dart';
 
+/// Display texts for student fields (education level, join date, last login).
 class UserLabels {
   static String joined(int? millis, String languageCode) {
     if (millis == null) return '–';
@@ -38,6 +39,7 @@ class UserLabels {
   }
 }
 
+/// Confirmation before locking or unlocking; locking explains the student will be signed out.
 Future<bool> confirmLockChange(BuildContext context, UserProfile user) {
   final l10n = AppLocalizations.of(context)!;
   final bool willLock = user.isActive;
@@ -52,6 +54,7 @@ Future<bool> confirmLockChange(BuildContext context, UserProfile user) {
   );
 }
 
+/// Round avatar with the student's initials.
 class UserAvatar extends StatelessWidget {
   final String name;
   final double size;
@@ -71,6 +74,7 @@ class UserAvatar extends StatelessWidget {
   }
 }
 
+/// Active / Locked label.
 class UserStatusBadge extends StatelessWidget {
   final bool isActive;
 
@@ -99,6 +103,7 @@ class UserStatusBadge extends StatelessWidget {
   }
 }
 
+/// Lock button for an active student, Unlock for a locked one.
 class LockButton extends StatelessWidget {
   final bool isActive;
   final VoidCallback onPressed;

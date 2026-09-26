@@ -156,6 +156,8 @@
     }
   },
   "usersNoMatch": "No students match your search.",
+  "usersLoadFailed": "Could not load accounts. Check the connection and try again.",
+  "usersSaveFailed": "Could not change the account. Check the connection and try again.",
   "usersShowing": "Showing {from}–{to} of {total} students",
   "@usersShowing": {
     "placeholders": {
@@ -289,6 +291,8 @@
   "supportMarksResolved": "Marks request as Resolved",
   "supportSendReply": "Send reply",
   "supportReplySent": "Reply sent. The request is now resolved.",
+  "supportLoadFailed": "Could not load support requests. Check the connection and try again.",
+  "supportReplyFailed": "Could not send the reply. Check the connection and try again.",
   "supportRepliedAt": "Your reply · {date}",
   "@supportRepliedAt": {
     "placeholders": {
@@ -321,6 +325,7 @@
   "feedbackNoComment": "No comment",
   "feedbackEmpty": "No feedback yet.",
   "feedbackEmptyFilter": "No feedback with this rating.",
+  "feedbackLoadFailed": "Could not load feedback. Check the connection and try again.",
   "feedbackRatingLabel": "{count} out of 5 stars",
   "@feedbackRatingLabel": {
     "placeholders": {
@@ -389,6 +394,8 @@
   "settingsMissingBoth": "Add the message in both languages before turning the announcement on",
   "settingsSave": "Save settings",
   "settingsSaved": "Settings saved. Students will see the changes next time they open the app.",
+  "settingsLoadFailed": "Could not load the settings. Check the connection and try again.",
+  "settingsSaveFailed": "Could not save the settings. Check the connection and try again.",
   "settingsLastUpdated": "Last updated {date}",
   "@settingsLastUpdated": {
     "placeholders": {

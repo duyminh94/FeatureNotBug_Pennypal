@@ -3,33 +3,100 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../models/app_settings.dart';
+import '../services/settings_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/lesson_editor.dart';
 import '../utils/settings_validator.dart';
 
+/// App Settings page: reads app_settings once from Firebase, then shows the form.
+/// The settings are read once (not live) so a change from elsewhere cannot wipe what the admin is typing.
 class AppSettingsScreen extends StatefulWidget {
-  final AppSettings settings;
-  final ValueChanged<AppSettings> onSaved;
-
-  const AppSettingsScreen({super.key, required this.settings, required this.onSaved});
+  const AppSettingsScreen({super.key});
 
   @override
   State<AppSettingsScreen> createState() => _AppSettingsScreenState();
 }
 
-class _AppSettingsScreenState extends State<AppSettingsScreen> with SingleTickerProviderStateMixin {
-  late final TabController _tabController = TabController(length: 2, vsync: this);
-  late final TextEditingController _emailController = TextEditingController(text: widget.settings.supportEmail);
-  late final TextEditingController _messageEnController = TextEditingController(text: widget.settings.announcementEn);
-  late final TextEditingController _messageViController = TextEditingController(text: widget.settings.announcementVi);
-  late int _threshold = widget.settings.defaultAlertThreshold.clamp(SettingsValidator.minThreshold, SettingsValidator.maxThreshold);
-  late bool _announcementActive = widget.settings.announcementActive;
-  late int? _updatedAt = widget.settings.updatedAt;
+class _AppSettingsScreenState extends State<AppSettingsScreen> {
+  late Future<AppSettings?> _settingsFuture;
 
   @override
   void initState() {
     super.initState();
-    _tabController.addListener(() => setState(() {}));
+    _settingsFuture = SettingsService.load();
+  }
+
+  /// Reads the settings again after a loading error.
+  void _retry() {
+    setState(() {
+      _settingsFuture = SettingsService.load();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return FutureBuilder<AppSettings?>(
+      future: _settingsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final AppSettings? settings = snapshot.data;
+        if (settings == null) {
+          return _LoadError(message: l10n.settingsLoadFailed, onRetry: _retry);
+        }
+        return AppSettingsForm(settings: settings);
+      },
+    );
+  }
+}
+
+/// The settings form: budget alert threshold, support email and the announcement banner in EN / VI.
+/// Rules: threshold 50–100%, a valid support email, and an active banner needs both languages.
+class AppSettingsForm extends StatefulWidget {
+  final AppSettings settings;
+
+  const AppSettingsForm({super.key, required this.settings});
+
+  @override
+  State<AppSettingsForm> createState() => _AppSettingsFormState();
+}
+
+class _AppSettingsFormState extends State<AppSettingsForm> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _messageEnController = TextEditingController();
+  final TextEditingController _messageViController = TextEditingController();
+  int _threshold = SettingsValidator.minThreshold;
+  bool _announcementActive = false;
+  int? _updatedAt;
+
+  // True while saving, so the button cannot save twice.
+  bool _isSaving = false;
+
+  /// Fills the form with the saved settings.
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    // Rebuild when the tab changes so the message box switches language.
+    _tabController.addListener(() {
+      setState(() {});
+    });
+
+    final AppSettings settings = widget.settings;
+    _emailController.text = settings.supportEmail;
+    _messageEnController.text = settings.announcementEn;
+    _messageViController.text = settings.announcementVi;
+    _announcementActive = settings.announcementActive;
+    _updatedAt = settings.updatedAt;
+
+    // Old data may hold a value outside 50–100; keep the slider inside its range.
+    _threshold = settings.defaultAlertThreshold;
+    if (_threshold < SettingsValidator.minThreshold) _threshold = SettingsValidator.minThreshold;
+    if (_threshold > SettingsValidator.maxThreshold) _threshold = SettingsValidator.maxThreshold;
   }
 
   @override
@@ -49,10 +116,11 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> with SingleTicker
         announcementVi: _messageViController.text,
       );
 
-  void _save() {
+  /// Saves to Firebase; "Last updated" only changes when the save works.
+  Future<void> _save() async {
     final l10n = AppLocalizations.of(context)!;
     final int now = DateTime.now().millisecondsSinceEpoch;
-    final AppSettings saved = SettingsValidator.build(
+    final AppSettings newSettings = SettingsValidator.build(
       threshold: _threshold,
       supportEmail: _emailController.text,
       announcementActive: _announcementActive,
@@ -60,16 +128,31 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> with SingleTicker
       announcementVi: _messageViController.text,
       updatedAt: now,
     );
-    setState(() => _updatedAt = now);
-    widget.onSaved(saved);
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(l10n.settingsSaved)));
+
+    setState(() {
+      _isSaving = true;
+    });
+    final bool isSaved = await SettingsService.save(newSettings);
+    if (!mounted) return;
+
+    setState(() {
+      _isSaving = false;
+      if (isSaved) _updatedAt = now;
+    });
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    if (isSaved) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.settingsSaved)));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.settingsSaveFailed)));
+    }
   }
 
+  /// Hint under the message box telling which language is still missing.
   String _missingMessage(AppLocalizations l10n, List<LessonLanguage> missing) {
     if (missing.length == 2) return l10n.settingsMissingBoth;
-    return missing.first == LessonLanguage.en ? l10n.settingsMissingEn : l10n.settingsMissingVi;
+    if (missing.first == LessonLanguage.en) return l10n.settingsMissingEn;
+    return l10n.settingsMissingVi;
   }
 
   @override
@@ -80,6 +163,28 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> with SingleTicker
     final List<LessonLanguage> missing = SettingsValidator.missingAnnouncement(_messageEnController.text, _messageViController.text);
     final bool isEnglishTab = _tabController.index == 0;
     final int? updatedAt = _updatedAt;
+
+    // Hint under the message: green check when both languages are filled,
+    // red warning only when the banner is on (a missing language would then reach students).
+    IconData hintIcon = Icons.check;
+    Color hintColor = AppColors.primary;
+    String hintText = l10n.settingsBothFilled;
+    Color hintTextColor = AppColors.textSecondary;
+    if (missing.isNotEmpty) {
+      hintIcon = Icons.warning_amber_rounded;
+      hintText = _missingMessage(l10n, missing);
+      hintColor = AppColors.textMuted;
+      if (_announcementActive) {
+        hintColor = AppColors.error;
+        hintTextColor = AppColors.error;
+      }
+    }
+
+    String updatedText = l10n.settingsNeverUpdated;
+    if (updatedAt != null) {
+      final DateTime updatedTime = DateTime.fromMillisecondsSinceEpoch(updatedAt);
+      updatedText = l10n.settingsLastUpdated(DateFormat('dd MMM yyyy, HH:mm', languageCode).format(updatedTime));
+    }
 
     return Align(
       alignment: Alignment.topCenter,
@@ -108,7 +213,11 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> with SingleTicker
                       max: SettingsValidator.maxThreshold.toDouble(),
                       divisions: (SettingsValidator.maxThreshold - SettingsValidator.minThreshold) ~/ 5,
                       label: '$_threshold%',
-                      onChanged: (value) => setState(() => _threshold = value.round()),
+                      onChanged: (value) {
+                        setState(() {
+                          _threshold = value.round();
+                        });
+                      },
                     ),
                     Row(
                       children: [
@@ -140,7 +249,11 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> with SingleTicker
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       value: _announcementActive,
-                      onChanged: (value) => setState(() => _announcementActive = value),
+                      onChanged: (value) {
+                        setState(() {
+                          _announcementActive = value;
+                        });
+                      },
                       title: Text(l10n.settingsAnnouncement, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800)),
                       subtitle: Text(l10n.settingsAnnouncementHint),
                     ),
@@ -163,19 +276,10 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> with SingleTicker
                     ),
                     Row(
                       children: [
-                        Icon(
-                          missing.isEmpty ? Icons.check : Icons.warning_amber_rounded,
-                          size: 18,
-                          color: missing.isEmpty ? AppColors.primary : (_announcementActive ? AppColors.error : AppColors.textMuted),
-                        ),
+                        Icon(hintIcon, size: 18, color: hintColor),
                         const SizedBox(width: 6),
                         Expanded(
-                          child: Text(
-                            missing.isEmpty ? l10n.settingsBothFilled : _missingMessage(l10n, missing),
-                            style: TextStyle(
-                              color: missing.isNotEmpty && _announcementActive ? AppColors.error : AppColors.textSecondary,
-                            ),
-                          ),
+                          child: Text(hintText, style: TextStyle(color: hintTextColor)),
                         ),
                       ],
                     ),
@@ -186,18 +290,44 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> with SingleTicker
             const SizedBox(height: 16),
             FilledButton(
               style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-              onPressed: _canSave ? _save : null,
+              onPressed: _canSave && !_isSaving ? _save : null,
               child: Text(l10n.settingsSave),
             ),
             const SizedBox(height: 12),
             Text(
-              updatedAt == null
-                  ? l10n.settingsNeverUpdated
-                  : l10n.settingsLastUpdated(
-                      DateFormat('dd MMM yyyy, HH:mm', languageCode).format(DateTime.fromMillisecondsSinceEpoch(updatedAt))),
+              updatedText,
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppColors.textSecondary),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown when the settings cannot be loaded, e.g. no connection or no permission.
+class _LoadError extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _LoadError({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: 12),
+            Text(message, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+            const SizedBox(height: 12),
+            FilledButton(onPressed: onRetry, child: Text(l10n.commonRetry)),
           ],
         ),
       ),

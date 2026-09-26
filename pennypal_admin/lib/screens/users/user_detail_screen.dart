@@ -3,42 +3,91 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/user_profile.dart';
+import '../../services/user_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/formatters.dart';
-import '../../utils/sample_data.dart';
 import '../../utils/user_filter.dart';
 import 'user_widgets.dart';
 
+/// Details of one student: profile, how many transactions and goals they have,
+/// and the Lock / Unlock button. The admin never sees the amounts, only counts.
 class UserDetailScreen extends StatefulWidget {
-  final String userId;
-  final AdminData data;
-  final ValueChanged<UserProfile> onUserChanged;
+  final UserProfile user;
 
-  const UserDetailScreen({super.key, required this.userId, required this.data, required this.onUserChanged});
+  const UserDetailScreen({super.key, required this.user});
 
   @override
   State<UserDetailScreen> createState() => _UserDetailScreenState();
 }
 
 class _UserDetailScreenState extends State<UserDetailScreen> {
-  late UserProfile _user = widget.data.users.firstWhere((user) => user.uid == widget.userId);
+  late UserProfile _user;
 
+  // Null while loading or when the count could not be read; the card then shows "–".
+  int? _transactionCount;
+  int? _goalCount;
+
+  // True while the lock change is being saved, so the button cannot be pressed twice.
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _user = widget.user;
+    _loadCounts();
+  }
+
+  /// Reads the two counts once when the screen opens.
+  Future<void> _loadCounts() async {
+    final int? transactionCount = await UserService.countTransactions(_user.uid);
+    final int? goalCount = await UserService.countGoals(_user.uid);
+    if (!mounted) return;
+
+    setState(() {
+      _transactionCount = transactionCount;
+      _goalCount = goalCount;
+    });
+  }
+
+  /// Asks first, then saves the new lock state. The screen only changes when the save works.
   Future<void> _toggleLock() async {
+    final l10n = AppLocalizations.of(context)!;
     final bool confirmed = await confirmLockChange(context, _user);
     if (!confirmed || !mounted) return;
 
-    final UserProfile changed = UserFilter.withActive(_user, !_user.isActive);
-    setState(() => _user = changed);
-    widget.onUserChanged(changed);
+    setState(() {
+      _isSaving = true;
+    });
+    final bool isSaved = await UserService.setActive(_user.uid, !_user.isActive);
+    if (!mounted) return;
+
+    setState(() {
+      _isSaving = false;
+      if (isSaved) _user = UserFilter.withActive(_user, !_user.isActive);
+    });
+
+    if (!isSaved) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.usersSaveFailed)));
+    }
+  }
+
+  /// Count as text for the current language, or "–" when it is not available.
+  String _countText(int? count, String languageCode) {
+    if (count == null) return '–';
+    return Formatters.count(count, languageCode);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final String languageCode = Localizations.localeOf(context).languageCode;
-    final int transactionCount = widget.data.transactionsByUser[_user.uid]?.length ?? 0;
-    final int goalCount = widget.data.goalCountByUser[_user.uid] ?? 0;
     final int? lastLogin = _user.lastLogin;
+
+    String lastLoginText = l10n.commonNever;
+    if (lastLogin != null) {
+      lastLoginText = DateFormat('dd MMM yyyy, HH:mm', languageCode).format(DateTime.fromMillisecondsSinceEpoch(lastLogin));
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.userDetailTitle, style: const TextStyle(fontWeight: FontWeight.w800))),
@@ -77,9 +126,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                       _InfoRow(label: l10n.usersJoined, value: UserLabels.joined(_user.createdAt, languageCode)),
                       _InfoRow(
                         label: l10n.usersLastLogin,
-                        value: lastLogin == null
-                            ? l10n.commonNever
-                            : DateFormat('dd MMM yyyy, HH:mm', languageCode).format(DateTime.fromMillisecondsSinceEpoch(lastLogin)),
+                        value: lastLoginText,
                         showDivider: false,
                       ),
                     ],
@@ -89,9 +136,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: _CountCard(label: l10n.userDetailTransactions, value: Formatters.count(transactionCount, languageCode))),
+                  Expanded(child: _CountCard(label: l10n.userDetailTransactions, value: _countText(_transactionCount, languageCode))),
                   const SizedBox(width: 12),
-                  Expanded(child: _CountCard(label: l10n.userDetailGoals, value: Formatters.count(goalCount, languageCode))),
+                  Expanded(child: _CountCard(label: l10n.userDetailGoals, value: _countText(_goalCount, languageCode))),
                 ],
               ),
               const SizedBox(height: 12),
@@ -113,7 +160,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                   minimumSize: const Size.fromHeight(52),
                   backgroundColor: _user.isActive ? AppColors.error : AppColors.primary,
                 ),
-                onPressed: _toggleLock,
+                onPressed: _isSaving ? null : _toggleLock,
                 icon: Icon(_user.isActive ? Icons.lock_outline : Icons.lock_open_outlined),
                 label: Text(_user.isActive ? l10n.usersLockConfirm : l10n.usersUnlockConfirm),
               ),
@@ -125,6 +172,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   }
 }
 
+/// One line of the profile card: label on the left, value on the right.
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
@@ -152,6 +200,7 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
+/// Small card with one number, e.g. the transaction count.
 class _CountCard extends StatelessWidget {
   final String label;
   final String value;
