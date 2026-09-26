@@ -12,7 +12,8 @@
     "scholarship": { "type": "income", "icon": "emoji_events", "isSelectable": true, "sortOrder": 2 },
     "part_time": { "type": "income", "icon": "work", "isSelectable": true, "sortOrder": 3 },
     "internship": { "type": "income", "icon": "badge", "isSelectable": true, "sortOrder": 4 },
-    "other_income": { "type": "income", "icon": "attach_money", "isSelectable": true, "sortOrder": 5 }
+    "gift": { "type": "income", "icon": "card_giftcard", "isSelectable": true, "sortOrder": 5 },
+    "other_income": { "type": "income", "icon": "attach_money", "isSelectable": true, "sortOrder": 6 }
   },
   "app_settings": {
     "defaultAlertThreshold": 80,

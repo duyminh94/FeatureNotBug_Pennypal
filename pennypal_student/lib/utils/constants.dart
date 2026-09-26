@@ -204,7 +204,7 @@ class NotificationTypes {
   static const String supportReplied = 'support_replied';
 }
 
-/// Keys of the 13 default categories (8 expense + 5 income).
+/// Keys of the 14 default categories (8 expense + 6 income).
 class CategoryKeys {
   static const String food = 'food';
   static const String transport = 'transport';
@@ -219,6 +219,7 @@ class CategoryKeys {
   static const String scholarship = 'scholarship';
   static const String partTime = 'part_time';
   static const String internship = 'internship';
+  static const String gift = 'gift';
   static const String otherIncome = 'other_income';
 
   /// Expense categories a student can pick by hand (savings is only created by goal contributions).
@@ -232,7 +233,7 @@ class CategoryKeys {
     miscellaneous,
   ];
 
-  static const List<String> income = [partTime, allowance, scholarship, internship, otherIncome];
+  static const List<String> income = [partTime, allowance, scholarship, internship, gift, otherIncome];
 }
 
 /// The 12 icons a student can pick for a custom category.
