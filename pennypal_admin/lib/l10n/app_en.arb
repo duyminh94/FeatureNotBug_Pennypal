@@ -407,5 +407,6 @@
   "settingsNeverUpdated": "Not saved yet",
   "loginTooMany": "Too many attempts, try again later",
   "loginNetwork": "No internet connection",
-  "loginUnknown": "Something went wrong, please try again"
+  "loginUnknown": "Something went wrong, please try again",
+  "overviewLoadFailed": "Could not load the statistics. Check the connection and try again."
 }

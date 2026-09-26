@@ -1207,5 +1207,28 @@
         "type": "String"
       }
     }
+  },
+  "reportsTypeSpending": "Spending",
+  "reportsTypeIncome": "Income",
+  "reportsIncomeByCategory": "Income by source",
+  "reportsTotalIncome": "Total income",
+  "reportsTopIncome": "Biggest income sources",
+  "reportsNoIncome": "No income this month yet.",
+  "reportsBalance": "Balance (income − expenses)",
+  "reportsBudgetTitle": "Budget vs actual",
+  "reportsNoBudget": "No budget set for this month.",
+  "reportsBudgetUsed": "{spent} of {limit} · {percent}%",
+  "@reportsBudgetUsed": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
   }
 }

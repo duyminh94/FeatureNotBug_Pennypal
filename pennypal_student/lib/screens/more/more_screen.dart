@@ -107,7 +107,7 @@ class _MoreScreenState extends State<MoreScreen> {
                 label: l10n.menuReports,
                 color: AppColors.info,
                 background: AppColors.infoSoft,
-                onTap: () => _openScreen(const ReportsScreen()),
+                onTap: () => _openScreen(ReportsScreen(transactions: widget.transactions, budgets: widget.budgets)),
               ),
               _MenuItem(
                 icon: Icons.sell_outlined,
@@ -146,7 +146,7 @@ class _MoreScreenState extends State<MoreScreen> {
                 label: l10n.dashFeedback,
                 color: AppColors.orange,
                 background: AppColors.orangeSoft,
-                onTap: () => _openScreen(const FeedbackScreen()),
+                onTap: () => _openScreen(FeedbackScreen(profile: _profile)),
               ),
               _MenuItem(
                 icon: Icons.support_outlined,

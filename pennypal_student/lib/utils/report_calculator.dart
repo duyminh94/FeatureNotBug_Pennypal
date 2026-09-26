@@ -64,13 +64,32 @@ class ReportCalculator {
       if (_monthOf(transaction) != key || !_isSpending(transaction)) continue;
       amounts[transaction.categoryId] = (amounts[transaction.categoryId] ?? 0) + transaction.amount;
     }
+    return _shares(amounts);
+  }
 
-    final double total = amounts.values.fold(0, (sum, amount) => sum + amount);
+  /// Income of the month grouped by source (allowance, part-time job, scholarship…).
+  static List<CategoryTotal> incomeByCategory(List<TransactionRecord> transactions, DateTime month) {
+    final String key = BudgetCalculator.monthKey(month);
+    final Map<String, double> amounts = {};
+    for (final TransactionRecord transaction in transactions) {
+      if (_monthOf(transaction) != key || transaction.type != TransactionTypes.income) continue;
+      amounts[transaction.categoryId] = (amounts[transaction.categoryId] ?? 0) + transaction.amount;
+    }
+    return _shares(amounts);
+  }
+
+  /// Amount per category -> list with each category's share of the total, biggest first. Empty when total is 0.
+  static List<CategoryTotal> _shares(Map<String, double> amounts) {
+    double total = 0;
+    for (final double amount in amounts.values) {
+      total += amount;
+    }
     if (total == 0) return [];
 
-    final List<CategoryTotal> result = amounts.entries
-        .map((entry) => CategoryTotal(categoryId: entry.key, amount: entry.value, percent: entry.value / total * 100))
-        .toList();
+    final List<CategoryTotal> result = [];
+    for (final MapEntry<String, double> entry in amounts.entries) {
+      result.add(CategoryTotal(categoryId: entry.key, amount: entry.value, percent: entry.value / total * 100));
+    }
     result.sort((a, b) => b.amount.compareTo(a.amount));
     return result;
   }

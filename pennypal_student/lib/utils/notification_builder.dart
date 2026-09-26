@@ -1,11 +1,12 @@
 import '../models/app_notification.dart';
 import '../models/budget.dart';
 import '../models/savings_goal.dart';
+import '../models/support_query.dart';
 import '../models/transaction_record.dart';
 import 'budget_calculator.dart';
 import 'constants.dart';
 
-/// Builds the in-app notifications from the student's budgets, goals and transactions.
+/// Builds the in-app notifications from the student's budgets, goals, transactions and help requests.
 ///
 /// Nothing is stored here: the list is worked out again every time the data changes, so deleting
 /// or editing an expense also removes a budget alert that is no longer true. Each notification has
@@ -17,6 +18,7 @@ class NotificationBuilder {
     required List<TransactionRecord> transactions,
     required List<Budget> budgets,
     required List<SavingsGoal> goals,
+    List<SupportQuery> supportQueries = const [],
     Set<String> readIds = const {},
   }) {
     final List<AppNotification> notifications = [];
@@ -26,6 +28,20 @@ class NotificationBuilder {
     }
     for (final SavingsGoal goal in goals) {
       notifications.addAll(_goalNotifications(goal, transactions, readIds));
+    }
+    // The admin answered a help request: tell the student once (the "read" mark keeps it quiet after).
+    for (final SupportQuery query in supportQueries) {
+      final String response = query.adminResponse ?? '';
+      if (!query.isResolved || response.isEmpty) continue;
+
+      final String id = 'support_${query.id}';
+      notifications.add(AppNotification(
+        id: id,
+        type: NotificationTypes.supportReplied,
+        params: {'subject': query.subject},
+        isRead: readIds.contains(id),
+        createdAt: query.respondedAt ?? query.submittedAt,
+      ));
     }
 
     notifications.sort((a, b) => (b.createdAt ?? 0).compareTo(a.createdAt ?? 0));
