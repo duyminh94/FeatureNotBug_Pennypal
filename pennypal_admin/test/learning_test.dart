@@ -1,0 +1,81 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:pennypal_admin/models/learning_content.dart';
+import 'package:pennypal_admin/screens/learning/lesson_form_screen.dart';
+import 'package:pennypal_admin/utils/app_theme.dart';
+import 'package:pennypal_admin/utils/constants.dart';
+import 'package:pennypal_admin/utils/lesson_editor.dart';
+import 'package:pennypal_admin/utils/sample_data.dart';
+
+Widget buildApp(Widget home) {
+  return MaterialApp(
+    theme: AppTheme.light(),
+    locale: const Locale('en'),
+    supportedLocales: const [Locale('en'), Locale('vi')],
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    home: Scaffold(body: home),
+  );
+}
+
+void useScreen(WidgetTester tester, Size size) {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+}
+
+LearningContent lesson(String id, String topic, int createdAt) {
+  return LearningContent(id: id, titleEn: id, titleVi: id, bodyEn: 'b', bodyVi: 'b', topic: topic, createdAt: createdAt);
+}
+
+void main() {
+  group('LessonEditor', () {
+    test('LN-04 / BR-63: both languages need a title and a body', () {
+      expect(LessonEditor.missingLanguages(titleEn: '', bodyEn: '', titleVi: '', bodyVi: ''), [LessonLanguage.en, LessonLanguage.vi]);
+      expect(LessonEditor.missingLanguages(titleEn: 'A', bodyEn: 'B', titleVi: '  ', bodyVi: 'C'), [LessonLanguage.vi]);
+      expect(LessonEditor.missingLanguages(titleEn: 'A', bodyEn: 'B', titleVi: 'C', bodyVi: 'D'), isEmpty);
+    });
+
+    test('image URL is optional but must be http or https', () {
+      expect(LessonEditor.isValidImageUrl(''), isTrue);
+      expect(LessonEditor.isValidImageUrl('https://cdn.test/a.png'), isTrue);
+      expect(LessonEditor.isValidImageUrl('http://cdn.test/a.png'), isTrue);
+      expect(LessonEditor.isValidImageUrl('ftp://cdn.test/a.png'), isFalse);
+      expect(LessonEditor.isValidImageUrl('picture.png'), isFalse);
+      expect(LessonEditor.isValidImageUrl('https://'), isFalse);
+    });
+
+    test('filter by topic, newest first, and toggling keeps the text', () {
+      final List<LearningContent> lessons = [
+        lesson('old', LearningTopics.saving, 1),
+        lesson('new', LearningTopics.saving, 3),
+        lesson('other', LearningTopics.income, 2),
+      ];
+
+      expect(LessonEditor.filter(lessons, null).map((item) => item.id), ['new', 'other', 'old']);
+      expect(LessonEditor.filter(lessons, LearningTopics.saving).map((item) => item.id), ['new', 'old']);
+
+      final LearningContent hidden = LessonEditor.withActive(lessons.first, false, 9);
+      expect(hidden.isActive, isFalse);
+      expect(hidden.titleVi, 'old');
+      expect(hidden.updatedAt, 9);
+    });
+  });
+
+  group('Lesson form (A07)', () {
+    FilledButton saveButton(WidgetTester tester) => tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Save lesson'));
+
+    testWidgets('a bad image link blocks saving an otherwise complete lesson', (tester) async {
+      useScreen(tester, const Size(420, 1600));
+      await tester.pumpWidget(buildApp(LessonFormScreen(lessonId: 'lesson_1', initial: SampleData.adminData().lessons.first)));
+
+      expect(find.text('Edit lesson'), findsOneWidget);
+      expect(saveButton(tester).onPressed, isNotNull);
+
+      await tester.enterText(find.byType(TextField).last, 'picture.png');
+      await tester.pump();
+      expect(find.text('Enter a link that starts with http:// or https://'), findsOneWidget);
+      expect(saveButton(tester).onPressed, isNull);
+    });
+  });
+}

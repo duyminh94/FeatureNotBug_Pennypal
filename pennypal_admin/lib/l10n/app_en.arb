@@ -1,0 +1,404 @@
+{
+  "@@locale": "en",
+  "appTitle": "PennyPal Admin",
+  "adminBadge": "ADMIN",
+  "adminConsole": "ADMIN CONSOLE",
+  "loginSubtitle": "Sign in with your admin account",
+  "loginEmail": "Email",
+  "loginPassword": "Password",
+  "loginShowPassword": "Show password",
+  "loginHidePassword": "Hide password",
+  "loginSignIn": "Sign in",
+  "loginFootnote": "Admin accounts are created in Firebase Console",
+  "loginNotAdmin": "This account cannot access Admin",
+  "loginWrong": "Email or password is incorrect",
+  "validationRequired": "This field is required",
+  "validationEmail": "Invalid email address",
+  "navOverview": "Overview",
+  "navAnalytics": "Analytics",
+  "navUsers": "Users",
+  "navLearning": "Learning",
+  "navSupport": "Support",
+  "navFeedbacks": "Feedbacks",
+  "navSettings": "Settings",
+  "navLogout": "Log out",
+  "navMenu": "Menu",
+  "logoutTitle": "Log out of Admin?",
+  "logoutBody": "You will need to sign in again to manage PennyPal.",
+  "commonCancel": "Cancel",
+  "commonViewAll": "View all",
+  "commonYesterday": "Yesterday",
+  "commonMinutesAgo": "{count}m ago",
+  "@commonMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commonHoursAgo": "{count}h ago",
+  "@commonHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "overviewGreetingMorning": "Good morning, Admin",
+  "overviewGreetingAfternoon": "Good afternoon, Admin",
+  "overviewGreetingEvening": "Good evening, Admin",
+  "overviewTotalStudents": "Total students",
+  "overviewAllRegistered": "All registered",
+  "overviewNewThisMonth": "New this month",
+  "overviewTransactions": "Transactions",
+  "overviewThisMonth": "This month",
+  "overviewOpenSupport": "Open support",
+  "overviewNeedsReply": "Needs reply",
+  "overviewAllReplied": "All replied",
+  "overviewAvgRating": "Avg rating",
+  "overviewNoRatings": "No ratings yet",
+  "overviewActiveLessons": "Active lessons",
+  "overviewOfLessons": "of {total} lessons",
+  "@overviewOfLessons": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "overviewNewStudentsChart": "New students per month",
+  "overviewOpenAnalytics": "Open Analytics",
+  "overviewOpenRequests": "Open support requests",
+  "overviewOpenCount": "{count} open",
+  "@overviewOpenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "overviewNoOpenRequests": "No open requests. Everything is answered!",
+  "overviewSubject": "Subject",
+  "overviewStudent": "Student",
+  "overviewSubmitted": "Submitted",
+  "overviewReply": "Reply",
+  "usersSubtitle": "Student accounts · lock / unlock only",
+  "usersSearchHint": "Search by name or email",
+  "usersFilterAll": "All · {count}",
+  "@usersFilterAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "usersFilterActive": "Active · {count}",
+  "@usersFilterActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "usersFilterLocked": "Locked · {count}",
+  "@usersFilterLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statusActive": "Active",
+  "statusLocked": "Locked",
+  "usersName": "Name",
+  "usersEmail": "Email",
+  "usersMobile": "Mobile",
+  "usersJoined": "Joined",
+  "usersLastLogin": "Last login",
+  "usersStatus": "Status",
+  "usersViewDetails": "View details",
+  "usersLock": "Lock",
+  "usersUnlock": "Unlock",
+  "usersLockTitle": "Lock {name}?",
+  "@usersLockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "usersLockBody": "This student will be signed out the next time they open the app and can't sign in until you unlock the account. Their data is kept.",
+  "usersLockConfirm": "Lock account",
+  "usersUnlockTitle": "Unlock {name}?",
+  "@usersUnlockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "usersUnlockBody": "This student will be able to sign in again.",
+  "usersUnlockConfirm": "Unlock account",
+  "usersLockedMessage": "{name} is now locked",
+  "@usersLockedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "usersUnlockedMessage": "{name} is now unlocked",
+  "@usersUnlockedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "usersNoMatch": "No students match your search.",
+  "usersShowing": "Showing {from}–{to} of {total} students",
+  "@usersShowing": {
+    "placeholders": {
+      "from": {
+        "type": "int"
+      },
+      "to": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "commonPrevious": "Previous",
+  "commonNext": "Next",
+  "commonNever": "Never",
+  "commonTodayAt": "Today {time}",
+  "@commonTodayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "commonDaysAgo": "{count} days ago",
+  "@commonDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "userDetailTitle": "User detail",
+  "userDetailStudentStatus": "Student status",
+  "userDetailCurrency": "Currency",
+  "userDetailTransactions": "Transactions",
+  "userDetailGoals": "Savings goals",
+  "userDetailPrivacy": "Individual transactions are private. Admins only see aggregate numbers.",
+  "studentStatusHighSchool": "High school",
+  "studentStatusUndergraduate": "Undergraduate",
+  "studentStatusPostgraduate": "Postgraduate",
+  "studentStatusOther": "Other",
+  "studentStatusNone": "Not specified",
+  "learningAllTopics": "All topics",
+  "topicBudgeting": "Budgeting",
+  "topicSaving": "Saving",
+  "topicIncome": "Income",
+  "topicNeedsVsWants": "Needs vs. wants",
+  "topicSmartSpending": "Smart spending",
+  "levelBeginner": "Beginner",
+  "levelIntermediate": "Intermediate",
+  "learningVisible": "Visible to students",
+  "learningHidden": "Hidden",
+  "learningAdd": "Add lesson",
+  "learningNew": "New lesson",
+  "learningEdit": "Edit lesson",
+  "commonEdit": "Edit",
+  "commonDelete": "Delete",
+  "commonClose": "Close",
+  "learningDeleteTitle": "Delete this lesson?",
+  "learningDeleteBody": "“{title}” will be removed for all students. To hide it temporarily, turn off Active instead.",
+  "@learningDeleteBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "learningDeleted": "Lesson deleted",
+  "learningSaved": "Lesson saved",
+  "learningShown": "“{title}” is now visible to students",
+  "@learningShown": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "learningHiddenMessage": "“{title}” is now hidden",
+  "@learningHiddenMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "learningTitleEn": "Title (EN)",
+  "learningTitleVi": "Title (VI)",
+  "learningBodyEn": "Body (EN)",
+  "learningBodyVi": "Body (VI)",
+  "learningMissingDot": "Missing",
+  "learningTopic": "Topic",
+  "learningLevel": "Level",
+  "learningImageUrl": "Image URL (optional)",
+  "learningImageUrlInvalid": "Enter a link that starts with http:// or https://",
+  "learningActive": "Active",
+  "learningActiveHint": "Show to students",
+  "learningMissingEn": "Fill in the English title and body to save.",
+  "learningMissingVi": "Fill in the Vietnamese title and body to save.",
+  "learningMissingBoth": "Fill in the title and body in both languages to save.",
+  "learningSave": "Save lesson",
+  "learningEmpty": "No lessons in this topic yet.",
+  "learningTitleColumn": "Title",
+  "learningLoadFailed": "Could not load lessons. Check the connection and try again.",
+  "learningSaveFailed": "Could not save the change. Check the connection and try again.",
+  "commonRetry": "Try again",
+  "supportFilterOpen": "Open · {count}",
+  "@supportFilterOpen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "supportFilterResolved": "Resolved · {count}",
+  "@supportFilterResolved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "supportOpen": "Open",
+  "supportResolved": "Resolved",
+  "supportEmptyOpen": "No open requests. Every student has an answer!",
+  "supportEmptyResolved": "No resolved requests yet.",
+  "supportRequestTitle": "Support request",
+  "supportYourReply": "Your reply",
+  "supportReplyHint": "Write a clear answer for the student…",
+  "supportMarksResolved": "Marks request as Resolved",
+  "supportSendReply": "Send reply",
+  "supportReplySent": "Reply sent. The request is now resolved.",
+  "supportRepliedAt": "Your reply · {date}",
+  "@supportRepliedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "supportStudentNotified": "Student notified once in the app",
+  "supportStudentPending": "The student will be notified the next time they open the app",
+  "supportReadOnly": "Resolved requests are read-only.",
+  "feedbackFrom": "{count, plural, =1{from 1 feedback} other{from {count} feedbacks}}",
+  "@feedbackFrom": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feedbackAll": "All",
+  "feedbackStars": "{count}★",
+  "@feedbackStars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feedbackLowest": "≤2★",
+  "feedbackNoComment": "No comment",
+  "feedbackEmpty": "No feedback yet.",
+  "feedbackEmptyFilter": "No feedback with this rating.",
+  "feedbackRatingLabel": "{count} out of 5 stars",
+  "@feedbackRatingLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsFrom": "From",
+  "analyticsTo": "To",
+  "analyticsRangeHint": "Max 12 months · default last 6",
+  "analyticsRangeReversed": "The start month must be before the end month",
+  "analyticsRangeTooLong": "Please choose at most 12 months",
+  "analyticsExport": "Export CSV",
+  "analyticsExported": "Exported {fileName}",
+  "@analyticsExported": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsExportFailed": "Couldn't export the file. Please try again.",
+  "analyticsNewUsers": "New users per month",
+  "analyticsTransactions": "Transactions per month",
+  "analyticsIncome": "Income",
+  "analyticsExpense": "Expense",
+  "analyticsShowTable": "Show data table",
+  "analyticsHideTable": "Hide data table",
+  "analyticsMonth": "Month",
+  "analyticsUsers": "Users",
+  "analyticsIncomeMillion": "Income (M ₫)",
+  "analyticsExpenseMillion": "Expense (M ₫)",
+  "analyticsCount": "Count",
+  "analyticsCategories": "Spending by category · all users",
+  "analyticsMonthsLabel": "{count, plural, =1{1 month} other{{count} months}}",
+  "@analyticsMonthsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsCustomNote": "Custom = total spending − default categories. Savings excluded.",
+  "analyticsNoSpending": "No spending in this period.",
+  "categoryFood": "Food",
+  "categoryTransport": "Transport",
+  "categoryEducation": "Education",
+  "categoryShopping": "Shopping",
+  "categoryEntertainment": "Entertainment",
+  "categoryBills": "Bills",
+  "categoryMiscellaneous": "Misc.",
+  "categoryCustom": "Custom",
+  "settingsTitle": "App settings",
+  "settingsBudgetSupport": "Budget & support",
+  "settingsThreshold": "Default alert threshold",
+  "settingsThresholdHelp": "Used when a student creates a new budget",
+  "settingsSupportEmail": "Support email",
+  "settingsAnnouncement": "Announcement",
+  "settingsAnnouncementHint": "Banner on the student Dashboard",
+  "settingsMessageEn": "Message (EN)",
+  "settingsMessageVi": "Message (VI)",
+  "settingsBothFilled": "English and Vietnamese both filled",
+  "settingsMissingEn": "Add the English message before turning the announcement on",
+  "settingsMissingVi": "Add the Vietnamese message before turning the announcement on",
+  "settingsMissingBoth": "Add the message in both languages before turning the announcement on",
+  "settingsSave": "Save settings",
+  "settingsSaved": "Settings saved. Students will see the changes next time they open the app.",
+  "settingsLastUpdated": "Last updated {date}",
+  "@settingsLastUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsNeverUpdated": "Not saved yet",
+  "loginTooMany": "Too many attempts, try again later",
+  "loginNetwork": "No internet connection",
+  "loginUnknown": "Something went wrong, please try again"
+}
