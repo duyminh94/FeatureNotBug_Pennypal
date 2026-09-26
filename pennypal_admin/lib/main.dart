@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'firebase_options.dart';
-import 'screens/login/login_screen.dart';
+import 'screens/login_screen.dart';
 import 'services/locale_service.dart';
 import 'utils/app_theme.dart';
 
-/// Starts Firebase and the saved language, then opens the admin login.
-/// The app still opens when Firebase fails so the login screen can show the error.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -22,7 +20,6 @@ Future<void> main() async {
   runApp(const PennyPalAdminApp());
 }
 
-/// Root widget; rebuilds the whole app when the admin switches EN / VI.
 class PennyPalAdminApp extends StatelessWidget {
   const PennyPalAdminApp({super.key});
 

@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../models/admin_data.dart';
-import '../../models/user_profile.dart';
-import '../../services/admin_auth_service.dart';
-import '../../utils/admin_section.dart';
-import '../../utils/app_theme.dart';
-import '../../utils/constants.dart';
-import '../../utils/formatters.dart';
-import '../../widgets/confirm_dialog.dart';
-import '../../widgets/language_toggle.dart';
-import '../login/login_screen.dart';
-import '../overview/overview_screen.dart';
+import '../models/user_profile.dart';
+import '../services/admin_auth_service.dart';
+import '../utils/admin_section.dart';
+import '../utils/app_theme.dart';
+import '../utils/constants.dart';
+import '../utils/formatters.dart';
+import '../utils/overview_calculator.dart';
+import '../utils/sample_data.dart';
+import '../widgets/confirm_dialog.dart';
+import '../widgets/language_toggle.dart';
+import 'analytics_screen.dart';
+import 'app_settings_screen.dart';
+import 'feedbacks/feedbacks_screen.dart';
+import 'learning/learning_screen.dart';
+import 'login_screen.dart';
+import 'overview_screen.dart';
+import 'support/support_screen.dart';
+import 'users/users_screen.dart';
 
-/// Main frame after login: the menu, the signed-in admin and the selected page.
-/// Wide screens (tablet) show a side rail, phones show a drawer.
 class AdminShell extends StatefulWidget {
+  final AdminData data;
   final UserProfile admin;
   final Future<void> Function() signOut;
 
-  const AdminShell({super.key, required this.admin, this.signOut = AdminAuthService.signOut});
+  const AdminShell({super.key, required this.data, required this.admin, this.signOut = AdminAuthService.signOut});
 
   @override
   State<AdminShell> createState() => _AdminShellState();
@@ -28,10 +34,6 @@ class AdminShell extends StatefulWidget {
 class _AdminShellState extends State<AdminShell> {
   AdminSection _section = AdminSection.overview;
 
-  // Empty until the screens are connected to Firebase.
-  final AdminData _data = AdminData.empty();
-
-  /// Menu title of a section in the current language.
   String _label(AppLocalizations l10n, AdminSection section) {
     return switch (section) {
       AdminSection.overview => l10n.navOverview,
@@ -44,7 +46,6 @@ class _AdminShellState extends State<AdminShell> {
     };
   }
 
-  /// Menu icon of a section.
   IconData _icon(AdminSection section) {
     return switch (section) {
       AdminSection.overview => Icons.bar_chart,
@@ -57,10 +58,15 @@ class _AdminShellState extends State<AdminShell> {
     };
   }
 
-  /// Switches the page shown next to the menu.
   void _open(AdminSection section) => setState(() => _section = section);
 
-  /// Asks for confirmation, signs out, then goes back to login and clears the page history.
+  void _updateUser(UserProfile changed) {
+    setState(() {
+      final int index = widget.data.users.indexWhere((user) => user.uid == changed.uid);
+      if (index >= 0) widget.data.users[index] = changed;
+    });
+  }
+
   Future<void> _logout() async {
     final l10n = AppLocalizations.of(context)!;
     final bool confirmed = await showConfirmDialog(
@@ -81,36 +87,41 @@ class _AdminShellState extends State<AdminShell> {
     );
   }
 
-  /// Page of the selected section; sections not built yet show their icon and name.
-  Widget _page(AppLocalizations l10n) {
-    if (_section == AdminSection.overview) {
-      return OverviewScreen(data: _data, onOpenSection: _open);
-    }
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(_icon(_section), size: 64, color: AppColors.textMuted),
-          const SizedBox(height: 12),
-          Text(_label(l10n, _section), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-        ],
-      ),
-    );
+  Widget _page() {
+    return switch (_section) {
+      AdminSection.overview => OverviewScreen(data: widget.data, onOpenSection: _open),
+      AdminSection.analytics => AnalyticsScreen(data: widget.data),
+      AdminSection.users => UsersScreen(data: widget.data, onUserChanged: _updateUser),
+      AdminSection.learning => const LearningScreen(),
+      AdminSection.support => SupportScreen(data: widget.data, onChanged: () => setState(() {})),
+      AdminSection.feedbacks => FeedbacksScreen(feedbacks: widget.data.feedbacks),
+      AdminSection.settings => AppSettingsScreen(
+          settings: widget.data.settings,
+          onSaved: (settings) => setState(() => widget.data.settings = settings),
+        ),
+    };
+  }
+
+  Widget _iconWithBadge(AdminSection section, int openSupport) {
+    final Widget icon = Icon(_icon(section));
+    if (section != AdminSection.support || openSupport == 0) return icon;
+    return Badge(label: Text('$openSupport'), child: icon);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final int openSupport = OverviewCalculator.openQueries(widget.data.supportByUser).length;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool isWide = constraints.maxWidth >= AdminLayout.wideBreakpoint;
-        return isWide ? _buildWide(l10n) : _buildNarrow(l10n);
+        return isWide ? _buildWide(l10n, openSupport) : _buildNarrow(l10n, openSupport);
       },
     );
   }
 
-  /// Tablet layout: rail on the left, page title and admin info on top.
-  Widget _buildWide(AppLocalizations l10n) {
+  Widget _buildWide(AppLocalizations l10n, int openSupport) {
     return Scaffold(
       body: Row(
         children: [
@@ -147,7 +158,7 @@ class _AdminShellState extends State<AdminShell> {
             ),
             destinations: AdminSection.values
                 .map((section) => NavigationRailDestination(
-                      icon: Icon(_icon(section)),
+                      icon: _iconWithBadge(section, openSupport),
                       label: Text(_label(l10n, section)),
                     ))
                 .toList(),
@@ -180,7 +191,7 @@ class _AdminShellState extends State<AdminShell> {
                   ),
                 ),
                 const Divider(height: 1, color: AppColors.border),
-                Expanded(child: _page(l10n)),
+                Expanded(child: _page()),
               ],
             ),
           ),
@@ -189,8 +200,7 @@ class _AdminShellState extends State<AdminShell> {
     );
   }
 
-  /// Phone layout: app bar with a drawer menu.
-  Widget _buildNarrow(AppLocalizations l10n) {
+  Widget _buildNarrow(AppLocalizations l10n, int openSupport) {
     return Scaffold(
       appBar: AppBar(
         title: Text(_label(l10n, _section), style: const TextStyle(fontWeight: FontWeight.w800)),
@@ -228,6 +238,7 @@ class _AdminShellState extends State<AdminShell> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   children: AdminSection.values.map((section) {
                     final bool isSelected = section == _section;
+                    final bool showBadge = section == AdminSection.support && openSupport > 0;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: ListTile(
@@ -237,6 +248,7 @@ class _AdminShellState extends State<AdminShell> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         leading: Icon(_icon(section)),
                         title: Text(_label(l10n, section), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                        trailing: showBadge ? Badge(label: Text('$openSupport'), largeSize: 24) : null,
                         onTap: () {
                           Navigator.of(context).pop();
                           _open(section);
@@ -261,12 +273,11 @@ class _AdminShellState extends State<AdminShell> {
           ),
         ),
       ),
-      body: _page(l10n),
+      body: _page(),
     );
   }
 }
 
-/// Round avatar with the admin's initials.
 class _AdminAvatar extends StatelessWidget {
   final String name;
 

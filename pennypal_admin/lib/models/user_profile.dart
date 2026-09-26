@@ -61,7 +61,7 @@ class UserProfile {
     };
   }
 
-  /// First letter of the name, used as the avatar.
+  /// First letter of the name, used as the avatar (A-21).
   String get initial => fullName.isEmpty ? '?' : fullName[0].toUpperCase();
 
   /// True when the user is an admin.

@@ -1,0 +1,177 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
+
+import '../../models/user_profile.dart';
+import '../../utils/app_theme.dart';
+import '../../utils/formatters.dart';
+import '../../utils/sample_data.dart';
+import '../../utils/user_filter.dart';
+import 'user_widgets.dart';
+
+class UserDetailScreen extends StatefulWidget {
+  final String userId;
+  final AdminData data;
+  final ValueChanged<UserProfile> onUserChanged;
+
+  const UserDetailScreen({super.key, required this.userId, required this.data, required this.onUserChanged});
+
+  @override
+  State<UserDetailScreen> createState() => _UserDetailScreenState();
+}
+
+class _UserDetailScreenState extends State<UserDetailScreen> {
+  late UserProfile _user = widget.data.users.firstWhere((user) => user.uid == widget.userId);
+
+  Future<void> _toggleLock() async {
+    final bool confirmed = await confirmLockChange(context, _user);
+    if (!confirmed || !mounted) return;
+
+    final UserProfile changed = UserFilter.withActive(_user, !_user.isActive);
+    setState(() => _user = changed);
+    widget.onUserChanged(changed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final String languageCode = Localizations.localeOf(context).languageCode;
+    final int transactionCount = widget.data.transactionsByUser[_user.uid]?.length ?? 0;
+    final int goalCount = widget.data.goalCountByUser[_user.uid] ?? 0;
+    final int? lastLogin = _user.lastLogin;
+
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.userDetailTitle, style: const TextStyle(fontWeight: FontWeight.w800))),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          UserAvatar(name: _user.fullName, size: 64),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(_user.fullName, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+                                const SizedBox(height: 6),
+                                UserStatusBadge(isActive: _user.isActive),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _InfoRow(label: l10n.usersEmail, value: _user.email),
+                      _InfoRow(label: l10n.usersMobile, value: _user.mobileNumber),
+                      _InfoRow(label: l10n.userDetailStudentStatus, value: UserLabels.studentStatus(l10n, _user.studentStatus)),
+                      _InfoRow(label: l10n.userDetailCurrency, value: _user.currency),
+                      _InfoRow(label: l10n.usersJoined, value: UserLabels.joined(_user.createdAt, languageCode)),
+                      _InfoRow(
+                        label: l10n.usersLastLogin,
+                        value: lastLogin == null
+                            ? l10n.commonNever
+                            : DateFormat('dd MMM yyyy, HH:mm', languageCode).format(DateTime.fromMillisecondsSinceEpoch(lastLogin)),
+                        showDivider: false,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(child: _CountCard(label: l10n.userDetailTransactions, value: Formatters.count(transactionCount, languageCode))),
+                  const SizedBox(width: 12),
+                  Expanded(child: _CountCard(label: l10n.userDetailGoals, value: Formatters.count(goalCount, languageCode))),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: AppColors.infoSoft, borderRadius: BorderRadius.circular(16)),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.verified_user_outlined, color: AppColors.info),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(l10n.userDetailPrivacy, style: const TextStyle(color: AppColors.info, fontSize: 15))),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  backgroundColor: _user.isActive ? AppColors.error : AppColors.primary,
+                ),
+                onPressed: _toggleLock,
+                icon: Icon(_user.isActive ? Icons.lock_outline : Icons.lock_open_outlined),
+                label: Text(_user.isActive ? l10n.usersLockConfirm : l10n.usersUnlockConfirm),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool showDivider;
+
+  const _InfoRow({required this.label, required this.value, this.showDivider = true});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        border: showDivider ? const Border(bottom: BorderSide(color: AppColors.border)) : null,
+      ),
+      child: Row(
+        children: [
+          Text(label, style: const TextStyle(fontSize: 15, color: AppColors.textSecondary)),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(value, textAlign: TextAlign.right, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CountCard extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _CountCard({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+            const SizedBox(height: 6),
+            Text(value, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
+          ],
+        ),
+      ),
+    );
+  }
+}

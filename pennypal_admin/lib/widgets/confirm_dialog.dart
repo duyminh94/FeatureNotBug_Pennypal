@@ -3,8 +3,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../utils/app_theme.dart';
 
-/// Asks the admin to confirm an action. Returns true only when Confirm is pressed;
-/// Cancel or tapping outside the dialog returns false.
 Future<bool> showConfirmDialog(
   BuildContext context, {
   required String title,

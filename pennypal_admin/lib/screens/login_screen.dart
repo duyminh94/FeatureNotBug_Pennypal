@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../services/admin_auth_service.dart';
-import '../../utils/app_theme.dart';
-import '../../utils/constants.dart';
-import '../../utils/validators.dart';
-import '../../widgets/language_toggle.dart';
-import '../shell/admin_shell.dart';
+import '../services/admin_auth_service.dart';
+import '../utils/app_theme.dart';
+import '../utils/constants.dart';
+import '../utils/sample_data.dart';
+import '../utils/validators.dart';
+import '../widgets/language_toggle.dart';
+import 'admin_shell.dart';
 
-/// Admin login. Only accounts with the admin role get past this screen.
 class LoginScreen extends StatefulWidget {
-  /// Login function; the real Firebase login by default, a fake one can be passed in tests.
+  final AdminData? data;
   final Future<AdminLoginResult> Function(String email, String password) signIn;
 
-  const LoginScreen({super.key, this.signIn = AdminAuthService.signIn});
+  const LoginScreen({super.key, this.data, this.signIn = AdminAuthService.signIn});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -34,12 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  /// Checks the form, logs in, then opens the admin menu.
-  /// On failure the screen stays here and shows the reason above the form.
   Future<void> _signIn() async {
-    if (_isLoading) return;
-    if (!_formKey.currentState!.validate()) return;
-
+    if (_isLoading || !_formKey.currentState!.validate()) return;
     setState(() {
       _isLoading = true;
       _problem = AdminLoginProblem.none;
@@ -55,16 +51,15 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Replace the login screen so the Back button cannot return to it.
+    final AdminData data = widget.data ?? SampleData.adminData();
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => AdminShell(admin: result.admin!)),
+      MaterialPageRoute(builder: (context) => AdminShell(data: data, admin: result.admin!)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Message for the last failed login, null when there is nothing to show.
     final String? errorText = switch (_problem) {
       AdminLoginProblem.notAdmin => l10n.loginNotAdmin,
       AdminLoginProblem.wrongCredentials => l10n.loginWrong,
@@ -136,7 +131,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               textInputAction: TextInputAction.next,
-                              // Hide the old error as soon as the admin edits the email.
                               onChanged: (_) => setState(() => _problem = AdminLoginProblem.none),
                               validator: (value) {
                                 if (Validators.isEmpty(value)) return l10n.validationRequired;

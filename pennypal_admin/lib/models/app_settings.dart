@@ -18,7 +18,7 @@ class AppSettings {
     this.updatedAt,
   });
 
-  /// Builds settings from the map read at app_settings (missing fields use defaults).
+  /// Builds settings from the map read at app_settings (missing fields use defaults, BR-105).
   factory AppSettings.fromMap(Map<dynamic, dynamic> map) {
     return AppSettings(
       defaultAlertThreshold:

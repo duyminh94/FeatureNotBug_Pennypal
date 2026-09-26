@@ -1,4 +1,3 @@
-/// Field names used in the Realtime Database.
 class DbFields {
   static const String fullName = 'fullName';
   static const String email = 'email';
@@ -51,19 +50,16 @@ class DbFields {
   static const String announcementActive = 'announcementActive';
 }
 
-/// Values of the transaction "type" field.
 class TransactionTypes {
   static const String income = 'income';
   static const String expense = 'expense';
 }
 
-/// Values of the user "role" field; only admin can open this app.
 class UserRoles {
   static const String student = 'student';
   static const String admin = 'admin';
 }
 
-/// Education levels a student can pick when registering.
 class StudentStatuses {
   static const String highSchool = 'high_school';
   static const String undergraduate = 'undergraduate';
@@ -71,18 +67,15 @@ class StudentStatuses {
   static const String other = 'other';
 }
 
-/// Supported currencies.
 class Currencies {
   static const String vnd = 'VND';
 }
 
-/// A support request is open until the admin replies.
 class SupportStatuses {
   static const String open = 'open';
   static const String resolved = 'resolved';
 }
 
-/// Difficulty levels of a lesson.
 class LearningLevels {
   static const String beginner = 'beginner';
   static const String intermediate = 'intermediate';
@@ -90,7 +83,6 @@ class LearningLevels {
   static const List<String> values = [beginner, intermediate];
 }
 
-/// Topics a lesson can belong to.
 class LearningTopics {
   static const String budgeting = 'budgeting';
   static const String saving = 'saving';
@@ -101,7 +93,6 @@ class LearningTopics {
   static const List<String> values = [budgeting, saving, income, needsVsWants, smartSpending];
 }
 
-/// Keys of the default categories created for every student.
 class CategoryKeys {
   static const String food = 'food';
   static const String transport = 'transport';
@@ -115,14 +106,11 @@ class CategoryKeys {
   static const String allowance = 'allowance';
 }
 
-/// Default values when a setting has not been saved yet.
 class AppDefaults {
-  /// Budget warning shows when a student has spent this percent of a budget.
   static const int alertThreshold = 80;
   static const String currency = Currencies.vnd;
 }
 
-/// Image paths inside assets/.
 class AppAssets {
   static const String logo = 'assets/images/logo.png';
 }

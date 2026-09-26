@@ -3,33 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
-import '../../models/admin_data.dart';
-import '../../models/support_query.dart';
-import '../../utils/admin_section.dart';
-import '../../utils/app_theme.dart';
-import '../../utils/formatters.dart';
-import '../../utils/overview_calculator.dart';
+import '../models/support_query.dart';
+import '../utils/admin_section.dart';
+import '../utils/app_theme.dart';
+import '../utils/formatters.dart';
+import '../utils/overview_calculator.dart';
+import '../utils/sample_data.dart';
 
-/// First page after login: six summary cards, open support requests
-/// and (on tablets) a chart of new students in the last six months.
 class OverviewScreen extends StatelessWidget {
-  // Phones only list the three newest requests, the rest are in Support.
   static const int mobileRequestCount = 3;
   static const double chartBreakpoint = 1000;
   static const double statCardHeight = 170;
 
   final AdminData data;
   final ValueChanged<AdminSection> onOpenSection;
-  /// Fixed "today" for tests; the real clock is used when null.
   final DateTime? now;
 
   const OverviewScreen({super.key, required this.data, required this.onOpenSection, this.now});
 
-  /// Good morning before 12:00, good afternoon before 18:00, good evening after.
   String _greeting(AppLocalizations l10n, DateTime time) {
     if (time.hour < 12) return l10n.overviewGreetingMorning;
-    if (time.hour < 18) return l10n.overviewGreetingAfternoon;
-    return l10n.overviewGreetingEvening;
+    return time.hour < 18 ? l10n.overviewGreetingAfternoon : l10n.overviewGreetingEvening;
   }
 
   @override
@@ -43,12 +37,8 @@ class OverviewScreen extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final double width = constraints.maxWidth;
+        final int columns = width >= 1100 ? 6 : (width >= AdminLayout.wideBreakpoint ? 3 : 2);
         final bool isWide = width >= AdminLayout.wideBreakpoint;
-
-        // Cards per row: 6 on a large tablet, 3 on a tablet, 2 on a phone.
-        int columns = 2;
-        if (isWide) columns = 3;
-        if (width >= 1100) columns = 6;
 
         final List<Widget> cards = [
           _StatCard(
@@ -160,7 +150,6 @@ class OverviewScreen extends StatelessWidget {
   }
 }
 
-/// Short "how long ago" text for a request: minutes, hours, yesterday, or dd/MM.
 String _timeAgo(AppLocalizations l10n, int? millis, DateTime now) {
   if (millis == null) return '';
   final DateTime time = DateTime.fromMillisecondsSinceEpoch(millis);
@@ -171,7 +160,6 @@ String _timeAgo(AppLocalizations l10n, int? millis, DateTime now) {
   return DateFormat('dd/MM').format(time);
 }
 
-/// One summary card: title, big number, and either a caption or star rating.
 class _StatCard extends StatelessWidget {
   final String title;
   final String value;
@@ -240,7 +228,6 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-/// Phone version of the open requests: a short list with "View all".
 class _RequestsList extends StatelessWidget {
   final List<SupportQuery> queries;
   final DateTime now;
@@ -285,7 +272,6 @@ class _RequestsList extends StatelessWidget {
   }
 }
 
-/// Tablet version of the open requests: a table with a Reply button per row.
 class _RequestsTable extends StatelessWidget {
   final List<SupportQuery> queries;
   final DateTime now;
@@ -347,7 +333,6 @@ class _RequestsTable extends StatelessWidget {
   }
 }
 
-/// Bar chart of new student sign-ups per month.
 class _NewStudentsChart extends StatelessWidget {
   final AdminData data;
   final DateTime now;
@@ -360,12 +345,7 @@ class _NewStudentsChart extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final String languageCode = Localizations.localeOf(context).languageCode;
     final List<MonthCount> counts = OverviewCalculator.newStudentsPerMonth(data.users, now);
-    int maxCount = 0;
-    for (final MonthCount item in counts) {
-      if (item.count > maxCount) maxCount = item.count;
-    }
-    // Leave space above the tallest bar for its number; use 1 when every month is 0.
-    final double chartTop = (maxCount == 0 ? 1 : maxCount) * 1.25;
+    final int maxCount = counts.fold(0, (max, item) => item.count > max ? item.count : max);
 
     return Card(
       child: Padding(
@@ -384,7 +364,7 @@ class _NewStudentsChart extends StatelessWidget {
               height: 220,
               child: BarChart(
                 BarChartData(
-                  maxY: chartTop,
+                  maxY: (maxCount == 0 ? 1 : maxCount) * 1.25,
                   alignment: BarChartAlignment.spaceAround,
                   gridData: const FlGridData(show: false),
                   borderData: FlBorderData(show: false),

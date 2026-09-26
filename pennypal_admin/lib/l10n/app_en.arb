@@ -260,6 +260,9 @@
   "learningSave": "Save lesson",
   "learningEmpty": "No lessons in this topic yet.",
   "learningTitleColumn": "Title",
+  "learningLoadFailed": "Could not load lessons. Check the connection and try again.",
+  "learningSaveFailed": "Could not save the change. Check the connection and try again.",
+  "commonRetry": "Try again",
   "supportFilterOpen": "Open · {count}",
   "@supportFilterOpen": {
     "placeholders": {
