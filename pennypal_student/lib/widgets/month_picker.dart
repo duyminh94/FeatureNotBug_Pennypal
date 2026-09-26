@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
+import '../utils/app_theme.dart';
+
 /// "< September 2026 >" selector; always passes the first day of the chosen month.
 class MonthPicker extends StatelessWidget {
   final DateTime month;
@@ -13,7 +15,8 @@ class MonthPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final String languageCode = Localizations.localeOf(context).languageCode;
-    final String label = DateFormat.yMMMM(languageCode).format(month);
+    final String monthText = DateFormat.yMMMM(languageCode).format(month);
+    final String label = monthText[0].toUpperCase() + monthText.substring(1);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -23,7 +26,22 @@ class MonthPicker extends StatelessWidget {
           icon: const Icon(Icons.chevron_left),
           onPressed: () => onChanged(DateTime(month.year, month.month - 1)),
         ),
-        Text(label, style: Theme.of(context).textTheme.titleMedium),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(99),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.calendar_today_outlined, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            ],
+          ),
+        ),
         IconButton(
           tooltip: l10n.commonNextMonth,
           icon: const Icon(Icons.chevron_right),

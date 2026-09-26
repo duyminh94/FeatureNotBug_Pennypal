@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/user_profile.dart';
 import '../services/admin_auth_service.dart';
+import '../services/admin_data_service.dart';
 import '../utils/admin_section.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
@@ -21,11 +22,12 @@ import 'support/support_screen.dart';
 import 'users/users_screen.dart';
 
 class AdminShell extends StatefulWidget {
-  final AdminData data;
+  /// Null in the real app: the shell loads the data from Firebase. Tests pass ready-made data.
+  final AdminData? data;
   final UserProfile admin;
   final Future<void> Function() signOut;
 
-  const AdminShell({super.key, required this.data, required this.admin, this.signOut = AdminAuthService.signOut});
+  const AdminShell({super.key, this.data, required this.admin, this.signOut = AdminAuthService.signOut});
 
   @override
   State<AdminShell> createState() => _AdminShellState();
@@ -33,6 +35,20 @@ class AdminShell extends StatefulWidget {
 
 class _AdminShellState extends State<AdminShell> {
   AdminSection _section = AdminSection.overview;
+  late Future<AdminData> _dataFuture = _loadData();
+  int _openSupport = 0;
+
+  /// Reads the data once; the support badge is updated when it arrives.
+  Future<AdminData> _loadData() {
+    final AdminData? readyData = widget.data;
+    final Future<AdminData> future = readyData != null ? Future.value(readyData) : AdminDataService.load();
+    future.then((data) {
+      if (mounted) setState(() => _openSupport = OverviewCalculator.openQueries(data.supportByUser).length);
+    }).catchError((Object error) {
+      debugPrint('AdminShell data failed: $error');
+    });
+    return future;
+  }
 
   String _label(AppLocalizations l10n, AdminSection section) {
     return switch (section) {
@@ -58,13 +74,42 @@ class _AdminShellState extends State<AdminShell> {
     };
   }
 
-  void _open(AdminSection section) => setState(() => _section = section);
-
-  void _updateUser(UserProfile changed) {
+  /// Opening Overview or Analytics reads the data again, so the numbers are never old.
+  void _open(AdminSection section) {
     setState(() {
-      final int index = widget.data.users.indexWhere((user) => user.uid == changed.uid);
-      if (index >= 0) widget.data.users[index] = changed;
+      _section = section;
+      if (section == AdminSection.overview || section == AdminSection.analytics) _dataFuture = _loadData();
     });
+  }
+
+  Widget _withData(Widget Function(AdminData data) buildPage) {
+    return FutureBuilder<AdminData>(
+      future: _dataFuture,
+      // Data passed in (tests) is shown at once instead of waiting one frame.
+      initialData: widget.data,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          final l10n = AppLocalizations.of(context)!;
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.cloud_off, size: 48, color: AppColors.textMuted),
+                  const SizedBox(height: 12),
+                  Text(l10n.overviewLoadFailed, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+                  const SizedBox(height: 12),
+                  FilledButton(onPressed: () => setState(() => _dataFuture = _loadData()), child: Text(l10n.commonRetry)),
+                ],
+              ),
+            ),
+          );
+        }
+        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        return buildPage(snapshot.data!);
+      },
+    );
   }
 
   Future<void> _logout() async {
@@ -89,16 +134,13 @@ class _AdminShellState extends State<AdminShell> {
 
   Widget _page() {
     return switch (_section) {
-      AdminSection.overview => OverviewScreen(data: widget.data, onOpenSection: _open),
-      AdminSection.analytics => AnalyticsScreen(data: widget.data),
-      AdminSection.users => UsersScreen(data: widget.data, onUserChanged: _updateUser),
+      AdminSection.overview => _withData((data) => OverviewScreen(data: data, onOpenSection: _open)),
+      AdminSection.analytics => _withData((data) => AnalyticsScreen(data: data)),
+      AdminSection.users => const UsersScreen(),
       AdminSection.learning => const LearningScreen(),
       AdminSection.support => const SupportScreen(),
       AdminSection.feedbacks => const FeedbacksScreen(),
-      AdminSection.settings => AppSettingsScreen(
-          settings: widget.data.settings,
-          onSaved: (settings) => setState(() => widget.data.settings = settings),
-        ),
+      AdminSection.settings => const AppSettingsScreen(),
     };
   }
 
@@ -111,7 +153,7 @@ class _AdminShellState extends State<AdminShell> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final int openSupport = OverviewCalculator.openQueries(widget.data.supportByUser).length;
+    final int openSupport = _openSupport;
 
     return LayoutBuilder(
       builder: (context, constraints) {

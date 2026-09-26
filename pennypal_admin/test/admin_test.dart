@@ -162,7 +162,7 @@ void main() {
 
     testWidgets('the admin account opens the Overview', (tester) async {
       useScreen(tester, const Size(1400, 1000));
-      await tester.pumpWidget(buildApp(LoginScreen(signIn: fakeSignIn)));
+      await tester.pumpWidget(buildApp(LoginScreen(signIn: fakeSignIn, data: SampleData.adminData())));
       await signIn(tester, 'admin@pennypal.app');
 
       expect(find.byType(AdminShell), findsOneWidget);

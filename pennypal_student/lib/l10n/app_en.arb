@@ -1,7 +1,6 @@
 {
   "@@locale": "en",
   "appTitle": "PennyPal",
-
   "commonSave": "Save",
   "commonCancel": "Cancel",
   "commonDelete": "Delete",
@@ -20,7 +19,6 @@
   "commonPreviousMonth": "Previous month",
   "commonNextMonth": "Next month",
   "commonOffline": "You are offline. Changes will sync automatically.",
-
   "validationRequired": "This field is required",
   "validationEmail": "Invalid email address",
   "validationPassword": "At least 8 characters with letters and numbers",
@@ -33,11 +31,12 @@
   "validationMaxLength": "Maximum {max} characters",
   "@validationMaxLength": {
     "placeholders": {
-      "max": { "type": "int" }
+      "max": {
+        "type": "int"
+      }
     }
   },
   "validationRating": "Please choose a rating",
-
   "errorEmailInUse": "This email is already registered",
   "errorInvalidLogin": "Incorrect email or password",
   "errorWeakPassword": "Password is too weak",
@@ -47,7 +46,6 @@
   "errorUnknown": "Something went wrong, please try again",
   "errorWrongApp": "This account cannot use this app",
   "errorAccountLocked": "Your account has been locked",
-
   "categoryFood": "Food",
   "categoryTransport": "Transport",
   "categoryEducation": "Education",
@@ -60,5 +58,1177 @@
   "categoryScholarship": "Scholarship",
   "categoryPartTime": "Part-time job",
   "categoryInternship": "Internship",
-  "categoryOtherIncome": "Other"
+  "categoryOtherIncome": "Other",
+  "commonComingSoon": "This screen is coming soon",
+  "commonBack": "Back",
+  "splashTagline": "A cheerful money diary for students",
+  "splashSubtitle": "Track spending, set budgets and save up — a little every day.",
+  "splashGetStarted": "Get started",
+  "authEmail": "Email",
+  "authPassword": "Password",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password",
+  "authLoginTitle": "Welcome back!",
+  "authLoginSubtitle": "Log in to keep tracking your spending.",
+  "authForgotPassword": "Forgot password?",
+  "authLoginButton": "Log in",
+  "authNoAccount": "Don't have an account?",
+  "authRegisterNow": "Sign up now",
+  "authRegisterTitle": "Create an account",
+  "authRegisterSubtitle": "It only takes a minute!",
+  "authFullName": "Full name",
+  "authMobile": "Mobile number",
+  "authStudentStatus": "Student status (optional)",
+  "authConfirmPassword": "Confirm password",
+  "authRegisterButton": "Sign up",
+  "authHaveAccount": "Already have an account?",
+  "studentStatusHighSchool": "High school student",
+  "studentStatusUndergraduate": "University / college student",
+  "studentStatusPostgraduate": "Postgraduate student",
+  "studentStatusOther": "Other",
+  "authForgotSubtitle": "Enter your registered email and Penny will send you a link to reset your password.",
+  "authSendResetLink": "Send reset link",
+  "authResetSentTitle": "Sent!",
+  "authResetSentBody": "Check the inbox of {email} (including Spam) to reset your password.",
+  "@authResetSentBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authResendIn": "Resend in {seconds} seconds",
+  "@authResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authBackToLogin": "Back to log in",
+  "notifTitle": "Let Penny remind you!",
+  "notifSubtitle": "Turn on notifications so you never miss the important moments:",
+  "notifBudgetTitle": "Close to your budget limit",
+  "notifBudgetBody": "A reminder when you reach the alert level",
+  "notifGoalTitle": "Goal milestones reached",
+  "notifGoalBody": "25%, 50%, 75% and 100%",
+  "notifSupportTitle": "Support has replied",
+  "notifSupportBody": "Know as soon as there is an answer",
+  "notifAllow": "Allow notifications",
+  "notifLater": "Later",
+  "notifFootnote": "You can still use the app if you decline · change it in Settings",
+  "commonToday": "Today",
+  "commonSeeAll": "See all",
+  "commonClose": "Close",
+  "navHome": "Home",
+  "navTransactions": "Transactions",
+  "navBudget": "Budget",
+  "navGoals": "Goals",
+  "navMore": "More",
+  "dashGreetingMorning": "Good morning,",
+  "dashGreetingAfternoon": "Good afternoon,",
+  "dashGreetingEvening": "Good evening,",
+  "dashNotifications": "Notifications",
+  "dashBalance": "Current balance",
+  "dashBalanceHint": "Updated from your whole income and expense history",
+  "dashBalanceEmptyHint": "Start recording to see your balance",
+  "dashBalanceNegativeHint": "Spending is ahead of income.",
+  "dashMonthIncome": "Income",
+  "dashMonthExpense": "Spending",
+  "dashMonthSavings": "Savings",
+  "dashBudgetTitle": "{month} budget",
+  "@dashBudgetTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "dashBudgetLeft": "{amount} left",
+  "@dashBudgetLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashBudgetOver": "Over by {amount}",
+  "@dashBudgetOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashBudgetUsed": "{percent}% used",
+  "@dashBudgetUsed": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "dashNoBudgetTitle": "No budget yet",
+  "dashNoBudgetBody": "Set a limit to get reminded before you overspend.",
+  "dashCreateBudget": "Create budget",
+  "dashGoalsTitle": "Goals in progress",
+  "dashGoalDeadline": "Deadline {date}",
+  "@dashGoalDeadline": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashShortcuts": "Shortcuts",
+  "dashAddIncome": "Add income",
+  "dashAddExpense": "Add expense",
+  "dashHistory": "History",
+  "dashLearning": "Learning",
+  "dashFeedback": "Feedback",
+  "dashSupport": "Support",
+  "dashRecent": "Recent transactions",
+  "dashNoTxTitle": "No transactions yet",
+  "dashNoTxBody": "Add your first expense so Penny can show where your money goes.",
+  "dashAskPenny": "Ask Penny!",
+  "txAddExpenseTitle": "Add expense",
+  "txAddIncomeTitle": "Add income",
+  "txEditExpenseTitle": "Edit expense",
+  "txEditIncomeTitle": "Edit income",
+  "txAmount": "Amount",
+  "txCategory": "Category",
+  "txIncomeSource": "Income source",
+  "txManage": "Manage",
+  "txDate": "Date",
+  "txDescription": "Description",
+  "txDescriptionHint": "Add a description",
+  "txPaymentMode": "Payment method",
+  "paymentCash": "Cash",
+  "paymentBankTransfer": "Bank transfer",
+  "paymentEWallet": "E-wallet",
+  "paymentOther": "Other",
+  "txScanReceipt": "Scan receipt",
+  "txSaveExpense": "Save expense",
+  "txSaveIncome": "Save income",
+  "txSaveChanges": "Save changes",
+  "txSaved": "Saved",
+  "txDeleted": "Transaction deleted",
+  "txDeleteTitle": "Delete this transaction?",
+  "txDeleteBody": "“{name}” {amount} will be deleted. Your balance and budgets will be recalculated.",
+  "@txDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "validationCategory": "Please choose a category",
+  "commonYesterday": "Yesterday",
+  "commonUndo": "Undo",
+  "historySearchHint": "Search by description, e.g. lunch",
+  "historyAddTransaction": "Add transaction",
+  "filterAllTypes": "All types",
+  "filterExpense": "Expense",
+  "filterIncome": "Income",
+  "filterAllCategories": "All categories",
+  "filterAllDates": "All dates",
+  "historyEmpty": "No transactions match your filters",
+  "historyDeletedNamed": "Deleted “{name}”",
+  "@historyDeletedNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "detailTitle": "Transaction details",
+  "detailType": "Type",
+  "typeExpense": "Expense",
+  "typeIncome": "Income",
+  "detailEdit": "Edit transaction",
+  "detailContributionLocked": "Goal contribution — edit or delete it in the Goals tab.",
+  "scanSheetBody": "Penny reads the text right on your phone and never uploads the photo.",
+  "scanFromCamera": "Take photo",
+  "scanFromCameraHint": "Use the camera to capture a receipt",
+  "scanFromGallery": "Choose from gallery",
+  "scanFromGalleryHint": "A receipt photo you already have",
+  "scanReading": "Reading receipt…",
+  "scanFilledHint": "Please check the highlighted fields",
+  "scanFilledFromReceipt": "Filled from receipt",
+  "scanSuggested": "suggested: {name}",
+  "@scanSuggested": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scanNoText": "Couldn't read this receipt",
+  "scanNoTextBody": "The photo is still attached. Enter the details yourself, or retake it in better light.",
+  "scanNoAmount": "Couldn't find the amount",
+  "scanNoAmountBody": "Other fields are filled in — enter the amount and check again.",
+  "scanEnterAmount": "Enter amount",
+  "scanAgain": "Scan again",
+  "scanPermissionDenied": "Camera permission is needed to scan receipts",
+  "scanPermissionBody": "PennyPal can't use the camera. Turn it on in your phone Settings, or choose a photo you already have. You can still fill the form by hand.",
+  "scanEnterManually": "Enter manually",
+  "scanFailed": "Couldn't open the photo. Please try again.",
+  "receiptPhoto": "Receipt photo",
+  "receiptPhotoHint": "Tap to view · saved on this phone only",
+  "receiptRemove": "Remove photo",
+  "budgetAdd": "Add budget",
+  "budgetEditTitle": "Edit budget",
+  "budgetTotal": "Total budget",
+  "budgetOfLimit": "of {amount}",
+  "@budgetOfLimit": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetByCategory": "By category",
+  "budgetCategoryOverTotal": "Category limits ({amount}) are more than the total budget.",
+  "@budgetCategoryOverTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverBadge": "Over budget",
+  "budgetNearBadge": "Near limit",
+  "budgetEmpty": "No budget for this month yet. Set a limit so Penny can remind you before you overspend.",
+  "budgetCreateFirst": "Create first budget",
+  "budgetNoTotal": "No total budget for this month",
+  "budgetMonth": "Month",
+  "budgetType": "Budget type",
+  "budgetTypeTotal": "Monthly total",
+  "budgetLimit": "Limit",
+  "budgetThreshold": "Alert threshold",
+  "budgetThresholdHint": "Penny will remind you when you have spent {amount}.",
+  "@budgetThresholdHint": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetLocked": "Month and category can't be changed. Delete this budget and create a new one instead.",
+  "budgetSpentIn": "Spent in {month}",
+  "@budgetSpentIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetSave": "Save budget",
+  "budgetDuplicate": "This budget already exists",
+  "budgetSaved": "Budget saved",
+  "budgetDeleted": "Budget deleted",
+  "budgetDeleteTitle": "Delete this budget?",
+  "budgetDeleteBody": "The {name} budget for {month} will be removed. Your transactions stay the same.",
+  "@budgetDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "goalAdd": "Create goal",
+  "goalEditTitle": "Edit goal",
+  "goalTabActive": "Active · {count}",
+  "@goalTabActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalTabHistory": "History · {count}",
+  "@goalTabHistory": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalEstimate": "Est. {estimated} · due {due}",
+  "@goalEstimate": {
+    "placeholders": {
+      "estimated": {
+        "type": "String"
+      },
+      "due": {
+        "type": "String"
+      }
+    }
+  },
+  "goalEstimateUnknown": "Not estimated · due {due}",
+  "@goalEstimateUnknown": {
+    "placeholders": {
+      "due": {
+        "type": "String"
+      }
+    }
+  },
+  "goalOnTrack": "On track",
+  "goalBehind": "Behind schedule",
+  "goalNotEstimated": "Not estimated",
+  "goalCreateNew": "Create new goal",
+  "goalEmptyActive": "No goals in progress. Set a savings goal and Penny will help you reach it.",
+  "goalEmptyHistory": "Completed and cancelled goals will appear here.",
+  "goalCompleted": "Completed",
+  "goalCancelled": "Cancelled",
+  "goalCompletedOn": "{amount} · done {date}",
+  "@goalCompletedOn": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalSavedOf": "Saved {current} of {target}",
+  "@goalSavedOf": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "goalKeptContributions": "{count, plural, =0{No contributions} =1{1 contribution kept} other{{count} contributions kept}}",
+  "@goalKeptContributions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalHistoryBanner": "{count, plural, =1{You completed 1 goal!} other{You completed {count} goals!}} Total saved: {amount}.",
+  "@goalHistoryBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalName": "Goal name",
+  "goalNameHint": "e.g. New laptop",
+  "goalTargetAmount": "Target amount",
+  "goalCurrentSavings": "Current savings",
+  "goalCurrentSavingsHelp": "Money you have already saved. It is not a transaction and does not change your balance.",
+  "goalCurrentSavingsLocked": "Current savings can't be changed after you have contributed to this goal.",
+  "goalTargetDate": "Target date",
+  "goalMonthlyContribution": "Monthly contribution",
+  "goalMonthlyContributionHelp": "Only used for the estimate. The app never takes money automatically.",
+  "goalEstimateTitle": "Penny's estimate",
+  "goalRemainingMonths": "{amount} left · {months, plural, =1{1 month} other{{months} months}}",
+  "@goalRemainingMonths": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "goalFinishAround": "Done around {date}",
+  "@goalFinishAround": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalValidationInitial": "Current savings must be less than the target. Set a higher target.",
+  "goalValidationDate": "Target date must be after today",
+  "goalSaved": "Goal saved",
+  "goalValidationTargetBelowSaved": "Target must be more than the {amount} already saved",
+  "@goalValidationTargetBelowSaved": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalSavedLabel": "saved",
+  "goalRemainingLabel": "Still needed",
+  "goalMonthsLabel": "Time left",
+  "goalMonthsValue": "{months, plural, =0{Done} =1{1 month} other{{months} months}}",
+  "@goalMonthsValue": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "goalEstimatedLabel": "Estimated finish",
+  "goalMilestones": "Milestones",
+  "goalMark": "Mark",
+  "goalMilestoneMarked": "{percent}% milestone marked!",
+  "@goalMilestoneMarked": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "goalMilestoneLocked": "{percent}% not reached yet",
+  "@goalMilestoneLocked": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "goalContributions": "Contributions",
+  "goalNoContributions": "No contributions yet",
+  "goalCreatedInfo": "Current savings when created: {initial} · {monthly}/month · due {due}",
+  "@goalCreatedInfo": {
+    "placeholders": {
+      "initial": {
+        "type": "String"
+      },
+      "monthly": {
+        "type": "String"
+      },
+      "due": {
+        "type": "String"
+      }
+    }
+  },
+  "goalDelete": "Delete goal",
+  "goalContribute": "Contribute",
+  "goalContributeTo": "Contribute to “{name}”",
+  "@goalContributeTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalEditContribution": "Edit contribution",
+  "goalContributionAmount": "Contribution amount",
+  "goalContributionInfo": "Contributions reduce your balance but don't count toward your spending budget.",
+  "goalContributeButton": "Contribute {amount}",
+  "@goalContributeButton": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalContributionTooMuch": "You only need {amount} more",
+  "@goalContributionTooMuch": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalContributionOverBalance": "This is more than your balance ({amount}). You can still save it if you have cash you haven't recorded.",
+  "@goalContributionOverBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalNote": "Note",
+  "goalNoteHint": "e.g. Saved from part-time pay",
+  "goalContributed": "Added {amount} to your goal",
+  "@goalContributed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalContributionUpdated": "Contribution updated",
+  "goalContributionDeleted": "Contribution deleted",
+  "goalDeleteContributionTitle": "Delete this contribution?",
+  "goalDeleteContributionBody": "{amount} will go back to your balance.",
+  "@goalDeleteContributionBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalDeleteTitle": "Delete this goal?",
+  "goalDeleteBody": "“{name}” will be removed.",
+  "@goalDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalHasContributionsTitle": "This goal has contributions",
+  "goalHasContributionsBody": "You have put {amount} into “{name}”. What should happen to this money?",
+  "@goalHasContributionsBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalRefund": "Refund {amount} to balance",
+  "@goalRefund": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalRefundHint": "{count, plural, =1{Delete the goal and 1 contribution. Your balance goes back up.} other{Delete the goal and {count} contributions. Your balance goes back up.}}",
+  "@goalRefundHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalKeepHistory": "Keep history",
+  "goalKeepHistoryHint": "Move it to the History tab as cancelled",
+  "goalDeleted": "Goal deleted",
+  "goalRefunded": "Goal deleted. {amount} is back in your balance.",
+  "@goalRefunded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalMovedToHistory": "Goal moved to History",
+  "goalCompletedTitle": "Well done!",
+  "goalCompletedBody": "You saved the full {amount} for “{name}”. Great discipline!",
+  "@goalCompletedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalCompletedBadge": "Completed · {date}",
+  "@goalCompletedBadge": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalCreateNext": "Create next goal",
+  "goalSeeHistory": "See goal history",
+  "goalCancelledInfo": "This goal was cancelled. Its contributions are kept in your history.",
+  "menuReports": "Reports",
+  "menuCategories": "Categories",
+  "menuChatbot": "Penny assistant",
+  "menuLearning": "Learning corner",
+  "menuAbout": "About PennyPal",
+  "menuSettings": "Settings",
+  "aboutTitle": "About",
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutWhatTitle": "What is PennyPal?",
+  "aboutWhatBody": "A money diary, reminder and finance tutor for students: record income and expenses, set budgets, save for goals and learn how to manage money.",
+  "aboutNotBank": "PennyPal is not a bank, wallet, payment or investment service. It does not connect to bank accounts, store cards or make real payments. All tips are for learning only.",
+  "aboutDataTitle": "How your data is protected",
+  "aboutData1": "Data travels over encrypted TLS connections and is stored encrypted on Firebase.",
+  "aboutData2": "Passwords are handled by Firebase Authentication. PennyPal never stores your password.",
+  "aboutData3": "Receipt photos stay on your phone only.",
+  "aboutData4": "Admins only see summary numbers, never your individual transactions.",
+  "aboutContactTitle": "Contact",
+  "aboutTeamTitle": "Development team",
+  "aboutTeamBody": "{team} · TechWiz 7 — Multi-Platform App Computing",
+  "@aboutTeamBody": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutToolsTitle": "Libraries & AI tools",
+  "aboutLibraries": "Libraries: Flutter, Firebase Authentication, Firebase Realtime Database, Google ML Kit Text Recognition, image_picker, fl_chart, string_similarity, shared_preferences, intl.",
+  "aboutAiTools": "AI tools: Claude (code assistant and UI design reference).",
+  "settingsLanguage": "Language",
+  "settingsCurrency": "Currency",
+  "settingsCurrencyNote": "Changing the currency only changes how amounts are shown.",
+  "settingsNotifications": "Notifications",
+  "settingsNotificationsBody": "Budget alerts and goal milestones",
+  "settingsStudentStatus": "Student status",
+  "settingsNoStatus": "Not specified",
+  "settingsSaved": "Profile saved",
+  "settingsLogout": "Log out",
+  "settingsLogoutTitle": "Log out of PennyPal?",
+  "settingsLogoutBody": "You can log in again any time with your email and password.",
+  "validationMinLength": "At least {min} characters",
+  "@validationMinLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "commonBackHome": "Back to home",
+  "feedbackQuestion": "How do you like PennyPal?",
+  "feedbackRating1": "Not good",
+  "feedbackRating2": "Could be better",
+  "feedbackRating3": "It's okay",
+  "feedbackRating4": "Really like it!",
+  "feedbackRating5": "Love it!",
+  "feedbackStar": "{count, plural, =1{1 star} other{{count} stars}}",
+  "@feedbackStar": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feedbackComments": "Comments",
+  "feedbackCommentsHint": "Tell us what you like or what we can improve",
+  "feedbackSend": "Send feedback",
+  "feedbackThanks": "Thank you, {name}!",
+  "@feedbackThanks": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackThanksBody": "{count, plural, =1{Penny got your 1-star feedback.} other{Penny got your {count}-star feedback.}} The team will read it carefully to make PennyPal better.",
+  "@feedbackThanksBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feedbackSendAnother": "Send more feedback",
+  "supportEmailLabel": "Support email",
+  "supportMyRequests": "My requests",
+  "supportNoRequests": "No requests yet. Ask us anything about using PennyPal.",
+  "supportNew": "New request",
+  "supportReplied": "Replied",
+  "supportWaiting": "Waiting",
+  "supportSentOn": "Sent {date}",
+  "@supportSentOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "supportReplyFrom": "PennyPal Support · {date}",
+  "@supportReplyFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "supportSubject": "Subject",
+  "supportSubjectHint": "e.g. Can't change the currency",
+  "supportMessage": "Message",
+  "supportMessageHint": "Describe the problem so we can help",
+  "supportSend": "Send request",
+  "supportSentTitle": "Request sent!",
+  "supportSentBody": "Penny will let you know as soon as the support team replies.",
+  "supportSentAt": "Sent at {time}",
+  "@supportSentAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "supportSeeRequests": "See my requests",
+  "topicBudgeting": "Budgeting",
+  "topicSaving": "Saving",
+  "topicIncome": "Income",
+  "topicNeedsVsWants": "Needs vs. wants",
+  "topicSmartSpending": "Smart spending",
+  "levelBeginner": "Beginner",
+  "levelIntermediate": "Intermediate",
+  "learningAll": "All",
+  "learningEmpty": "No lessons yet. New tips will appear here soon.",
+  "learningEmptyTopic": "No lessons in this topic yet.",
+  "learningMinutes": "{count, plural, =1{1 min read} other{{count} min read}}",
+  "@learningMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "learningDisclaimer": "For learning only. This is not professional financial advice.",
+  "reportsByCategory": "Spending by category",
+  "reportsTotalSpending": "Total spending",
+  "reportsTrend": "Income and spending, 6 months",
+  "reportsTrendSummary": "{month}: income {income} · spending {spending}",
+  "@reportsTrendSummary": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "spending": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsTop": "Top spending",
+  "reportsNoData": "Not enough data",
+  "reportsNoDataBody": "{month} has no transactions yet. Add a few expenses so Penny can draw your charts.",
+  "@reportsNoDataBody": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsSeeMonth": "See the {month} report",
+  "@reportsSeeMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsNoSpending": "No spending this month. Savings contributions are not counted as spending.",
+  "inboxTitleBudgetWarning": "Close to your limit",
+  "inboxTitleBudgetExceeded": "Over budget",
+  "inboxTitleGoalMilestone": "New milestone",
+  "inboxTitleGoalCompleted": "Goal completed",
+  "inboxTitleSupportReplied": "Support replied",
+  "inboxBudgetWarning": "You've used {percent}% of your {category} budget.",
+  "@inboxBudgetWarning": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "inboxBudgetExceeded": "You're over your {category} budget by {amount}.",
+  "@inboxBudgetExceeded": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "inboxGoalMilestone": "“{goal}” reached {percent}%! Keep going.",
+  "@inboxGoalMilestone": {
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "inboxGoalCompleted": "You completed “{goal}”! 🎉",
+  "@inboxGoalCompleted": {
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "inboxSupportReplied": "Support replied to “{subject}”.",
+  "@inboxSupportReplied": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "inboxMonthly": "monthly",
+  "inboxUnread": "{count} unread",
+  "@inboxUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inboxMarkAllRead": "Mark all as read",
+  "inboxEmpty": "No notifications yet. Penny will let you know about budgets, goals and support replies here.",
+  "inboxJustNow": "Just now",
+  "inboxMinutesAgo": "{count} min ago",
+  "@inboxMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inboxHoursAgo": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
+  "@inboxHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryExpenseTab": "Expenses",
+  "categoryIncomeTab": "Income",
+  "categoryMine": "Mine",
+  "categoryDefault": "Default",
+  "categoryNoCustom": "No categories of your own yet. Tap + to add one.",
+  "categoryNotUsed": "Not used",
+  "categoryUsage": "{transactions, plural, =1{1 transaction} other{{transactions} transactions}} · {budgets, plural, =1{1 budget} other{{budgets} budgets}}",
+  "@categoryUsage": {
+    "placeholders": {
+      "transactions": {
+        "type": "int"
+      },
+      "budgets": {
+        "type": "int"
+      }
+    }
+  },
+  "categorySavingsNote": "“Savings” is created automatically when you contribute to a goal.",
+  "categoryAdd": "Add category",
+  "categoryEdit": "Edit category",
+  "categoryName": "Category name",
+  "categoryNameHelp": "2–30 characters, not the same as another category of this type",
+  "categoryNameLength": "Name must be 2–30 characters",
+  "categoryNameExists": "This name already exists",
+  "categoryType": "Type",
+  "categoryTypeLocked": "This category already has transactions, so its type can't change.",
+  "categoryIcon": "Icon",
+  "categorySave": "Save category",
+  "categorySaved": "Category saved",
+  "categoryDeleteTitle": "Delete “{name}”?",
+  "@categoryDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryDeleteBody": "This category is not used yet, so nothing else changes.",
+  "categoryDeleted": "Category deleted",
+  "categoryMoveTo": "Move {transactions, plural, =1{1 transaction} other{{transactions} transactions}} and {budgets, plural, =1{1 budget} other{{budgets} budgets}} to…",
+  "@categoryMoveTo": {
+    "placeholders": {
+      "transactions": {
+        "type": "int"
+      },
+      "budgets": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryMoveAndDelete": "Move and delete",
+  "categoryMerged": "Moved {transactions, plural, =1{1 transaction} other{{transactions} transactions}} and {budgets, plural, =0{no budgets} =1{1 budget} other{{budgets} budgets}} to {name}.",
+  "@categoryMerged": {
+    "placeholders": {
+      "transactions": {
+        "type": "int"
+      },
+      "budgets": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryKeptBudgets": "{name} already had a budget for {months}, so that budget was kept.",
+  "@categoryKeptBudgets": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "months": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSubtitle": "Answers from your own data",
+  "chatHint": "Ask Penny about your money…",
+  "chatSend": "Send",
+  "chatDisclaimer": "Educational guidance only, not professional financial advice.",
+  "chatChipTop": "What did I spend most on?",
+  "chatChipBudget": "How much budget is left?",
+  "chatChipGoal": "How is my savings goal?",
+  "chatChipSave": "How can I save money?",
+  "chatWelcome": "Hi {name}! I'm Penny. Ask me about your spending, budgets or goals.",
+  "@chatWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatHelp": "I can tell you where your money went this month, how much budget is left, how your goals are going and how this month compares to last month. I also share simple budgeting and saving tips.",
+  "chatTopSpending": "In {month} you spent the most on {category}: {amount}, {percent} of your spending.",
+  "@chatTopSpending": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "chatTopTip": "Tip: a budget for your biggest category is the easiest way to keep it under control.",
+  "chatNoSpending": "You have no spending in {month} yet. Add an expense and ask me again.",
+  "@chatNoSpending": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "chatPercentOfLimit": "{percent}% of limit",
+  "@chatPercentOfLimit": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMonthSummary": "In {month} you earned {income}, spent {spending} and saved {savings}.",
+  "@chatMonthSummary": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "spending": {
+        "type": "String"
+      },
+      "savings": {
+        "type": "String"
+      }
+    }
+  },
+  "chatTotalBudgetName": "total",
+  "chatBudgetLeft": "Your {name} budget for {month}: {left} left of {limit} ({percent}% used).",
+  "@chatBudgetLeft": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "chatBudgetOver": "Your {name} budget for {month} is over by {amount} ({percent}% used).",
+  "@chatBudgetOver": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "chatNoBudget": "You don't have a {name} budget for {month} yet. Create one in the Budget tab so I can keep track of it.",
+  "@chatNoBudget": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "chatGoalProgress": "“{goal}”: {current} of {target} ({percent}%). {pace}",
+  "@chatGoalProgress": {
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      },
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "chatPaceOnTrack": "You're on track to finish around {date}.",
+  "@chatPaceOnTrack": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chatPaceBehind": "At this pace you'll finish around {date}, after your deadline {due}.",
+  "@chatPaceBehind": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "due": {
+        "type": "String"
+      }
+    }
+  },
+  "chatPaceUnknown": "Set a monthly contribution so I can estimate when you'll finish.",
+  "chatNoGoal": "You have no active goals. Create one in the Goals tab and start saving!",
+  "chatCompareMore": "You spent {current} this month and {last} last month: {percent} more.",
+  "@chatCompareMore": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "chatCompareLess": "You spent {current} this month and {last} last month: {percent} less. Nice!",
+  "@chatCompareLess": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "chatCompareNoLast": "There's no spending last month to compare with. This month you spent {current}.",
+  "@chatCompareNoLast": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "chatBudgetingTips": "Try the 50/30/20 rule: 50% for needs, 30% for wants and 20% for savings. Set a total budget for the month, then add budgets for the categories you spend most on.",
+  "chatSavingTips": "Save a fixed part, like 10%, on the day you get money, before spending. Give your savings a name by creating a goal, and wait 24 hours before buying things you don't need.",
+  "chatNeedsWants": "Needs are things you must pay for to live and study: meals, rent, transport, textbooks. Wants make life nicer but can wait. Ask yourself: what happens if I don't buy this?",
+  "chatUnknown": "I didn't understand that yet. Try one of these:",
+  "chatCategorySpending": "In {month} you spent {amount} on {category}, {percent} of your spending.",
+  "@chatCategorySpending": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "chatOnlyThisMonth": "I can only answer about {month}. To see another month, open Reports.",
+  "@chatOnlyThisMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsTypeSpending": "Spending",
+  "reportsTypeIncome": "Income",
+  "reportsIncomeByCategory": "Income by source",
+  "reportsTotalIncome": "Total income",
+  "reportsTopIncome": "Biggest income sources",
+  "reportsNoIncome": "No income this month yet.",
+  "reportsBalance": "Balance (income − expenses)",
+  "reportsBudgetTitle": "Budget vs actual",
+  "reportsNoBudget": "No budget set for this month.",
+  "reportsBudgetUsed": "{spent} of {limit} · {percent}%",
+  "@reportsBudgetUsed": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

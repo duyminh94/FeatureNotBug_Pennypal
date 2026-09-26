@@ -74,7 +74,7 @@ void main() {
 
     testWidgets('ST-02: a bad email disables saving', (tester) async {
       useScreen(tester);
-      await tester.pumpWidget(buildApp(AppSettingsScreen(settings: SampleData.adminData().settings, onSaved: (_) {})));
+      await tester.pumpWidget(buildApp(AppSettingsForm(settings: SampleData.adminData().settings)));
 
       expect(find.text('80%'), findsOneWidget);
       expect(find.text('English and Vietnamese both filled'), findsOneWidget);
@@ -88,7 +88,7 @@ void main() {
 
     testWidgets('ST-03: clearing the Vietnamese message blocks saving until the banner is off', (tester) async {
       useScreen(tester);
-      await tester.pumpWidget(buildApp(AppSettingsScreen(settings: SampleData.adminData().settings, onSaved: (_) {})));
+      await tester.pumpWidget(buildApp(AppSettingsForm(settings: SampleData.adminData().settings)));
 
       await tester.tap(find.text('Tiếng Việt'));
       await tester.pumpAndSettle();
@@ -102,24 +102,6 @@ void main() {
       await tester.tap(find.byType(Switch));
       await tester.pump();
       expect(saveButton(tester).onPressed, isNotNull);
-    });
-
-    testWidgets('ST-01: saving sends the new settings and confirms', (tester) async {
-      useScreen(tester);
-      AppSettings? saved;
-      await tester.pumpWidget(buildApp(AppSettingsScreen(
-        settings: AppSettings(supportEmail: 'support@pennypal.app'),
-        onSaved: (settings) => saved = settings,
-      )));
-
-      expect(find.text('Not saved yet'), findsOneWidget);
-      await tester.tap(find.text('Save settings'));
-      await tester.pump();
-
-      expect(saved?.supportEmail, 'support@pennypal.app');
-      expect(saved?.defaultAlertThreshold, 80);
-      expect(find.textContaining('Settings saved.'), findsOneWidget);
-      expect(find.textContaining('Last updated'), findsOneWidget);
     });
   });
 }

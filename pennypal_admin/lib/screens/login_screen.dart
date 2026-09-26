@@ -51,9 +51,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final AdminData data = widget.data ?? SampleData.adminData();
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => AdminShell(data: data, admin: result.admin!)),
+      MaterialPageRoute(builder: (context) => AdminShell(data: widget.data, admin: result.admin!)),
     );
   }
 
