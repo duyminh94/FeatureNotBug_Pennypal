@@ -4,6 +4,10 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>PennyPal uses the camera to scan receipts. The photo stays on this phone.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>PennyPal reads a receipt photo you choose. The photo stays on this phone.</string>
 	<key>CFBundleDisplayName</key>
 	<string>PennyPal</string>
 	<key>CFBundleExecutable</key>

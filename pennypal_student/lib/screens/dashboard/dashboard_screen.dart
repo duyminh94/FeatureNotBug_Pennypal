@@ -8,6 +8,7 @@ import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../../utils/balance_calculator.dart';
 import '../../utils/budget_calculator.dart';
+import '../../utils/chatbot_engine.dart';
 import '../../utils/formatters.dart';
 import '../../utils/goal_calculator.dart';
 import '../../utils/report_calculator.dart';
@@ -70,6 +71,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => screen));
   }
 
+  /// The chatbot answers from the same Firebase data the dashboard shows (custom categories are not stored online yet).
+  void _openChatbot() {
+    final ChatbotData chatbotData = ChatbotData(
+      userName: widget.userName,
+      transactions: widget.transactions ?? const [],
+      budgets: widget.budgets,
+      goals: widget.goals,
+      customCategories: const [],
+    );
+    _openScreen(ChatbotScreen(data: chatbotData));
+  }
+
   void _openDetail(TransactionRecord transaction) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => TransactionDetailScreen(transaction: transaction)),
@@ -115,7 +128,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openScreen(const ChatbotScreen()),
+        onPressed: _openChatbot,
         backgroundColor: AppColors.textPrimary,
         foregroundColor: Colors.white,
         icon: Image.asset(AppAssets.pig, width: 32, height: 32),

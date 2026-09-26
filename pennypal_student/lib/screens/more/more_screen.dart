@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../models/budget.dart';
+import '../../models/savings_goal.dart';
+import '../../models/transaction_record.dart';
 import '../../models/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/user_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
+import '../../utils/chatbot_engine.dart';
 import '../../widgets/profile_avatar.dart';
 import '../categories/categories_screen.dart';
 import '../chatbot/chatbot_screen.dart';
@@ -18,16 +22,24 @@ import 'settings_screen.dart';
 
 class MoreScreen extends StatefulWidget {
   final UserProfile profile;
+  final List<TransactionRecord> transactions;
+  final List<Budget> budgets;
+  final List<SavingsGoal> goals;
   final int unreadCount;
   final VoidCallback? onOpenNotifications;
+  final ValueChanged<UserProfile>? onProfileChanged;
   final Future<bool> Function(UserProfile profile) saveProfile;
   final Future<void> Function() signOut;
 
   const MoreScreen({
     super.key,
     required this.profile,
+    this.transactions = const [],
+    this.budgets = const [],
+    this.goals = const [],
     this.unreadCount = 0,
     this.onOpenNotifications,
+    this.onProfileChanged,
     this.saveProfile = UserService.saveProfile,
     this.signOut = AuthService.signOut,
   });
@@ -49,13 +61,28 @@ class _MoreScreenState extends State<MoreScreen> {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => screen));
   }
 
+  /// Same real data as the dashboard chatbot button (custom categories are not stored online yet).
+  void _openChatbot() {
+    final ChatbotData chatbotData = ChatbotData(
+      userName: _profile.fullName,
+      transactions: widget.transactions,
+      budgets: widget.budgets,
+      goals: widget.goals,
+      customCategories: const [],
+    );
+    _openScreen(ChatbotScreen(data: chatbotData));
+  }
+
   Future<void> _openSettings() async {
     final UserProfile? saved = await Navigator.of(context).push<UserProfile>(
       MaterialPageRoute(
         builder: (context) => SettingsScreen(profile: _profile, saveProfile: widget.saveProfile, signOut: widget.signOut),
       ),
     );
-    if (saved != null && mounted) setState(() => _profile = saved);
+    if (saved == null || !mounted) return;
+    setState(() => _profile = saved);
+    // MainShell needs the new "notifications on/off" setting for the bell badge.
+    widget.onProfileChanged?.call(saved);
   }
 
   @override
@@ -102,7 +129,7 @@ class _MoreScreenState extends State<MoreScreen> {
                 label: l10n.menuChatbot,
                 color: AppColors.primary,
                 background: AppColors.mintSoft,
-                onTap: () => _openScreen(const ChatbotScreen()),
+                onTap: _openChatbot,
               ),
             ]),
             const SizedBox(height: 16),

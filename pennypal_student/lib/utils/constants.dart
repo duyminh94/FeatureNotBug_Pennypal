@@ -220,6 +220,19 @@ class CategoryKeys {
   static const String partTime = 'part_time';
   static const String internship = 'internship';
   static const String otherIncome = 'other_income';
+
+  /// Expense categories a student can pick by hand (savings is only created by goal contributions).
+  static const List<String> selectableExpense = [
+    food,
+    transport,
+    education,
+    shopping,
+    entertainment,
+    bills,
+    miscellaneous,
+  ];
+
+  static const List<String> income = [partTime, allowance, scholarship, internship, otherIncome];
 }
 
 /// The 12 icons a student can pick for a custom category.
@@ -245,4 +258,40 @@ class AppDefaults {
   static const int alertThreshold = 80;
   static const String currency = Currencies.vnd;
   static const int customCategorySortOrder = 100;
+  static const double maxAmount = 1000000000;
+  static const int descriptionMaxLength = 100;
+}
+
+class FormLimits {
+  static const int subjectMin = 3;
+  static const int subjectMax = 100;
+  static const int messageMin = 10;
+  static const int messageMax = 1000;
+  static const int commentsMax = 500;
+}
+
+class AppInfo {
+  static const String version = '1.0.0';
+  static const String teamName = 'Feature Not Bug';
+}
+
+/// Image paths declared under assets/images/ in pubspec.yaml.
+class AppAssets {
+  static const String logo = 'assets/images/logo.png';
+  static const String pig = 'assets/images/pig.png';
+}
+
+/// Tab indexes of the bottom navigation bar.
+class MainTabs {
+  static const int home = 0;
+  static const int transactions = 1;
+  static const int budget = 2;
+  static const int goals = 3;
+  static const int more = 4;
+}
+
+/// Values a form screen returns with Navigator.pop, so the previous screen knows what happened.
+class FormResults {
+  static const String saved = 'saved';
+  static const String deleted = 'deleted';
 }
