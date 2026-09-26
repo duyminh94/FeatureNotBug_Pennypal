@@ -289,6 +289,8 @@
   "supportMarksResolved": "Marks request as Resolved",
   "supportSendReply": "Send reply",
   "supportReplySent": "Reply sent. The request is now resolved.",
+  "supportLoadFailed": "Could not load support requests. Check the connection and try again.",
+  "supportReplyFailed": "Could not send the reply. Check the connection and try again.",
   "supportRepliedAt": "Your reply · {date}",
   "@supportRepliedAt": {
     "placeholders": {
@@ -321,6 +323,7 @@
   "feedbackNoComment": "No comment",
   "feedbackEmpty": "No feedback yet.",
   "feedbackEmptyFilter": "No feedback with this rating.",
+  "feedbackLoadFailed": "Could not load feedback. Check the connection and try again.",
   "feedbackRatingLabel": "{count} out of 5 stars",
   "@feedbackRatingLabel": {
     "placeholders": {

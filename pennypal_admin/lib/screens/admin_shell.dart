@@ -93,8 +93,8 @@ class _AdminShellState extends State<AdminShell> {
       AdminSection.analytics => AnalyticsScreen(data: widget.data),
       AdminSection.users => UsersScreen(data: widget.data, onUserChanged: _updateUser),
       AdminSection.learning => const LearningScreen(),
-      AdminSection.support => SupportScreen(data: widget.data, onChanged: () => setState(() {})),
-      AdminSection.feedbacks => FeedbacksScreen(feedbacks: widget.data.feedbacks),
+      AdminSection.support => const SupportScreen(),
+      AdminSection.feedbacks => const FeedbacksScreen(),
       AdminSection.settings => AppSettingsScreen(
           settings: widget.data.settings,
           onSaved: (settings) => setState(() => widget.data.settings = settings),

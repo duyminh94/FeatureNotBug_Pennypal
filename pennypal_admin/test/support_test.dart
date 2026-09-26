@@ -3,8 +3,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pennypal_admin/models/feedback_entry.dart';
 import 'package:pennypal_admin/models/support_query.dart';
-import 'package:pennypal_admin/screens/admin_shell.dart';
 import 'package:pennypal_admin/screens/feedbacks/feedbacks_screen.dart';
+import 'package:pennypal_admin/screens/support/support_detail_screen.dart';
 import 'package:pennypal_admin/utils/app_theme.dart';
 import 'package:pennypal_admin/utils/constants.dart';
 import 'package:pennypal_admin/utils/sample_data.dart';
@@ -57,9 +57,8 @@ void main() {
       expect(replied.studentNotified, isFalse);
       expect(replied.submittedAt, 1);
 
-      final Map<String, List<SupportQuery>> support = {'u': [open]};
-      SupportManager.replace(support, replied);
-      expect(support['u']!.single.isResolved, isTrue);
+      expect(SupportManager.ownerOf({'u': [open]}, 'q'), 'u');
+      expect(SupportManager.ownerOf({'u': [open]}, 'missing'), isNull);
     });
 
     test('feedback filter by rating, newest first', () {
@@ -72,53 +71,13 @@ void main() {
     });
   });
 
-  testWidgets('Replying from the Support list resolves the request and lowers the badge', (tester) async {
-    useScreen(tester, const Size(420, 1200));
-    final AdminData data = SampleData.adminData();
-    await tester.pumpWidget(buildApp(AdminShell(data: data, admin: data.users.first, signOut: () async {})));
-    await tester.tap(find.byTooltip('Open navigation menu'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Support'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Open · 4'), findsOneWidget);
-    await tester.tap(find.text('Budget alert not showing'));
-    await tester.pumpAndSettle();
-
-    FilledButton sendButton() => tester.widget<FilledButton>(find.ancestor(of: find.text('Send reply'), matching: find.bySubtype<FilledButton>()));
-    expect(sendButton().onPressed, isNull);
-    await tester.enterText(find.byType(TextField), '   ');
-    await tester.pump();
-    expect(sendButton().onPressed, isNull);
-
-    await tester.enterText(find.byType(TextField), 'Please allow notifications for PennyPal in Android Settings.');
-    await tester.pump();
-    await tester.tap(find.text('Send reply'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Reply sent. The request is now resolved.'), findsOneWidget);
-    expect(find.text('Resolved requests are read-only.'), findsOneWidget);
-    expect(find.byType(TextField), findsNothing);
-
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    expect(find.text('Open · 3'), findsOneWidget);
-    expect(find.text('Resolved · 3'), findsOneWidget);
-    expect(find.text('Budget alert not showing'), findsNothing);
-  });
-
   testWidgets('A resolved request shows the reply read-only', (tester) async {
     useScreen(tester, const Size(420, 1200));
-    final AdminData data = SampleData.adminData();
-    await tester.pumpWidget(buildApp(AdminShell(data: data, admin: data.users.first, signOut: () async {})));
-    await tester.tap(find.byTooltip('Open navigation menu'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Support'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Resolved · 2'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Currency does not change'));
-    await tester.pumpAndSettle();
+    final Map<String, List<SupportQuery>> support = SampleData.adminData().supportByUser;
+    final SupportQuery resolved = SupportManager.withStatus(support, SupportStatuses.resolved)
+        .firstWhere((query) => query.subject == 'Currency does not change');
+    final String uid = SupportManager.ownerOf(support, resolved.id)!;
+    await tester.pumpWidget(buildApp(SupportDetailScreen(uid: uid, query: resolved)));
 
     expect(find.textContaining('changing the currency only changes'), findsOneWidget);
     expect(find.text('Student notified once in the app'), findsOneWidget);
@@ -128,7 +87,7 @@ void main() {
   testWidgets('Feedbacks show the average and filter by stars', (tester) async {
     useScreen(tester, const Size(420, 1600));
     final SemanticsHandle semantics = tester.ensureSemantics();
-    await tester.pumpWidget(buildApp(Scaffold(body: FeedbacksScreen(feedbacks: SampleData.adminData().feedbacks))));
+    await tester.pumpWidget(buildApp(Scaffold(body: FeedbackListView(feedbacks: SampleData.adminData().feedbacks))));
 
     expect(find.text('4.3'), findsOneWidget);
     expect(find.text('from 6 feedbacks'), findsOneWidget);
@@ -145,7 +104,7 @@ void main() {
   });
 
   testWidgets('No feedback at all shows an empty message', (tester) async {
-    await tester.pumpWidget(buildApp(const Scaffold(body: FeedbacksScreen(feedbacks: []))));
+    await tester.pumpWidget(buildApp(const Scaffold(body: FeedbackListView(feedbacks: []))));
     expect(find.text('No feedback yet.'), findsOneWidget);
   });
 }

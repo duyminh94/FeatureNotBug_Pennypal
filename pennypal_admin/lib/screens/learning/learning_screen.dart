@@ -29,13 +29,23 @@ class _LearningScreenState extends State<LearningScreen> {
   @override
   void initState() {
     super.initState();
-    _lessonStream = LearningService.watch();
+    _openStream();
+  }
+
+  /// Starts listening to learning_contents. If Firebase is not ready the screen
+  /// shows the error box instead of crashing.
+  void _openStream() {
+    try {
+      _lessonStream = LearningService.watch();
+    } catch (e) {
+      _lessonStream = Stream.error(e);
+    }
   }
 
   /// Opens the lesson stream again after a loading error.
   void _retry() {
     setState(() {
-      _lessonStream = LearningService.watch();
+      _openStream();
     });
   }
 
