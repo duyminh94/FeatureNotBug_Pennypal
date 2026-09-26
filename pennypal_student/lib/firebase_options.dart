@@ -47,31 +47,30 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBvVjVReU5lMO5wwU_vwZfZvbYw3UPPfps',
-    appId: '1:402155578:web:5defeed6430c30a92c2d03',
-    messagingSenderId: '402155578',
-    projectId: 'pennypal-featurenotbug',
-    authDomain: 'pennypal-featurenotbug.firebaseapp.com',
-    databaseURL: 'https://pennypal-featurenotbug-default-rtdb.asia-southeast1.firebasedatabase.app',
-    storageBucket: 'pennypal-featurenotbug.firebasestorage.app',
+    apiKey: 'AIzaSyC0a-S1dbPvy0Y-uvN4AsYail_VFsLUOTM',
+    appId: '1:760315859875:web:5c1f918120828da1688016',
+    messagingSenderId: '760315859875',
+    projectId: 'pennypal-featurenotbug-beb05',
+    authDomain: 'pennypal-featurenotbug-beb05.firebaseapp.com',
+    databaseURL: 'https://pennypal-featurenotbug-beb05-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'pennypal-featurenotbug-beb05.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC9NxaoHmqzSN6HmaxIQRuKd-wRTSEOM2s',
-    appId: '1:402155578:android:beba900cf937e28f2c2d03',
-    messagingSenderId: '402155578',
-    projectId: 'pennypal-featurenotbug',
-    databaseURL: 'https://pennypal-featurenotbug-default-rtdb.asia-southeast1.firebasedatabase.app',
-    storageBucket: 'pennypal-featurenotbug.firebasestorage.app',
+    apiKey: 'AIzaSyBKCEy5xT1ikJ-YtiEZMhrEikywUfafLiM',
+    appId: '1:760315859875:android:4e44fa3f53ea12a9688016',
+    messagingSenderId: '760315859875',
+    projectId: 'pennypal-featurenotbug-beb05',
+    databaseURL: 'https://pennypal-featurenotbug-beb05-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'pennypal-featurenotbug-beb05.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBGs61tIF0QD9eBMGkGZEo3ctnOncvge0s',
-    appId: '1:402155578:ios:0b63c108d989c06a2c2d03',
-    messagingSenderId: '402155578',
-    projectId: 'pennypal-featurenotbug',
-    databaseURL: 'https://pennypal-featurenotbug-default-rtdb.asia-southeast1.firebasedatabase.app',
-    storageBucket: 'pennypal-featurenotbug.firebasestorage.app',
+    apiKey: 'AIzaSyDbfWsz3yHVFztWGNpngDUxQ-JVHn5zI_I',
+    appId: '1:760315859875:ios:38160ba77e9f2fc2688016',
+    messagingSenderId: '760315859875',
+    projectId: 'pennypal-featurenotbug-beb05',
+    databaseURL: 'https://pennypal-featurenotbug-beb05-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'pennypal-featurenotbug-beb05.firebasestorage.app',
     iosBundleId: 'com.featurenotbug.pennypalStudent',
   );
 }
