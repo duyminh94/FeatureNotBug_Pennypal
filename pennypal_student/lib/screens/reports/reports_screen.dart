@@ -3,22 +3,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
+import '../../models/budget.dart';
 import '../../models/transaction_record.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/budget_calculator.dart';
 import '../../utils/category_display.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
 import '../../utils/report_calculator.dart';
-import '../../utils/sample_data.dart';
+import '../../widgets/app_progress_bar.dart';
 import '../../widgets/category_icon.dart';
 import '../../widgets/month_picker.dart';
 import '../../widgets/summary_card.dart';
 import '../transactions/transaction_form_screen.dart';
 
+/// Reports for one month: totals, balance, spending or income by category, 6-month trend and budget vs actual.
 class ReportsScreen extends StatefulWidget {
-  final List<TransactionRecord>? transactions;
+  final List<TransactionRecord> transactions;
+  final List<Budget> budgets;
 
-  const ReportsScreen({super.key, this.transactions});
+  const ReportsScreen({super.key, this.transactions = const [], this.budgets = const []});
 
   @override
   State<ReportsScreen> createState() => _ReportsScreenState();
@@ -27,9 +31,10 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> {
   static const int _topCount = 3;
 
-  late final List<TransactionRecord> _transactions =
-      widget.transactions ?? [...SampleData.transactions(), ...SampleData.pastMonthsTransactions()];
+  late final List<TransactionRecord> _transactions = widget.transactions;
   DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
+  // Filter by transaction type: false = spending by category, true = income by source.
+  bool _showIncome = false;
 
   void _openAddExpense() {
     Navigator.of(context).push(
@@ -42,7 +47,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final String languageCode = Localizations.localeOf(context).languageCode;
     final MonthSummary summary = ReportCalculator.summary(_transactions, _month);
-    final List<CategoryTotal> byCategory = ReportCalculator.spendingByCategory(_transactions, _month);
+    List<CategoryTotal> byCategory = ReportCalculator.spendingByCategory(_transactions, _month);
+    if (_showIncome) byCategory = ReportCalculator.incomeByCategory(_transactions, _month);
 
     return Scaffold(
       appBar: AppBar(
@@ -87,21 +93,118 @@ class _ReportsScreenState extends State<ReportsScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          _buildBalanceRow(l10n, summary),
           const SizedBox(height: 16),
           if (summary.isEmpty)
             _buildEmpty(l10n, languageCode)
           else ...[
+            SegmentedButton<bool>(
+              segments: [
+                ButtonSegment(value: false, label: Text(l10n.reportsTypeSpending)),
+                ButtonSegment(value: true, label: Text(l10n.reportsTypeIncome)),
+              ],
+              selected: {_showIncome},
+              onSelectionChanged: (selection) => setState(() => _showIncome = selection.first),
+            ),
+            const SizedBox(height: 12),
             _buildCategoryCard(l10n, languageCode, summary, byCategory),
+            const SizedBox(height: 16),
+            _buildBudgetCard(l10n),
             const SizedBox(height: 16),
             _buildTrendCard(l10n, languageCode),
             if (byCategory.isNotEmpty) ...[
               const SizedBox(height: 20),
-              Text(l10n.reportsTop, style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 20, fontWeight: FontWeight.w700)),
+              Text(
+                _showIncome ? l10n.reportsTopIncome : l10n.reportsTop,
+                style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 20, fontWeight: FontWeight.w700),
+              ),
               const SizedBox(height: 10),
               _buildTopCard(l10n, byCategory.take(_topCount).toList()),
             ],
           ],
         ],
+      ),
+    );
+  }
+
+  /// Balance of the month = income − (spending + money put into savings goals).
+  Widget _buildBalanceRow(AppLocalizations l10n, MonthSummary summary) {
+    final double balance = summary.income - summary.spending - summary.savings;
+    String sign = '';
+    if (balance > 0) sign = '+';
+    Color color = AppColors.primary;
+    if (balance < 0) color = AppColors.expense;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Icon(Icons.balance, color: color),
+            const SizedBox(width: 10),
+            Expanded(child: Text(l10n.reportsBalance, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600))),
+            Text('$sign${Formatters.money(balance)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: color)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Budget vs actual for every budget of the month (the monthly total first, then each category).
+  Widget _buildBudgetCard(AppLocalizations l10n) {
+    final String monthKey = BudgetCalculator.monthKey(_month);
+    final List<Budget> budgets = [];
+    final Budget? total = BudgetCalculator.totalBudget(widget.budgets, monthKey);
+    if (total != null) budgets.add(total);
+    budgets.addAll(BudgetCalculator.categoryBudgets(widget.budgets, monthKey));
+
+    final List<Widget> rows = [];
+    for (final Budget budget in budgets) {
+      final double spent = BudgetCalculator.spent(_transactions, monthKey, categoryId: budget.categoryId);
+      final int percent = BudgetCalculator.percent(spent, budget.limitAmount);
+      final String? categoryId = budget.categoryId;
+      String name = l10n.budgetTotal;
+      if (categoryId != null) name = CategoryDisplay.name(l10n, categoryId);
+      Color barColor = AppColors.primary;
+      if (percent >= budget.alertThreshold) barColor = AppColors.honeyText;
+      if (percent >= 100) barColor = AppColors.expense;
+
+      rows.add(Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(child: Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600))),
+                Text(
+                  l10n.reportsBudgetUsed(Formatters.money(spent), Formatters.money(budget.limitAmount), percent),
+                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            AppProgressBar(value: budget.limitAmount <= 0 ? 0 : spent / budget.limitAmount, color: barColor),
+          ],
+        ),
+      ));
+    }
+    if (rows.isEmpty) {
+      rows.add(Text(l10n.reportsNoBudget, style: const TextStyle(color: AppColors.textSecondary)));
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.reportsBudgetTitle, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            ...rows,
+          ],
+        ),
       ),
     );
   }
@@ -161,10 +264,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.reportsByCategory, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            Text(
+              _showIncome ? l10n.reportsIncomeByCategory : l10n.reportsByCategory,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 12),
             if (byCategory.isEmpty)
-              Text(l10n.reportsNoSpending, style: const TextStyle(color: AppColors.textSecondary))
+              Text(_showIncome ? l10n.reportsNoIncome : l10n.reportsNoSpending, style: const TextStyle(color: AppColors.textSecondary))
             else ...[
               SizedBox(
                 height: 200,
@@ -188,9 +294,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(l10n.reportsTotalSpending, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                         Text(
-                          Formatters.money(summary.spending),
+                          _showIncome ? l10n.reportsTotalIncome : l10n.reportsTotalSpending,
+                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                        ),
+                        Text(
+                          Formatters.money(_showIncome ? summary.income : summary.spending),
                           style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 17, fontWeight: FontWeight.w800),
                         ),
                       ],

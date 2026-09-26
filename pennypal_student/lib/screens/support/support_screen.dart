@@ -4,26 +4,25 @@ import 'package:intl/intl.dart';
 
 import '../../models/app_settings.dart';
 import '../../models/support_query.dart';
+import '../../services/app_settings_service.dart';
+import '../../services/support_service.dart';
 import '../../utils/app_theme.dart';
-import '../../utils/sample_data.dart';
+import '../../widgets/error_state.dart';
 import 'support_form_screen.dart';
 import 'support_sent_screen.dart';
 import 'support_widgets.dart';
 
+/// The student's help requests from Firebase; the admin's reply shows up here live.
 class SupportScreen extends StatefulWidget {
-  final List<SupportQuery>? initialQueries;
-  final AppSettings? settings;
-
-  const SupportScreen({super.key, this.initialQueries, this.settings});
+  const SupportScreen({super.key});
 
   @override
   State<SupportScreen> createState() => _SupportScreenState();
 }
 
 class _SupportScreenState extends State<SupportScreen> {
-  late final List<SupportQuery> _queries = [...(widget.initialQueries ?? SampleData.supportQueries())]
-    ..sort((a, b) => (b.submittedAt ?? 0).compareTo(a.submittedAt ?? 0));
-  late final String _supportEmail = (widget.settings ?? SampleData.appSettings()).supportEmail;
+  late Stream<List<SupportQuery>> _queriesStream = SupportService.watchMine();
+  final Future<AppSettings> _settingsFuture = AppSettingsService.load();
   final Set<String> _openedIds = {};
 
   Future<void> _openNewRequest() async {
@@ -32,9 +31,11 @@ class _SupportScreenState extends State<SupportScreen> {
     );
     if (sent == null || !mounted) return;
 
-    setState(() => _queries.insert(0, sent));
+    // No need to add it to the list by hand: the stream already contains the new request.
     await Navigator.of(context).push(MaterialPageRoute(builder: (context) => SupportSentScreen(query: sent)));
   }
+
+  void _reload() => setState(() => _queriesStream = SupportService.watchMine());
 
   void _toggle(SupportQuery query) {
     setState(() {
@@ -46,6 +47,62 @@ class _SupportScreenState extends State<SupportScreen> {
     });
   }
 
+  Widget _buildEmailCard(AppLocalizations l10n) {
+    return FutureBuilder<AppSettings>(
+      future: _settingsFuture,
+      builder: (context, snapshot) {
+        final String supportEmail = snapshot.data?.supportEmail ?? '';
+        if (supportEmail.isEmpty) return const SizedBox.shrink();
+
+        return Container(
+          padding: const EdgeInsets.all(18),
+          margin: const EdgeInsets.only(bottom: 20),
+          decoration: BoxDecoration(color: AppColors.textPrimary, borderRadius: BorderRadius.circular(22)),
+          child: Row(
+            children: [
+              const Icon(Icons.mail_outline, color: AppColors.mint),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.supportEmailLabel, style: const TextStyle(fontSize: 14, color: AppColors.textOnDark)),
+                    Text(supportEmail, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildList(AppLocalizations l10n, List<SupportQuery> queries) {
+    final List<Widget> children = [
+      _buildEmailCard(l10n),
+      Text(
+        l10n.supportMyRequests,
+        style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 20, fontWeight: FontWeight.w700),
+      ),
+      const SizedBox(height: 10),
+    ];
+
+    if (queries.isEmpty) {
+      children.add(Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(l10n.supportNoRequests, style: const TextStyle(color: AppColors.textSecondary)),
+        ),
+      ));
+    }
+    for (final SupportQuery query in queries) {
+      children.add(_QueryCard(query: query, isOpened: _openedIds.contains(query.id), onTap: () => _toggle(query)));
+    }
+
+    return ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 24), children: children);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -55,52 +112,16 @@ class _SupportScreenState extends State<SupportScreen> {
         centerTitle: true,
         title: Text(l10n.dashSupport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        children: [
-          if (_supportEmail.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(color: AppColors.textPrimary, borderRadius: BorderRadius.circular(22)),
-              child: Row(
-                children: [
-                  const Icon(Icons.mail_outline, color: AppColors.mint),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(l10n.supportEmailLabel, style: const TextStyle(fontSize: 14, color: AppColors.textOnDark)),
-                        Text(
-                          _supportEmail,
-                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          const SizedBox(height: 20),
-          Text(
-            l10n.supportMyRequests,
-            style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 20, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 10),
-          if (_queries.isEmpty)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(l10n.supportNoRequests, style: const TextStyle(color: AppColors.textSecondary)),
-              ),
-            )
-          else
-            ..._queries.map((query) => _QueryCard(
-                  query: query,
-                  isOpened: _openedIds.contains(query.id),
-                  onTap: () => _toggle(query),
-                )),
-        ],
+      body: StreamBuilder<List<SupportQuery>>(
+        stream: _queriesStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            debugPrint('SupportScreen load failed: ${snapshot.error}');
+            return ErrorState(onRetry: _reload);
+          }
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          return _buildList(l10n, snapshot.data!);
+        },
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(

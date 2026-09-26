@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/budget.dart';
 import '../../models/savings_goal.dart';
 import '../../models/transaction_record.dart';
+import '../../models/user_profile.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../../utils/balance_calculator.dart';
@@ -31,6 +32,7 @@ class DashboardScreen extends StatefulWidget {
   final List<Budget> budgets;
   final List<SavingsGoal> goals;
   final String userName;
+  final UserProfile? profile;
   final ValueChanged<int> onOpenTab;
   final int unreadCount;
   final VoidCallback? onOpenNotifications;
@@ -42,6 +44,7 @@ class DashboardScreen extends StatefulWidget {
     this.budgets = const [],
     this.goals = const [],
     this.userName = '',
+    this.profile,
     required this.onOpenTab,
     this.unreadCount = 0,
     this.onOpenNotifications,
@@ -341,7 +344,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         label: l10n.dashFeedback,
         color: AppColors.orange,
         background: AppColors.orangeSoft,
-        onTap: () => _openScreen(const FeedbackScreen()),
+        onTap: () => _openScreen(FeedbackScreen(profile: widget.profile)),
       ),
       ShortcutButton(
         icon: Icons.support_outlined,

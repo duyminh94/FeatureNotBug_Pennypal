@@ -4,11 +4,13 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/app_notification.dart';
 import '../models/budget.dart';
 import '../models/savings_goal.dart';
+import '../models/support_query.dart';
 import '../models/transaction_record.dart';
 import '../models/user_profile.dart';
 import '../services/budget_service.dart';
 import '../services/goal_service.dart';
 import '../services/notification_service.dart';
+import '../services/support_service.dart';
 import '../services/push_notification_service.dart';
 import '../services/transaction_service.dart';
 import '../utils/app_theme.dart';
@@ -30,6 +32,7 @@ class MainShell extends StatefulWidget {
   final Stream<List<Budget>> Function(String uid) watchBudgets;
   final Stream<List<SavingsGoal>> Function(String uid) watchGoals;
   final Stream<Set<String>> Function(String uid) watchReadIds;
+  final Stream<List<SupportQuery>> Function(String uid) watchSupport;
   final void Function(String uid, List<String> ids) markRead;
 
   const MainShell({
@@ -39,6 +42,7 @@ class MainShell extends StatefulWidget {
     this.watchBudgets = BudgetService.watch,
     this.watchGoals = GoalService.watch,
     this.watchReadIds = NotificationService.watchReadIds,
+    this.watchSupport = SupportService.watch,
     this.markRead = NotificationService.markRead,
   });
 
@@ -53,6 +57,7 @@ class _MainShellState extends State<MainShell> {
   late Stream<List<Budget>> _budgetStream = _openBudgetStream();
   late Stream<List<SavingsGoal>> _goalStream = _openGoalStream();
   late Stream<Set<String>> _readIdsStream = _openReadIdsStream();
+  late Stream<List<SupportQuery>> _supportStream = _openSupportStream();
   // Notification ids already on screen. Null until the first data arrives.
   Set<String>? _knownNotificationIds;
 
@@ -97,12 +102,21 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
+  Stream<List<SupportQuery>> _openSupportStream() {
+    try {
+      return widget.watchSupport(widget.profile.uid);
+    } catch (e) {
+      return Stream.error(e);
+    }
+  }
+
   void _reloadData() {
     setState(() {
       _transactionStream = _openTransactionStream();
       _budgetStream = _openBudgetStream();
       _goalStream = _openGoalStream();
       _readIdsStream = _openReadIdsStream();
+      _supportStream = _openSupportStream();
     });
   }
 
@@ -153,9 +167,20 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
-  Widget _buildTabs(List<TransactionRecord> transactions, List<Budget> budgets, List<SavingsGoal> goals, Set<String> readIds) {
-    final List<AppNotification> notifications =
-        NotificationBuilder.build(transactions: transactions, budgets: budgets, goals: goals, readIds: readIds);
+  Widget _buildTabs(
+    List<TransactionRecord> transactions,
+    List<Budget> budgets,
+    List<SavingsGoal> goals,
+    List<SupportQuery> supportQueries,
+    Set<String> readIds,
+  ) {
+    final List<AppNotification> notifications = NotificationBuilder.build(
+      transactions: transactions,
+      budgets: budgets,
+      goals: goals,
+      supportQueries: supportQueries,
+      readIds: readIds,
+    );
     _pushNewNotifications(notifications);
     // The student can turn alerts off in Settings: the list stays, only the badge is hidden.
     int unreadCount = 0;
@@ -169,6 +194,7 @@ class _MainShellState extends State<MainShell> {
           budgets: budgets,
           goals: goals,
           userName: _profile.fullName,
+          profile: _profile,
           onOpenTab: _openTab,
           unreadCount: unreadCount,
           onOpenNotifications: () => _openNotifications(notifications, readIds),
@@ -201,25 +227,34 @@ class _MainShellState extends State<MainShell> {
           if (readSnapshot.hasError) debugPrint('MainShell read notifications failed: ${readSnapshot.error}');
           final Set<String> readIds = readSnapshot.data ?? {};
 
-          return StreamBuilder<List<SavingsGoal>>(
-            stream: _goalStream,
-            builder: (context, goalSnapshot) {
-              return StreamBuilder<List<Budget>>(
-                stream: _budgetStream,
-                builder: (context, budgetSnapshot) {
-                  return StreamBuilder<List<TransactionRecord>>(
-                    stream: _transactionStream,
-                    builder: (context, transactionSnapshot) {
-                      final Object? error = transactionSnapshot.error ?? budgetSnapshot.error ?? goalSnapshot.error;
-                      if (error != null) {
-                        debugPrint('MainShell data failed: $error');
-                        return SafeArea(child: ErrorState(onRetry: _reloadData));
-                      }
-                      if (!transactionSnapshot.hasData || !budgetSnapshot.hasData || !goalSnapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+          return StreamBuilder<List<SupportQuery>>(
+            stream: _supportStream,
+            builder: (context, supportSnapshot) {
+              // Same for help requests: without them only the "admin replied" notifications are missing.
+              if (supportSnapshot.hasError) debugPrint('MainShell support requests failed: ${supportSnapshot.error}');
+              final List<SupportQuery> supportQueries = supportSnapshot.data ?? [];
 
-                      return _buildTabs(transactionSnapshot.data!, budgetSnapshot.data!, goalSnapshot.data!, readIds);
+              return StreamBuilder<List<SavingsGoal>>(
+                stream: _goalStream,
+                builder: (context, goalSnapshot) {
+                  return StreamBuilder<List<Budget>>(
+                    stream: _budgetStream,
+                    builder: (context, budgetSnapshot) {
+                      return StreamBuilder<List<TransactionRecord>>(
+                        stream: _transactionStream,
+                        builder: (context, transactionSnapshot) {
+                          final Object? error = transactionSnapshot.error ?? budgetSnapshot.error ?? goalSnapshot.error;
+                          if (error != null) {
+                            debugPrint('MainShell data failed: $error');
+                            return SafeArea(child: ErrorState(onRetry: _reloadData));
+                          }
+                          if (!transactionSnapshot.hasData || !budgetSnapshot.hasData || !goalSnapshot.hasData) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+
+                          return _buildTabs(transactionSnapshot.data!, budgetSnapshot.data!, goalSnapshot.data!, supportQueries, readIds);
+                        },
+                      );
                     },
                   );
                 },
@@ -235,7 +270,8 @@ class _MainShellState extends State<MainShell> {
         indicatorColor: AppColors.mintSoft,
         destinations: [
           NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: l10n.navHome),
-          NavigationDestination(icon: const Icon(Icons.receipt_long_outlined), selectedIcon: const Icon(Icons.receipt_long), label: l10n.navTransactions),
+          NavigationDestination(
+              icon: const Icon(Icons.receipt_long_outlined), selectedIcon: const Icon(Icons.receipt_long), label: l10n.navTransactions),
           NavigationDestination(
             icon: const Icon(Icons.account_balance_wallet_outlined),
             selectedIcon: const Icon(Icons.account_balance_wallet),

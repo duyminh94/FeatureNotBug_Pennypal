@@ -219,5 +219,6 @@
   "settingsNeverUpdated": "Chưa lưu lần nào",
   "loginTooMany": "Thử quá nhiều lần, vui lòng thử lại sau",
   "loginNetwork": "Không có kết nối mạng",
-  "loginUnknown": "Đã có lỗi, vui lòng thử lại"
+  "loginUnknown": "Đã có lỗi, vui lòng thử lại",
+  "overviewLoadFailed": "Không tải được số liệu thống kê. Kiểm tra kết nối rồi thử lại."
 }

@@ -2,19 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/app_settings.dart';
+import '../../services/app_settings_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
-import '../../utils/sample_data.dart';
 
-class AboutScreen extends StatelessWidget {
-  final AppSettings? settings;
+class AboutScreen extends StatefulWidget {
+  const AboutScreen({super.key});
 
-  const AboutScreen({super.key, this.settings});
+  @override
+  State<AboutScreen> createState() => _AboutScreenState();
+}
+
+class _AboutScreenState extends State<AboutScreen> {
+  // The support email comes from app_settings, which the admin edits.
+  final Future<AppSettings> _settingsFuture = AppSettingsService.load();
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<AppSettings>(
+      future: _settingsFuture,
+      builder: (context, snapshot) => _buildPage(context, snapshot.data?.supportEmail ?? ''),
+    );
+  }
+
+  Widget _buildPage(BuildContext context, String supportEmail) {
     final l10n = AppLocalizations.of(context)!;
-    final String supportEmail = (settings ?? SampleData.appSettings()).supportEmail;
 
     return Scaffold(
       appBar: AppBar(

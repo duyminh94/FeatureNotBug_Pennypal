@@ -464,5 +464,15 @@
   "chatNeedsWants": "Thiết yếu là thứ phải trả để sống và học: ăn uống, tiền nhà, đi lại, giáo trình. Mong muốn làm cuộc sống vui hơn nhưng có thể chờ. Hãy tự hỏi: nếu không mua thì sao?",
   "chatUnknown": "Mình chưa hiểu câu này. Bạn thử hỏi một trong các câu sau nhé:",
   "chatCategorySpending": "{month} bạn đã chi {amount} cho {category}, chiếm {percent} chi tiêu.",
-  "chatOnlyThisMonth": "Mình chỉ trả lời được số liệu {month}. Muốn xem tháng khác, bạn mở mục Báo cáo nhé."
+  "chatOnlyThisMonth": "Mình chỉ trả lời được số liệu {month}. Muốn xem tháng khác, bạn mở mục Báo cáo nhé.",
+  "reportsTypeSpending": "Chi tiêu",
+  "reportsTypeIncome": "Thu nhập",
+  "reportsIncomeByCategory": "Thu nhập theo nguồn",
+  "reportsTotalIncome": "Tổng thu",
+  "reportsTopIncome": "Nguồn thu lớn nhất",
+  "reportsNoIncome": "Tháng này chưa có khoản thu.",
+  "reportsBalance": "Cân bằng thu – chi",
+  "reportsBudgetTitle": "So sánh ngân sách",
+  "reportsNoBudget": "Tháng này chưa đặt ngân sách.",
+  "reportsBudgetUsed": "{spent} / {limit} · {percent}%"
 }

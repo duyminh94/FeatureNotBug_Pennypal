@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/support_query.dart';
-import '../../models/user_profile.dart';
+import '../../services/support_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
-import '../../utils/sample_data.dart';
 import '../../utils/validators.dart';
 
 class SupportFormScreen extends StatefulWidget {
-  final UserProfile? profile;
-
-  const SupportFormScreen({super.key, this.profile});
+  const SupportFormScreen({super.key});
 
   @override
   State<SupportFormScreen> createState() => _SupportFormScreenState();
@@ -36,18 +33,16 @@ class _SupportFormScreenState extends State<SupportFormScreen> {
     return (value ?? '').trim().length < min ? l10n.validationMinLength(min) : l10n.validationMaxLength(max);
   }
 
+  /// Sends the request to Firebase (status "open"); the admin sees it in the Admin app.
   void _send() {
     setState(() => _hasTriedToSend = true);
     if (!_formKey.currentState!.validate()) return;
 
-    final int now = DateTime.now().millisecondsSinceEpoch;
-    final SupportQuery query = SupportQuery(
-      id: 'sq_$now',
-      userEmail: (widget.profile ?? SampleData.profile()).email,
-      subject: _subjectController.text.trim(),
-      message: _messageController.text.trim(),
-      submittedAt: now,
-    );
+    final SupportQuery? query = SupportService.send(_subjectController.text.trim(), _messageController.text.trim());
+    if (query == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorUnknown)));
+      return;
+    }
     Navigator.of(context).pop(query);
   }
 

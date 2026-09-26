@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/user_profile.dart';
+import '../../services/feedback_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
-import '../../utils/sample_data.dart';
 import '../../utils/validators.dart';
 import '../../widgets/labeled_text_field.dart';
 import '../../widgets/success_view.dart';
@@ -23,9 +23,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   static const int _maxRating = 5;
 
   final _formKey = GlobalKey<FormState>();
-  late final UserProfile _profile = widget.profile ?? SampleData.profile();
-  late final TextEditingController _nameController = TextEditingController(text: _profile.fullName);
-  late final TextEditingController _emailController = TextEditingController(text: _profile.email);
+  late final TextEditingController _nameController = TextEditingController(text: widget.profile?.fullName ?? '');
+  late final TextEditingController _emailController = TextEditingController(text: widget.profile?.email ?? '');
   final TextEditingController _commentsController = TextEditingController();
   int _rating = 0;
   int? _sentRating;
@@ -50,16 +49,28 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     };
   }
 
+  /// Rating 1-5 is required; the feedback goes to Firebase and only the admin can read it.
   void _send() {
     setState(() => _hasTriedToSend = true);
     final bool isFormValid = _formKey.currentState!.validate();
     if (!isFormValid || _rating == 0) return;
+
+    final bool isSent = FeedbackService.send(
+      _nameController.text.trim(),
+      _emailController.text.trim(),
+      _rating,
+      _commentsController.text.trim(),
+    );
+    if (!isSent) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorUnknown)));
+      return;
+    }
     setState(() => _sentRating = _rating);
   }
 
   void _resetForm() {
-    _nameController.text = _profile.fullName;
-    _emailController.text = _profile.email;
+    _nameController.text = widget.profile?.fullName ?? '';
+    _emailController.text = widget.profile?.email ?? '';
     _commentsController.clear();
     setState(() {
       _rating = 0;

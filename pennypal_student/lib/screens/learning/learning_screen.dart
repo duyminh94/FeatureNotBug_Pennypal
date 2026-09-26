@@ -5,71 +5,86 @@ import '../../models/learning_content.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/constants.dart';
+import '../../services/learning_service.dart';
 import '../../utils/learning_filter.dart';
-import '../../utils/sample_lessons.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
 import 'learning_detail_screen.dart';
 import 'learning_widgets.dart';
 
+/// Lessons written by the admin in Firebase; the student only sees lessons that are turned on.
 class LearningScreen extends StatefulWidget {
-  final List<LearningContent>? lessons;
-
-  const LearningScreen({super.key, this.lessons});
+  const LearningScreen({super.key});
 
   @override
   State<LearningScreen> createState() => _LearningScreenState();
 }
 
 class _LearningScreenState extends State<LearningScreen> {
-  late final List<LearningContent> _lessons = widget.lessons ?? SampleLessons.all();
+  late Stream<List<LearningContent>> _lessonsStream = LearningService.watch();
   String? _topic;
 
   void _openLesson(LearningContent lesson) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => LearningDetailScreen(lesson: lesson)));
   }
 
+  void _reload() => setState(() => _lessonsStream = LearningService.watch());
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final List<LearningContent> allVisible = LearningFilter.visible(_lessons);
-    final List<LearningContent> shown = LearningFilter.visible(_lessons, topic: _topic);
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(l10n.menuLearning, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
       ),
-      body: allVisible.isEmpty
-          ? EmptyState(icon: Icons.menu_book_outlined, message: l10n.learningEmpty)
-          : Column(
-              children: [
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-                  child: Row(
-                    children: [
-                      _TopicChip(label: l10n.learningAll, isSelected: _topic == null, onTap: () => setState(() => _topic = null)),
-                      ...LearningTopics.values.map((topic) => _TopicChip(
-                            label: LearningDisplay.topicName(l10n, topic),
-                            isSelected: _topic == topic,
-                            onTap: () => setState(() => _topic = topic),
-                          )),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: shown.isEmpty
-                      ? EmptyState(icon: Icons.menu_book_outlined, message: l10n.learningEmptyTopic)
-                      : ListView(
-                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                          children: shown
-                              .map((lesson) => _LessonCard(lesson: lesson, onTap: () => _openLesson(lesson)))
-                              .toList(),
-                        ),
-                ),
-              ],
-            ),
+      body: StreamBuilder<List<LearningContent>>(
+        stream: _lessonsStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            debugPrint('LearningScreen load failed: ${snapshot.error}');
+            return ErrorState(onRetry: _reload);
+          }
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          return _buildLessons(l10n, snapshot.data!);
+        },
+      ),
     );
+  }
+
+  Widget _buildLessons(AppLocalizations l10n, List<LearningContent> lessons) {
+    final List<LearningContent> allVisible = LearningFilter.visible(lessons);
+    final List<LearningContent> shown = LearningFilter.visible(lessons, topic: _topic);
+
+    return allVisible.isEmpty
+        ? EmptyState(icon: Icons.menu_book_outlined, message: l10n.learningEmpty)
+        : Column(
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                child: Row(
+                  children: [
+                    _TopicChip(label: l10n.learningAll, isSelected: _topic == null, onTap: () => setState(() => _topic = null)),
+                    ...LearningTopics.values.map((topic) => _TopicChip(
+                          label: LearningDisplay.topicName(l10n, topic),
+                          isSelected: _topic == topic,
+                          onTap: () => setState(() => _topic = topic),
+                        )),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: shown.isEmpty
+                    ? EmptyState(icon: Icons.menu_book_outlined, message: l10n.learningEmptyTopic)
+                    : ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                        children: shown.map((lesson) => _LessonCard(lesson: lesson, onTap: () => _openLesson(lesson))).toList(),
+                      ),
+              ),
+            ],
+          );
   }
 }
 
