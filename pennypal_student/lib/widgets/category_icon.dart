@@ -34,16 +34,18 @@ IconData categoryIconData(String iconName) {
   return _iconsByName[iconName] ?? Icons.category;
 }
 
-/// Round colored icon used in category lists and transaction rows.
+/// Rounded square icon used in category lists and transaction rows.
 class CategoryIcon extends StatelessWidget {
   final String iconName;
   final Color? color;
+  final Color? backgroundColor;
   final double size;
 
   const CategoryIcon({
     super.key,
     required this.iconName,
     this.color,
+    this.backgroundColor,
     this.size = 40,
   });
 
@@ -51,11 +53,14 @@ class CategoryIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color mainColor = color ?? Theme.of(context).colorScheme.primary;
 
-    return CircleAvatar(
-      radius: size / 2,
-      backgroundColor: mainColor.withOpacity(0.12),
-      child:
-          Icon(categoryIconData(iconName), color: mainColor, size: size * 0.55),
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? mainColor.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(size * 0.32),
+      ),
+      child: Icon(categoryIconData(iconName), color: mainColor, size: size * 0.55),
     );
   }
 }

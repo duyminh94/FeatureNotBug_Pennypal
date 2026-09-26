@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/user_profile.dart';
+import '../../services/push_notification_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../main_shell.dart';
@@ -11,6 +12,18 @@ class NotificationPermissionScreen extends StatelessWidget {
   final UserProfile profile;
 
   const NotificationPermissionScreen({super.key, required this.profile});
+
+  /// "Allow": shows the system permission dialog, then opens the app.
+  Future<void> _allow(BuildContext context) async {
+    await PushNotificationService.requestPermission();
+    if (context.mounted) _continue(context);
+  }
+
+  /// "Later": the app will not ask again on its own; the student can still allow it in phone settings.
+  Future<void> _later(BuildContext context) async {
+    await PushNotificationService.markAsked();
+    if (context.mounted) _continue(context);
+  }
 
   void _continue(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
@@ -80,7 +93,7 @@ class NotificationPermissionScreen extends StatelessWidget {
                 ),
               ),
               FilledButton.icon(
-                onPressed: () => _continue(context),
+                onPressed: () => _allow(context),
                 icon: const Icon(Icons.notifications_none),
                 label: Text(l10n.notifAllow),
               ),
@@ -90,7 +103,7 @@ class NotificationPermissionScreen extends StatelessWidget {
                   backgroundColor: AppColors.surface,
                   side: const BorderSide(color: AppColors.border, width: 1.5),
                 ),
-                onPressed: () => _continue(context),
+                onPressed: () => _later(context),
                 child: Text(l10n.notifLater),
               ),
               const SizedBox(height: 10),

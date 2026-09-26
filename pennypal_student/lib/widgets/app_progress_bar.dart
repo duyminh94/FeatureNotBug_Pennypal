@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/app_theme.dart';
+
 /// Rounded progress bar for budgets and goals; value is clamped to 0–1.
 class AppProgressBar extends StatelessWidget {
   final double value;
@@ -20,8 +22,7 @@ class AppProgressBar extends StatelessWidget {
           value: safeValue,
           minHeight: 8,
           color: color ?? Theme.of(context).colorScheme.primary,
-          backgroundColor:
-              Theme.of(context).colorScheme.surfaceContainerHighest,
+          backgroundColor: AppColors.fill,
         ),
       ),
     );
