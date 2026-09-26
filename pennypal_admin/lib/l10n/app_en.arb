@@ -156,6 +156,8 @@
     }
   },
   "usersNoMatch": "No students match your search.",
+  "usersLoadFailed": "Could not load accounts. Check the connection and try again.",
+  "usersSaveFailed": "Could not change the account. Check the connection and try again.",
   "usersShowing": "Showing {from}–{to} of {total} students",
   "@usersShowing": {
     "placeholders": {
@@ -389,6 +391,8 @@
   "settingsMissingBoth": "Add the message in both languages before turning the announcement on",
   "settingsSave": "Save settings",
   "settingsSaved": "Settings saved. Students will see the changes next time they open the app.",
+  "settingsLoadFailed": "Could not load the settings. Check the connection and try again.",
+  "settingsSaveFailed": "Could not save the settings. Check the connection and try again.",
   "settingsLastUpdated": "Last updated {date}",
   "@settingsLastUpdated": {
     "placeholders": {

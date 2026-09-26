@@ -3,7 +3,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:pennypal_admin/models/user_profile.dart';
-import 'package:pennypal_admin/screens/admin_shell.dart';
 import 'package:pennypal_admin/screens/users/user_detail_screen.dart';
 import 'package:pennypal_admin/screens/users/user_widgets.dart';
 import 'package:pennypal_admin/utils/app_theme.dart';
@@ -24,18 +23,6 @@ void useScreen(WidgetTester tester, Size size) {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-}
-
-Future<void> openUsers(WidgetTester tester, Size size) async {
-  useScreen(tester, size);
-  final AdminData data = SampleData.adminData();
-  await tester.pumpWidget(buildApp(AdminShell(data: data, admin: data.users.first, signOut: () async {})));
-  if (size.width < 600) {
-    await tester.tap(find.byTooltip('Open navigation menu'));
-    await tester.pumpAndSettle();
-  }
-  await tester.tap(find.text('Users').last);
-  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -90,44 +77,11 @@ void main() {
     });
   });
 
-  testWidgets('Wide table pages 8 students and filters locked accounts', (tester) async {
-    await openUsers(tester, const Size(1500, 1100));
-
-    expect(find.byType(DataTable), findsOneWidget);
-    expect(find.text('Showing 1–8 of 10 students'), findsOneWidget);
-    await tester.tap(find.text('Next'));
-    await tester.pump();
-    expect(find.text('Showing 9–10 of 10 students'), findsOneWidget);
-
-    await tester.tap(find.text('Locked · 1'));
-    await tester.pump();
-    expect(find.text('Le Minh Nghia'), findsOneWidget);
-    expect(find.text('Unlock'), findsOneWidget);
-  });
-
-  testWidgets('AD-03: locking a student asks first and updates the counts', (tester) async {
-    await openUsers(tester, const Size(390, 900));
-
-    await tester.tap(find.text('Lock').first);
-    await tester.pumpAndSettle();
-    expect(find.text('Lock Vu Thanh Son?'), findsOneWidget);
-    await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
-    expect(find.text('Locked · 1'), findsOneWidget);
-
-    await tester.tap(find.text('Lock').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Lock account'));
-    await tester.pumpAndSettle();
-    expect(find.text('Vu Thanh Son is now locked'), findsOneWidget);
-    expect(find.text('Locked · 2'), findsOneWidget);
-  });
-
-  testWidgets('AD-04 and AD-06: detail shows counts only and can unlock', (tester) async {
+  testWidgets('AD-04: detail shows the profile and counts only, never the amounts', (tester) async {
     useScreen(tester, const Size(390, 900));
-    final AdminData data = SampleData.adminData();
-    UserProfile? changed;
-    await tester.pumpWidget(buildApp(UserDetailScreen(userId: 'u_nghia', data: data, onUserChanged: (user) => changed = user)));
+    final UserProfile locked = SampleData.adminData().users.firstWhere((user) => user.uid == 'u_nghia');
+    await tester.pumpWidget(buildApp(UserDetailScreen(user: locked)));
+    await tester.pump();
 
     expect(find.text('Le Minh Nghia'), findsOneWidget);
     expect(find.text('Locked'), findsOneWidget);
@@ -135,15 +89,6 @@ void main() {
     expect(find.text('Savings goals'), findsOneWidget);
     expect(find.textContaining('Individual transactions are private'), findsOneWidget);
     expect(find.byType(DataTable), findsNothing);
-
-    await tester.ensureVisible(find.text('Unlock account'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Unlock account'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Unlock account').last);
-    await tester.pumpAndSettle();
-
-    expect(changed?.isActive, isTrue);
-    expect(find.text('Active'), findsOneWidget);
+    expect(find.text('Unlock account'), findsOneWidget);
   });
 }

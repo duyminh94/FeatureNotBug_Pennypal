@@ -60,13 +60,6 @@ class _AdminShellState extends State<AdminShell> {
 
   void _open(AdminSection section) => setState(() => _section = section);
 
-  void _updateUser(UserProfile changed) {
-    setState(() {
-      final int index = widget.data.users.indexWhere((user) => user.uid == changed.uid);
-      if (index >= 0) widget.data.users[index] = changed;
-    });
-  }
-
   Future<void> _logout() async {
     final l10n = AppLocalizations.of(context)!;
     final bool confirmed = await showConfirmDialog(
@@ -91,14 +84,11 @@ class _AdminShellState extends State<AdminShell> {
     return switch (_section) {
       AdminSection.overview => OverviewScreen(data: widget.data, onOpenSection: _open),
       AdminSection.analytics => AnalyticsScreen(data: widget.data),
-      AdminSection.users => UsersScreen(data: widget.data, onUserChanged: _updateUser),
+      AdminSection.users => const UsersScreen(),
       AdminSection.learning => const LearningScreen(),
       AdminSection.support => SupportScreen(data: widget.data, onChanged: () => setState(() {})),
       AdminSection.feedbacks => FeedbacksScreen(feedbacks: widget.data.feedbacks),
-      AdminSection.settings => AppSettingsScreen(
-          settings: widget.data.settings,
-          onSaved: (settings) => setState(() => widget.data.settings = settings),
-        ),
+      AdminSection.settings => const AppSettingsScreen(),
     };
   }
 

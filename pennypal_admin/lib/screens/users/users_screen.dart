@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/user_profile.dart';
+import '../../services/user_service.dart';
 import '../../utils/admin_section.dart';
 import '../../utils/app_theme.dart';
-import '../../utils/sample_data.dart';
 import '../../utils/user_filter.dart';
 import 'user_detail_screen.dart';
 import 'user_widgets.dart';
 
+/// Student accounts: search by name or email, filter active / locked,
+/// lock or unlock an account, and open a student's details.
 class UsersScreen extends StatefulWidget {
-  final AdminData data;
-  final ValueChanged<UserProfile> onUserChanged;
-
-  const UsersScreen({super.key, required this.data, required this.onUserChanged});
+  const UsersScreen({super.key});
 
   @override
   State<UsersScreen> createState() => _UsersScreenState();
@@ -21,9 +20,18 @@ class UsersScreen extends StatefulWidget {
 
 class _UsersScreenState extends State<UsersScreen> {
   final TextEditingController _searchController = TextEditingController();
+  late Stream<List<UserProfile>> _userStream;
   String _query = '';
   UserStatusFilter _status = UserStatusFilter.all;
+
+  // Current page of the tablet table, reset to the first page when the search or filter changes.
   int _pageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _openStream();
+  }
 
   @override
   void dispose() {
@@ -31,46 +39,93 @@ class _UsersScreenState extends State<UsersScreen> {
     super.dispose();
   }
 
+  /// Starts listening to users. If Firebase is not ready the screen
+  /// shows the error box instead of crashing.
+  void _openStream() {
+    try {
+      _userStream = UserService.watch();
+    } catch (e) {
+      _userStream = Stream.error(e);
+    }
+  }
+
+  /// Tries to load the accounts again after an error.
+  void _retry() {
+    setState(() {
+      _openStream();
+    });
+  }
+
+  /// Asks first, then locks an active student or unlocks a locked one.
+  /// The list updates by itself from Firebase after the save.
   Future<void> _toggleLock(UserProfile user) async {
     final l10n = AppLocalizations.of(context)!;
     final bool confirmed = await confirmLockChange(context, user);
     if (!confirmed || !mounted) return;
 
-    widget.onUserChanged(UserFilter.withActive(user, !user.isActive));
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text(user.isActive ? l10n.usersLockedMessage(user.fullName) : l10n.usersUnlockedMessage(user.fullName)),
-      ));
+    final bool isSaved = await UserService.setActive(user.uid, !user.isActive);
+    if (!mounted) return;
+
+    String message = l10n.usersSaveFailed;
+    if (isSaved && user.isActive) message = l10n.usersLockedMessage(user.fullName);
+    if (isSaved && !user.isActive) message = l10n.usersUnlockedMessage(user.fullName);
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _openDetail(UserProfile user) {
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => UserDetailScreen(
-        userId: user.uid,
-        data: widget.data,
-        onUserChanged: widget.onUserChanged,
-      ),
+      builder: (context) => UserDetailScreen(user: user),
     ));
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final List<UserProfile> students = UserFilter.students(widget.data.users);
+
+    return StreamBuilder<List<UserProfile>>(
+      stream: _userStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _LoadError(message: l10n.usersLoadFailed, onRetry: _retry);
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return _buildContent(l10n, snapshot.data!);
+      },
+    );
+  }
+
+  /// Search box, Active / Locked filter with counts, then a table (tablet) or cards (phone).
+  Widget _buildContent(AppLocalizations l10n, List<UserProfile> users) {
+    final List<UserProfile> students = UserFilter.students(users);
     final List<UserProfile> searched = UserFilter.apply(students, query: _query);
     final List<UserProfile> shown = UserFilter.apply(students, query: _query, status: _status);
-    final int activeCount = searched.where((user) => user.isActive).length;
+
+    // The filter counts follow the search, so "Locked 2" means 2 locked students match the search.
+    int activeCount = 0;
+    for (final UserProfile user in searched) {
+      if (user.isActive) activeCount++;
+    }
+
+    final List<Widget> userCards = [];
+    for (final UserProfile user in shown) {
+      userCards.add(_UserCard(user: user, onLock: () => _toggleLock(user), onOpen: () => _openDetail(user)));
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool isWide = constraints.maxWidth >= AdminLayout.wideBreakpoint;
         final Widget search = TextField(
           controller: _searchController,
-          onChanged: (value) => setState(() {
-            _query = value;
-            _pageIndex = 0;
-          }),
+          onChanged: (value) {
+            setState(() {
+              _query = value;
+              _pageIndex = 0;
+            });
+          },
           decoration: InputDecoration(hintText: l10n.usersSearchHint, prefixIcon: const Icon(Icons.search)),
         );
         final Widget statusFilter = SegmentedButton<UserStatusFilter>(
@@ -81,10 +136,12 @@ class _UsersScreenState extends State<UsersScreen> {
             ButtonSegment(value: UserStatusFilter.locked, label: Text(l10n.usersFilterLocked(searched.length - activeCount))),
           ],
           selected: {_status},
-          onSelectionChanged: (selected) => setState(() {
-            _status = selected.first;
-            _pageIndex = 0;
-          }),
+          onSelectionChanged: (selected) {
+            setState(() {
+              _status = selected.first;
+              _pageIndex = 0;
+            });
+          },
         );
 
         return ListView(
@@ -116,20 +173,45 @@ class _UsersScreenState extends State<UsersScreen> {
             else if (isWide)
               _buildTable(l10n, shown)
             else
-              ...shown.map((user) => _UserCard(user: user, onLock: () => _toggleLock(user), onOpen: () => _openDetail(user))),
+              ...userCards,
           ],
         );
       },
     );
   }
 
+  /// Tablet table, 8 students per page with Previous / Next.
   Widget _buildTable(AppLocalizations l10n, List<UserProfile> shown) {
     final String languageCode = Localizations.localeOf(context).languageCode;
     final int pageCount = UserFilter.pageCount(shown.length);
-    final int pageIndex = _pageIndex >= pageCount ? pageCount - 1 : _pageIndex;
+    // Stay inside the last page when a student disappears from the filtered list.
+    int pageIndex = _pageIndex;
+    if (pageIndex >= pageCount) pageIndex = pageCount - 1;
     final List<UserProfile> pageUsers = UserFilter.page(shown, pageIndex);
     final int from = pageIndex * UserFilter.pageSize + 1;
     final int to = from + pageUsers.length - 1;
+
+    final List<DataRow> tableRows = [];
+    for (final UserProfile user in pageUsers) {
+      tableRows.add(DataRow(
+        onSelectChanged: (_) => _openDetail(user),
+        cells: [
+          DataCell(Row(
+            children: [
+              UserAvatar(name: user.fullName, size: 36),
+              const SizedBox(width: 10),
+              Text(user.fullName, style: const TextStyle(fontWeight: FontWeight.w700)),
+            ],
+          )),
+          DataCell(Text(user.email)),
+          DataCell(Text(user.mobileNumber)),
+          DataCell(Text(UserLabels.joined(user.createdAt, languageCode))),
+          DataCell(Text(UserLabels.lastLogin(l10n, user.lastLogin, languageCode))),
+          DataCell(UserStatusBadge(isActive: user.isActive)),
+          DataCell(LockButton(isActive: user.isActive, onPressed: () => _toggleLock(user))),
+        ],
+      ));
+    }
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -150,26 +232,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 DataColumn(label: Text(l10n.usersStatus)),
                 const DataColumn(label: SizedBox.shrink()),
               ],
-              rows: pageUsers.map((user) {
-                return DataRow(
-                  onSelectChanged: (_) => _openDetail(user),
-                  cells: [
-                    DataCell(Row(
-                      children: [
-                        UserAvatar(name: user.fullName, size: 36),
-                        const SizedBox(width: 10),
-                        Text(user.fullName, style: const TextStyle(fontWeight: FontWeight.w700)),
-                      ],
-                    )),
-                    DataCell(Text(user.email)),
-                    DataCell(Text(user.mobileNumber)),
-                    DataCell(Text(UserLabels.joined(user.createdAt, languageCode))),
-                    DataCell(Text(UserLabels.lastLogin(l10n, user.lastLogin, languageCode))),
-                    DataCell(UserStatusBadge(isActive: user.isActive)),
-                    DataCell(LockButton(isActive: user.isActive, onPressed: () => _toggleLock(user))),
-                  ],
-                );
-              }).toList(),
+              rows: tableRows,
             ),
           ),
           const Divider(height: 1, color: AppColors.border),
@@ -184,12 +247,24 @@ class _UsersScreenState extends State<UsersScreen> {
                   ),
                 ),
                 OutlinedButton(
-                  onPressed: pageIndex == 0 ? null : () => setState(() => _pageIndex = pageIndex - 1),
+                  onPressed: pageIndex == 0
+                      ? null
+                      : () {
+                          setState(() {
+                            _pageIndex = pageIndex - 1;
+                          });
+                        },
                   child: Text(l10n.commonPrevious),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton(
-                  onPressed: pageIndex >= pageCount - 1 ? null : () => setState(() => _pageIndex = pageIndex + 1),
+                  onPressed: pageIndex >= pageCount - 1
+                      ? null
+                      : () {
+                          setState(() {
+                            _pageIndex = pageIndex + 1;
+                          });
+                        },
                   child: Text(l10n.commonNext),
                 ),
               ],
@@ -201,6 +276,7 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 }
 
+/// Phone layout of one student with Lock / Unlock and a tap to open details.
 class _UserCard extends StatelessWidget {
   final UserProfile user;
   final VoidCallback onLock;
@@ -280,6 +356,35 @@ class _Fact extends StatelessWidget {
         const SizedBox(height: 2),
         Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
       ],
+    );
+  }
+}
+
+/// Shown when the accounts cannot be loaded, e.g. no connection or no permission.
+class _LoadError extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _LoadError({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off, size: 48, color: AppColors.textMuted),
+            const SizedBox(height: 12),
+            Text(message, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+            const SizedBox(height: 12),
+            FilledButton(onPressed: onRetry, child: Text(l10n.commonRetry)),
+          ],
+        ),
+      ),
     );
   }
 }
