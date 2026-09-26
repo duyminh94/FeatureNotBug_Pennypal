@@ -1,14 +1,14 @@
 {
   "project_info": {
-    "project_number": "402155578",
-    "firebase_url": "https://pennypal-featurenotbug-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "pennypal-featurenotbug",
-    "storage_bucket": "pennypal-featurenotbug.firebasestorage.app"
+    "project_number": "760315859875",
+    "firebase_url": "https://pennypal-featurenotbug-beb05-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "pennypal-featurenotbug-beb05",
+    "storage_bucket": "pennypal-featurenotbug-beb05.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:402155578:android:162eb4197633ec332c2d03",
+        "mobilesdk_app_id": "1:760315859875:android:4de24c2496b5a56b688016",
         "android_client_info": {
           "package_name": "com.featurenotbug.pennypal_admin"
         }
@@ -16,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC9NxaoHmqzSN6HmaxIQRuKd-wRTSEOM2s"
+          "current_key": "AIzaSyBKCEy5xT1ikJ-YtiEZMhrEikywUfafLiM"
         }
       ],
       "services": {
@@ -27,7 +27,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:402155578:android:beba900cf937e28f2c2d03",
+        "mobilesdk_app_id": "1:760315859875:android:4e44fa3f53ea12a9688016",
         "android_client_info": {
           "package_name": "com.featurenotbug.pennypal_student"
         }
@@ -35,7 +35,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC9NxaoHmqzSN6HmaxIQRuKd-wRTSEOM2s"
+          "current_key": "AIzaSyBKCEy5xT1ikJ-YtiEZMhrEikywUfafLiM"
         }
       ],
       "services": {
