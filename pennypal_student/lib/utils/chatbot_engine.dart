@@ -1,11 +1,14 @@
-﻿import 'package:pennypal_student/l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../models/budget.dart';
+import '../models/budget_plan_proposal.dart';
 import '../models/category.dart';
 import '../models/chat_message.dart';
+import '../models/recurring_item.dart';
 import '../models/savings_goal.dart';
 import '../models/transaction_record.dart';
+import '../services/gemini_advisor_service.dart';
 import 'budget_calculator.dart';
 import 'category_display.dart';
 import 'category_keywords.dart';
@@ -22,6 +25,7 @@ class ChatbotData {
   final List<Budget> budgets;
   final List<SavingsGoal> goals;
   final List<Category> customCategories;
+  final List<RecurringItem> recurringItems;
 
   const ChatbotData({
     required this.userName,
@@ -29,6 +33,7 @@ class ChatbotData {
     required this.budgets,
     required this.goals,
     required this.customCategories,
+    this.recurringItems = const [],
   });
 }
 
@@ -42,25 +47,51 @@ class ChatbotEngine {
       : now = now ?? DateTime.now();
 
   DateTime get _month => DateTime(now.year, now.month);
+  String get _monthFormat => '${now.year}-${now.month.toString().padLeft(2, '0')}';
 
   String get _monthLabel => Formatters.monthLabel(_month, languageCode);
 
   String _percentText(double value) => '${NumberFormat('0.0', languageCode).format(value)}%';
 
-  ChatMessage _botMessage(String text, {List<String> suggestions = const [], ChatProgress? progress, bool showAddExpense = false}) {
+  ChatMessage _botMessage(String text, {List<String> suggestions = const [], ChatProgress? progress, bool showAddExpense = false, BudgetPlanProposal? budgetPlan}) {
     return ChatMessage(
       isUser: false,
       text: text,
       suggestions: suggestions,
       progress: progress,
       showAddExpense: showAddExpense,
+      budgetPlan: budgetPlan,
       sentAt: now.millisecondsSinceEpoch,
     );
   }
 
-  List<String> get defaultSuggestions => [l10n.chatChipTop, l10n.chatChipBudget, l10n.chatChipGoal, l10n.chatChipSave];
+  List<String> get defaultSuggestions => [
+        l10n.chatChipTop,
+        l10n.chatChipBudget,
+        languageCode == 'vi' ? 'Lập kế hoạch tháng' : 'Plan monthly budget',
+        l10n.chatChipGoal,
+        l10n.chatChipSave,
+      ];
 
   ChatMessage welcome() => _botMessage(l10n.chatWelcome(Formatters.givenName(data.userName)));
+
+  ChatMessage planBudget() {
+    final BudgetPlanProposal plan = GeminiAdvisorService.generateHeuristicPlan(
+      data: data,
+      month: _monthFormat,
+    );
+    final String text = languageCode == 'vi'
+        ? '🐷 Dựa trên thu nhập và các khoản chi tiêu của bạn, Penny đã thiết kế một bảng phân bổ ngân sách thông minh (quy tắc 50/30/20) để bạn kiểm soát chi tiêu tốt nhất trong tháng này:'
+        : '🐷 Based on your income and expenses, Penny designed a smart budget allocation (50/30/20 rule) to help you stay on track this month:';
+
+    return _botMessage(
+      text,
+      budgetPlan: plan,
+      suggestions: languageCode == 'vi'
+          ? ['Kiểm tra số dư', 'Chi tiêu tháng này', 'Xem mục tiêu']
+          : ['Check balance', 'This month spending', 'View goals'],
+    );
+  }
 
   ChatMessage reply(String message) {
     final ChatIntent intent = ChatIntentMatcher.detect(message);
@@ -81,6 +112,7 @@ class ChatbotEngine {
       ChatIntent.budgetRemaining => _budgetRemaining(message),
       ChatIntent.goalProgress => _goalProgress(),
       ChatIntent.compareLastMonth => _compareLastMonth(),
+      ChatIntent.planBudget => planBudget(),
       ChatIntent.budgetingTips => _botMessage(l10n.chatBudgetingTips),
       ChatIntent.savingTips => _botMessage(l10n.chatSavingTips),
       ChatIntent.needsVsWants => _botMessage(l10n.chatNeedsWants),
