@@ -1,15 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../models/support_query.dart';
 import '../models/user_profile.dart';
 import '../services/admin_auth_service.dart';
 import '../services/admin_data_service.dart';
+import '../services/support_service.dart';
 import '../utils/admin_section.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import '../utils/overview_calculator.dart';
-import '../utils/sample_data.dart';
+import '../models/admin_data.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/language_toggle.dart';
 import 'analytics_screen.dart';
@@ -26,8 +30,15 @@ class AdminShell extends StatefulWidget {
   final AdminData? data;
   final UserProfile admin;
   final Future<void> Function() signOut;
+  final Stream<Map<String, List<SupportQuery>>> Function() watchSupport;
 
-  const AdminShell({super.key, this.data, required this.admin, this.signOut = AdminAuthService.signOut});
+  const AdminShell({
+    super.key,
+    this.data,
+    required this.admin,
+    this.signOut = AdminAuthService.signOut,
+    this.watchSupport = SupportService.watch,
+  });
 
   @override
   State<AdminShell> createState() => _AdminShellState();
@@ -37,6 +48,31 @@ class _AdminShellState extends State<AdminShell> {
   AdminSection _section = AdminSection.overview;
   late Future<AdminData> _dataFuture = _loadData();
   int _openSupport = 0;
+  StreamSubscription<Map<String, List<SupportQuery>>>? _supportSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _listenSupport();
+  }
+
+  @override
+  void dispose() {
+    _supportSubscription?.cancel();
+    super.dispose();
+  }
+
+  /// Keeps the menu badge live: after a reply the count goes down without opening the Overview again.
+  void _listenSupport() {
+    try {
+      _supportSubscription = widget.watchSupport().listen(
+        (supportByUser) => setState(() => _openSupport = OverviewCalculator.openQueries(supportByUser).length),
+        onError: (Object error) => debugPrint('AdminShell support badge failed: $error'),
+      );
+    } catch (e) {
+      debugPrint('AdminShell support badge failed: $e');
+    }
+  }
 
   /// Reads the data once; the support badge is updated when it arrives.
   Future<AdminData> _loadData() {

@@ -6,7 +6,7 @@ import 'package:pennypal_admin/screens/learning/lesson_form_screen.dart';
 import 'package:pennypal_admin/utils/app_theme.dart';
 import 'package:pennypal_admin/utils/constants.dart';
 import 'package:pennypal_admin/utils/lesson_editor.dart';
-import 'package:pennypal_admin/utils/sample_data.dart';
+import 'sample_data.dart';
 
 Widget buildApp(Widget home) {
   return MaterialApp(
@@ -54,11 +54,6 @@ void main() {
 
       expect(LessonEditor.filter(lessons, null).map((item) => item.id), ['new', 'other', 'old']);
       expect(LessonEditor.filter(lessons, LearningTopics.saving).map((item) => item.id), ['new', 'old']);
-
-      final LearningContent hidden = LessonEditor.withActive(lessons.first, false, 9);
-      expect(hidden.isActive, isFalse);
-      expect(hidden.titleVi, 'old');
-      expect(hidden.updatedAt, 9);
     });
   });
 
@@ -76,6 +71,17 @@ void main() {
       await tester.pump();
       expect(find.text('Enter a link that starts with http:// or https://'), findsOneWidget);
       expect(saveButton(tester).onPressed, isNull);
+    });
+
+    testWidgets('a lesson with an unknown topic opens with the first topic instead of crashing', (tester) async {
+      useScreen(tester, const Size(420, 1600));
+      final LearningContent oddLesson = LearningContent(
+        id: 'odd', titleEn: 'Odd', titleVi: 'La', bodyEn: 'b', bodyVi: 'b', topic: 'crypto', level: 'expert', createdAt: 1);
+      await tester.pumpWidget(buildApp(LessonFormScreen(lessonId: 'odd', initial: oddLesson)));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Edit lesson'), findsOneWidget);
     });
 
     // Opens the form from a button, like the lesson list does, and keeps what the form returns.

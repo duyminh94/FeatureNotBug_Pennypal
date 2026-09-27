@@ -137,6 +137,7 @@
   "dashMonthIncome": "Income",
   "dashMonthExpense": "Spending",
   "dashMonthSavings": "Savings",
+  "dashSavedInGoals": "Saved",
   "dashBudgetTitle": "{month} budget",
   "@dashBudgetTitle": {
     "placeholders": {

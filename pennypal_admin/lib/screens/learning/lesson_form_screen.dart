@@ -56,8 +56,9 @@ class _LessonFormScreenState extends State<LessonFormScreen> with SingleTickerPr
       _titleViController.text = lesson.titleVi;
       _bodyViController.text = lesson.bodyVi;
       _imageUrlController.text = lesson.imageUrl ?? '';
-      _topic = lesson.topic;
-      _level = lesson.level;
+      // A topic or level typed by hand in the console is not in the list, and the dropdown would crash on it.
+      if (LearningTopics.values.contains(lesson.topic)) _topic = lesson.topic;
+      if (LearningLevels.values.contains(lesson.level)) _level = lesson.level;
       _isActive = lesson.isActive;
     }
   }

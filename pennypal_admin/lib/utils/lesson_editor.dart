@@ -40,21 +40,4 @@ class LessonEditor {
     result.sort((a, b) => (b.createdAt ?? 0).compareTo(a.createdAt ?? 0));
     return result;
   }
-
-  /// Copy of a lesson with a new visibility; everything else stays the same.
-  static LearningContent withActive(LearningContent lesson, bool isActive, int updatedAt) {
-    return LearningContent(
-      id: lesson.id,
-      titleEn: lesson.titleEn,
-      titleVi: lesson.titleVi,
-      bodyEn: lesson.bodyEn,
-      bodyVi: lesson.bodyVi,
-      topic: lesson.topic,
-      level: lesson.level,
-      imageUrl: lesson.imageUrl,
-      isActive: isActive,
-      createdAt: lesson.createdAt,
-      updatedAt: updatedAt,
-    );
-  }
 }

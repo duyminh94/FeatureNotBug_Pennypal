@@ -23,10 +23,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -66,5 +63,14 @@ class DefaultFirebaseOptions {
     projectId: 'pennypal-featurenotbug-beb05',
     databaseURL: 'https://pennypal-featurenotbug-beb05-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'pennypal-featurenotbug-beb05.firebasestorage.app',
+  );
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDbfWsz3yHVFztWGNpngDUxQ-JVHn5zI_I',
+    appId: '1:760315859875:ios:aa89523042b9d6e1688016',
+    messagingSenderId: '760315859875',
+    projectId: 'pennypal-featurenotbug-beb05',
+    databaseURL: 'https://pennypal-featurenotbug-beb05-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'pennypal-featurenotbug-beb05.firebasestorage.app',
+    iosBundleId: 'com.featurenotbug.pennypalAdmin',
   );
 }

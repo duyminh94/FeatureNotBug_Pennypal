@@ -8,7 +8,7 @@ import 'package:pennypal_admin/utils/analytics_calculator.dart';
 import 'package:pennypal_admin/utils/app_theme.dart';
 import 'package:pennypal_admin/utils/constants.dart';
 import 'package:pennypal_admin/utils/csv_builder.dart';
-import 'package:pennypal_admin/utils/sample_data.dart';
+import 'sample_data.dart';
 
 Widget buildApp(Widget home) {
   return MaterialApp(

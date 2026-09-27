@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pennypal_admin/models/admin_data.dart';
 import 'package:pennypal_admin/models/app_settings.dart';
 import 'package:pennypal_admin/models/feedback_entry.dart';
 import 'package:pennypal_admin/models/support_query.dart';
@@ -14,7 +15,7 @@ import 'package:pennypal_admin/services/admin_auth_service.dart';
 import 'package:pennypal_admin/utils/app_theme.dart';
 import 'package:pennypal_admin/utils/constants.dart';
 import 'package:pennypal_admin/utils/overview_calculator.dart';
-import 'package:pennypal_admin/utils/sample_data.dart';
+import 'sample_data.dart';
 
 Widget buildApp(Widget home) {
   return MaterialApp(

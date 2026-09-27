@@ -116,6 +116,7 @@
   "dashMonthIncome": "Thu tháng",
   "dashMonthExpense": "Chi tiêu",
   "dashMonthSavings": "Tiết kiệm",
+  "dashSavedInGoals": "Đã tiết kiệm",
   "dashBudgetTitle": "Ngân sách {month}",
   "dashBudgetLeft": "Còn {amount}",
   "dashBudgetOver": "Vượt {amount}",

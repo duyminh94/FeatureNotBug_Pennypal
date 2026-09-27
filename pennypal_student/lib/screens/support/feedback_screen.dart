@@ -126,20 +126,24 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 20, fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (int star = 1; star <= _maxRating; star++)
-                        IconButton(
-                          tooltip: l10n.feedbackStar(star),
-                          iconSize: 40,
-                          onPressed: () => setState(() => _rating = star),
-                          icon: Icon(
-                            star <= _rating ? Icons.star_rounded : Icons.star_outline_rounded,
-                            color: star <= _rating ? AppColors.honey : AppColors.border,
+                  // Five 56px buttons need 280px; on a narrower screen the row shrinks a little instead of overflowing.
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (int star = 1; star <= _maxRating; star++)
+                          IconButton(
+                            tooltip: l10n.feedbackStar(star),
+                            iconSize: 40,
+                            onPressed: () => setState(() => _rating = star),
+                            icon: Icon(
+                              star <= _rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                              color: star <= _rating ? AppColors.honey : AppColors.border,
+                            ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                   Text(
                     showRatingError ? l10n.validationRating : _ratingLabel(l10n),

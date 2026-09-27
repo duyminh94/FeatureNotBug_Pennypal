@@ -255,9 +255,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
             Row(
               children: [
                 Expanded(child: Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600))),
-                Text(
-                  l10n.reportsBudgetUsed(Formatters.money(spent), Formatters.money(budget.limitAmount), percent),
-                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                const SizedBox(width: 8),
+                // Big amounts ("100.000.000 ₫ of 200.000.000 ₫") wrap to a second line instead of overflowing on 320dp.
+                Flexible(
+                  child: Text(
+                    l10n.reportsBudgetUsed(Formatters.money(spent), Formatters.money(budget.limitAmount), percent),
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  ),
                 ),
               ],
             ),

@@ -157,6 +157,16 @@ class GoalCalculator {
     return result;
   }
 
+  /// Money the student has in goals that are still running: the starting amount plus every contribution.
+  /// Shown as "Saved" on the dashboard, so it matches the numbers on the Goals tab.
+  static double savedInActiveGoals(List<SavingsGoal> goals) {
+    double total = 0;
+    for (final SavingsGoal goal in goalsWithStatus(goals, GoalStatuses.active)) {
+      total += goal.currentAmount;
+    }
+    return total;
+  }
+
   /// Goals with one status (active, completed or cancelled).
   static List<SavingsGoal> goalsWithStatus(List<SavingsGoal> goals, String status) {
     final List<SavingsGoal> result = [];

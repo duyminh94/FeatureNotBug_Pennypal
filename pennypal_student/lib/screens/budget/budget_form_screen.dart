@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
+import '../../models/app_settings.dart';
 import '../../models/budget.dart';
 import '../../models/transaction_record.dart';
+import '../../services/app_settings_service.dart';
 import '../../services/budget_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/budget_calculator.dart';
@@ -33,12 +35,16 @@ class BudgetFormScreen extends StatefulWidget {
   /// The budget being edited, null when adding.
   final Budget? initial;
 
+  /// Reads app_settings; a new budget starts at the admin's default threshold (BR-22).
+  final Future<AppSettings> Function() loadSettings;
+
   const BudgetFormScreen({
     super.key,
     required this.month,
     required this.budgets,
     required this.transactions,
     this.initial,
+    this.loadSettings = AppSettingsService.load,
   });
 
   @override
@@ -56,6 +62,7 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
   bool _isTotal = false;
   String? _categoryId;
   int _threshold = AppDefaults.alertThreshold;
+  bool _isThresholdMovedByUser = false;
 
   // Errors appear only after the first Save press, not while the student is still typing.
   bool _hasTriedToSave = false;
@@ -77,7 +84,22 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
       _isTotal = initial.isTotal;
       _categoryId = initial.categoryId;
       _threshold = initial.alertThreshold;
+    } else {
+      _loadDefaultThreshold();
     }
+  }
+
+  /// BR-22: a new budget uses app_settings.defaultAlertThreshold; if it can't be read the 80% default stays.
+  /// A value the student already picked on the slider is never replaced.
+  Future<void> _loadDefaultThreshold() async {
+    final AppSettings settings = await widget.loadSettings();
+    if (!mounted || _isThresholdMovedByUser) return;
+
+    int threshold = settings.defaultAlertThreshold;
+    if (threshold < _minThreshold || threshold > _maxThreshold) threshold = AppDefaults.alertThreshold;
+    setState(() {
+      _threshold = threshold;
+    });
   }
 
   @override
@@ -236,6 +258,7 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
               onChanged: (value) {
                 setState(() {
                   _threshold = value.round();
+                  _isThresholdMovedByUser = true;
                 });
               },
             ),

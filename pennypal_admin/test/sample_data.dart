@@ -1,31 +1,11 @@
-import '../models/app_settings.dart';
-import '../models/feedback_entry.dart';
-import '../models/learning_content.dart';
-import '../models/support_query.dart';
-import '../models/transaction_record.dart';
-import '../models/user_profile.dart';
-import 'constants.dart';
+import 'package:pennypal_admin/models/admin_data.dart';
+import 'package:pennypal_admin/models/app_settings.dart';
+import 'package:pennypal_admin/models/feedback_entry.dart';
+import 'package:pennypal_admin/models/support_query.dart';
+import 'package:pennypal_admin/models/transaction_record.dart';
+import 'package:pennypal_admin/models/user_profile.dart';
+import 'package:pennypal_admin/utils/constants.dart';
 import 'sample_lessons.dart';
-
-class AdminData {
-  final List<UserProfile> users;
-  final Map<String, List<TransactionRecord>> transactionsByUser;
-  final Map<String, List<SupportQuery>> supportByUser;
-  final Map<String, int> goalCountByUser;
-  final List<FeedbackEntry> feedbacks;
-  final List<LearningContent> lessons;
-  AppSettings settings;
-
-  AdminData({
-    required this.users,
-    required this.transactionsByUser,
-    required this.supportByUser,
-    this.goalCountByUser = const {},
-    required this.feedbacks,
-    required this.lessons,
-    required this.settings,
-  });
-}
 
 class SampleData {
   static const String adminEmail = 'admin@pennypal.app';

@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/learning_content.dart';
+import '../utils/constants.dart';
 
 /// Reads and writes the financial lessons at learning_contents/{contentId}.
 /// Students read the same node, so every change here shows up in the student app.
@@ -49,6 +50,19 @@ class LearningService {
       return true;
     } catch (e) {
       debugPrint('LearningService.save failed: $e');
+      return false;
+    }
+  }
+
+  /// Shows or hides a lesson. Only isActive and updatedAt change, so an edit another admin just saved
+  /// (title, body…) is not overwritten by the old copy in this list. Returns false when the write fails.
+  static Future<bool> setActive(String lessonId, bool isActive, int updatedAt) async {
+    try {
+      final DatabaseReference lessonRef = FirebaseDatabase.instance.ref('$node/$lessonId');
+      await lessonRef.update({DbFields.isActive: isActive, DbFields.updatedAt: updatedAt}).timeout(writeTimeout);
+      return true;
+    } catch (e) {
+      debugPrint('LearningService.setActive failed: $e');
       return false;
     }
   }

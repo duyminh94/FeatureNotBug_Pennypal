@@ -8,6 +8,7 @@ import '../../utils/app_theme.dart';
 import '../../utils/budget_calculator.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
+import '../../utils/goal_calculator.dart';
 import '../../widgets/app_progress_bar.dart';
 import '../budget/budget_cards.dart';
 
@@ -83,7 +84,10 @@ class BudgetCard extends StatelessWidget {
   final DateTime month;
   final VoidCallback onTap;
 
-  const BudgetCard({super.key, required this.budget, required this.spent, required this.month, required this.onTap});
+  /// Category name when the card shows a category budget; null shows "{month} budget" for the total.
+  final String? title;
+
+  const BudgetCard({super.key, required this.budget, required this.spent, required this.month, required this.onTap, this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +114,7 @@ class BudgetCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      l10n.dashBudgetTitle(DateFormat.MMMM(languageCode).format(month)),
+                      title ?? l10n.dashBudgetTitle(DateFormat.MMMM(languageCode).format(month)),
                       style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                     ),
                   ),
@@ -217,7 +221,8 @@ class GoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final int percent = (goal.progress * 100).round();
+    // Same rounding as the Goals tab (down), so 99.6% is 99% on both screens and 100% only when the goal is done.
+    final int percent = GoalCalculator.percentOf(goal.progress);
 
     return Card(
       child: InkWell(

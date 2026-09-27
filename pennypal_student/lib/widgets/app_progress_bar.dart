@@ -12,7 +12,8 @@ class AppProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double safeValue = value.isNaN ? 0 : value.clamp(0.0, 1.0);
-    final int percent = (safeValue * 100).round();
+    // Rounded down like the numbers on screen, so a screen reader never says 100% before the limit or goal is reached.
+    final int percent = (safeValue * 100 + 0.0001).floor();
 
     return Semantics(
       label: '$percent%',

@@ -61,10 +61,16 @@ class LearningContent {
     };
   }
 
-  /// Title in the given language code ("vi" or "en").
-  String titleFor(String languageCode) =>
-      languageCode == 'vi' ? titleVi : titleEn;
+  /// Title in the given language code ("vi" or "en"); if that language is empty the other one is used.
+  String titleFor(String languageCode) => _pick(languageCode, titleVi, titleEn);
 
-  /// Body in the given language code ("vi" or "en").
-  String bodyFor(String languageCode) => languageCode == 'vi' ? bodyVi : bodyEn;
+  /// Body in the given language code ("vi" or "en"); if that language is empty the other one is used.
+  String bodyFor(String languageCode) => _pick(languageCode, bodyVi, bodyEn);
+
+  /// A lesson typed in only one language still shows text instead of an empty card.
+  String _pick(String languageCode, String vietnamese, String english) {
+    final String wanted = languageCode == 'vi' ? vietnamese : english;
+    final String other = languageCode == 'vi' ? english : vietnamese;
+    return wanted.trim().isEmpty ? other : wanted;
+  }
 }

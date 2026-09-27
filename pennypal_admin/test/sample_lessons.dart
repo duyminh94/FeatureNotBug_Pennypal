@@ -1,5 +1,5 @@
-import '../models/learning_content.dart';
-import 'constants.dart';
+import 'package:pennypal_admin/models/learning_content.dart';
+import 'package:pennypal_admin/utils/constants.dart';
 
 class SampleLessons {
   static List<LearningContent> all() {

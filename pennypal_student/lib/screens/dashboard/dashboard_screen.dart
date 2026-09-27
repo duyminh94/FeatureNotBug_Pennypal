@@ -9,6 +9,7 @@ import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../../utils/balance_calculator.dart';
 import '../../utils/budget_calculator.dart';
+import '../../utils/category_display.dart';
 import '../../utils/formatters.dart';
 import '../../utils/goal_calculator.dart';
 import '../../utils/report_calculator.dart';
@@ -79,9 +80,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _openScreen(ChatbotScreen(uid: profile.uid, userName: widget.userName));
   }
 
-  void _openDetail(TransactionRecord transaction) {
-    Navigator.of(context).push(
+  /// The History tab shows its own "Deleted / Undo" bar; from the dashboard the student still needs a message.
+  Future<void> _openDetail(TransactionRecord transaction) async {
+    final Object? result = await Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => TransactionDetailScreen(transaction: transaction)),
+    );
+    if (result != FormResults.deleted || !mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.txDeleted)));
+  }
+
+  /// Money spent this month in one category (same rule as the Budget tab: savings are not spending).
+  double _categorySpent(Budget budget) {
+    final String monthKey = BudgetCalculator.monthKey(_month);
+    return BudgetCalculator.spent(widget.transactions ?? const [], monthKey, categoryId: budget.categoryId);
+  }
+
+  /// Without a total budget the card shows the category budget that is closest to its limit,
+  /// so a warning like "Food 82%" is still on the home screen. Null when the month has no budget at all.
+  Budget? _mostUsedCategoryBudget() {
+    final List<Budget> categoryBudgets = BudgetCalculator.categoryBudgets(widget.budgets, BudgetCalculator.monthKey(_month));
+    Budget? mostUsed;
+    int highestPercent = -1;
+    for (final Budget budget in categoryBudgets) {
+      final int percent = BudgetCalculator.percent(_categorySpent(budget), budget.limitAmount);
+      if (percent > highestPercent) {
+        highestPercent = percent;
+        mostUsed = budget;
+      }
+    }
+    return mostUsed;
+  }
+
+  Widget _buildBudgetCard(DashboardData data) {
+    final l10n = AppLocalizations.of(context)!;
+    void openBudgetTab() => widget.onOpenTab(MainTabs.budget);
+
+    final Budget? totalBudget = data.totalBudget;
+    if (totalBudget != null) {
+      return BudgetCard(budget: totalBudget, spent: data.monthExpense, month: _month, onTap: openBudgetTab);
+    }
+
+    final Budget? categoryBudget = _mostUsedCategoryBudget();
+    if (categoryBudget == null) return NoBudgetCard(onCreate: openBudgetTab);
+
+    return BudgetCard(
+      budget: categoryBudget,
+      spent: _categorySpent(categoryBudget),
+      month: _month,
+      title: CategoryDisplay.name(l10n, categoryBudget.categoryId!),
+      onTap: openBudgetTab,
     );
   }
 
@@ -102,7 +152,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       balance: BalanceCalculator.balance(transactions),
       monthIncome: summary.income,
       monthExpense: summary.spending,
-      monthSavings: summary.savings,
+      savedInGoals: GoalCalculator.savedInActiveGoals(widget.goals),
       totalBudget: BudgetCalculator.totalBudget(widget.budgets, BudgetCalculator.monthKey(_month)),
       activeGoal: _nearestActiveGoal(),
       recentTransactions: transactions.take(5).toList(),
@@ -170,8 +220,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: SummaryCard(
-                    title: l10n.dashMonthSavings,
-                    value: Formatters.money(data.monthSavings),
+                    title: l10n.dashSavedInGoals,
+                    value: Formatters.money(data.savedInGoals),
                     icon: Icons.savings_outlined,
                     color: AppColors.honeyText,
                     backgroundColor: AppColors.honeySoft,
@@ -181,14 +231,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            data.totalBudget == null
-                ? NoBudgetCard(onCreate: () => widget.onOpenTab(MainTabs.budget))
-                : BudgetCard(
-                    budget: data.totalBudget!,
-                    spent: data.monthExpense,
-                    month: _month,
-                    onTap: () => widget.onOpenTab(MainTabs.budget),
-                  ),
+            _buildBudgetCard(data),
             if (data.activeGoal != null) ...[
               const SizedBox(height: 20),
               _buildSectionTitle(l10n.dashGoalsTitle, onSeeAll: () => widget.onOpenTab(MainTabs.goals)),

@@ -9,7 +9,7 @@ import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 import '../utils/csv_builder.dart';
 import '../utils/formatters.dart';
-import '../utils/sample_data.dart';
+import '../models/admin_data.dart';
 
 typedef CsvExport = Future<bool> Function(String fileName, String content);
 

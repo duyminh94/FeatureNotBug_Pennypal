@@ -25,7 +25,8 @@ class ReceiptParser {
   /// Header words printed on almost every receipt; they are not a description or a category hint.
   static const List<String> _headerWords = ['hoa don', 'receipt', 'invoice', 'phieu tinh tien', 'phieu thanh toan'];
 
-  static final RegExp _datePattern = RegExp(r'\b(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})\b');
+  // The year has 2 or 4 digits; an OCR misread like "202" is not taken as the year 202.
+  static final RegExp _datePattern = RegExp(r'\b(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})\b');
   static final RegExp _timePattern = RegExp(r'\b\d{1,2}:\d{2}(:\d{2})?\b');
   static final RegExp _numberPattern = RegExp(r'\d[\d.,]*');
   static final RegExp _letterPattern = RegExp(r'[a-z]');
@@ -163,7 +164,8 @@ class ReceiptParser {
     final int year = rawYear < 100 ? 2000 + rawYear : rawYear;
     final DateTime date = DateTime(year, month, day);
 
-    final bool isRealDate = date.year == year && date.month == month && date.day == day;
+    // Receipts older than year 2000 are an OCR mistake, not a real purchase.
+    final bool isRealDate = year >= 2000 && date.year == year && date.month == month && date.day == day;
     final DateTime endOfToday = DateTime(today.year, today.month, today.day, 23, 59, 59);
     return isRealDate && !date.isAfter(endOfToday) ? date : null;
   }

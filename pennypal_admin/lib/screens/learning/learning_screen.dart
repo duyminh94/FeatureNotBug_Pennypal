@@ -26,6 +26,9 @@ class _LearningScreenState extends State<LearningScreen> {
   // Selected topic filter, null means all topics.
   String? _topic;
 
+  // Lessons whose show / hide switch is being saved right now.
+  final Set<String> _savingIds = {};
+
   @override
   void initState() {
     super.initState();
@@ -55,11 +58,14 @@ class _LearningScreenState extends State<LearningScreen> {
   }
 
   /// Shows or hides a lesson for students without deleting it.
+  /// A second tap on the same switch while the first one is still saving is ignored.
   Future<void> _setActive(LearningContent lesson, bool isActive) async {
+    if (_savingIds.contains(lesson.id)) return;
     final l10n = AppLocalizations.of(context)!;
     final int now = DateTime.now().millisecondsSinceEpoch;
-    final LearningContent changedLesson = LessonEditor.withActive(lesson, isActive, now);
-    final bool isSaved = await LearningService.save(changedLesson);
+    _savingIds.add(lesson.id);
+    final bool isSaved = await LearningService.setActive(lesson.id, isActive, now);
+    _savingIds.remove(lesson.id);
     if (!mounted) return;
 
     if (!isSaved) {

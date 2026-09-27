@@ -90,10 +90,13 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
   Future<void> _pickDate() async {
     final DateTime today = DateTime.now();
+    // Editing a record older than 5 years: the picker must start at its date, or Flutter throws.
+    DateTime firstDate = DateTime(today.year - 5);
+    if (_date.isBefore(firstDate)) firstDate = DateTime(_date.year, _date.month, _date.day);
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _date.isAfter(today) ? today : _date,
-      firstDate: DateTime(today.year - 5),
+      firstDate: firstDate,
       lastDate: today,
     );
     if (picked == null) return;

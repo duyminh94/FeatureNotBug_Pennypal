@@ -5,7 +5,7 @@ import 'package:pennypal_admin/models/app_settings.dart';
 import 'package:pennypal_admin/screens/app_settings_screen.dart';
 import 'package:pennypal_admin/utils/app_theme.dart';
 import 'package:pennypal_admin/utils/lesson_editor.dart';
-import 'package:pennypal_admin/utils/sample_data.dart';
+import 'sample_data.dart';
 import 'package:pennypal_admin/utils/settings_validator.dart';
 
 Widget buildApp(Widget home) {

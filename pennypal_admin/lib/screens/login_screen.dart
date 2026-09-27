@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/admin_auth_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
-import '../utils/sample_data.dart';
+import '../models/admin_data.dart';
 import '../utils/validators.dart';
 import '../widgets/language_toggle.dart';
 import 'admin_shell.dart';

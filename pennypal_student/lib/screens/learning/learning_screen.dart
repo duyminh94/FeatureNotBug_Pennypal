@@ -121,6 +121,8 @@ class _LessonCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final String languageCode = Localizations.localeOf(context).languageCode;
     final String body = lesson.bodyFor(languageCode);
+    final String imageUrl = lesson.imageUrl ?? '';
+    final Widget topicIcon = Icon(LearningDisplay.topicIcon(lesson.topic), size: 56, color: LearningDisplay.topicColor(lesson.topic));
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -144,8 +146,11 @@ class _LessonCard extends StatelessWidget {
                       foreground: AppColors.textPrimary,
                     ),
                   ),
+                  // SRS: lessons may use simple images. No image, or a broken link, shows the topic icon.
                   Center(
-                    child: Icon(LearningDisplay.topicIcon(lesson.topic), size: 56, color: LearningDisplay.topicColor(lesson.topic)),
+                    child: imageUrl.isEmpty
+                        ? topicIcon
+                        : Image.network(imageUrl, height: 96, fit: BoxFit.contain, errorBuilder: (context, error, stackTrace) => topicIcon),
                   ),
                 ],
               ),

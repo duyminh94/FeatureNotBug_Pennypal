@@ -2,11 +2,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pennypal_student/models/app_settings.dart';
 import 'package:pennypal_student/models/budget.dart';
 import 'package:pennypal_student/models/category.dart';
+import 'package:pennypal_student/models/learning_content.dart';
 import 'package:pennypal_student/models/savings_goal.dart';
 import 'package:pennypal_student/models/transaction_record.dart';
 import 'package:pennypal_student/utils/constants.dart';
 
 void main() {
+  group('LearningContent', () {
+    test('a lesson typed in one language shows that text in the other language too', () {
+      final LearningContent englishOnly = LearningContent(
+        id: 'l1', titleEn: 'Budget basics', titleVi: '', bodyEn: 'Plan first', bodyVi: '  ', topic: LearningTopics.budgeting);
+
+      expect(englishOnly.titleFor('vi'), 'Budget basics');
+      expect(englishOnly.bodyFor('vi'), 'Plan first');
+      expect(englishOnly.titleFor('en'), 'Budget basics');
+    });
+  });
+
   group('TransactionRecord', () {
     test('toMap then fromMap keeps every field', () {
       final original = TransactionRecord(

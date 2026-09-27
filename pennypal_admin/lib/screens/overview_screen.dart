@@ -8,7 +8,7 @@ import '../utils/admin_section.dart';
 import '../utils/app_theme.dart';
 import '../utils/formatters.dart';
 import '../utils/overview_calculator.dart';
-import '../utils/sample_data.dart';
+import '../models/admin_data.dart';
 
 class OverviewScreen extends StatelessWidget {
   static const int mobileRequestCount = 3;

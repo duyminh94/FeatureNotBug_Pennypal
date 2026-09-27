@@ -6,7 +6,7 @@ import 'package:pennypal_admin/models/user_profile.dart';
 import 'package:pennypal_admin/screens/users/user_detail_screen.dart';
 import 'package:pennypal_admin/screens/users/user_widgets.dart';
 import 'package:pennypal_admin/utils/app_theme.dart';
-import 'package:pennypal_admin/utils/sample_data.dart';
+import 'sample_data.dart';
 import 'package:pennypal_admin/utils/user_filter.dart';
 
 Widget buildApp(Widget home) {

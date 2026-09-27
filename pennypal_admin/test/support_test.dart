@@ -7,7 +7,7 @@ import 'package:pennypal_admin/screens/feedbacks/feedbacks_screen.dart';
 import 'package:pennypal_admin/screens/support/support_detail_screen.dart';
 import 'package:pennypal_admin/utils/app_theme.dart';
 import 'package:pennypal_admin/utils/constants.dart';
-import 'package:pennypal_admin/utils/sample_data.dart';
+import 'sample_data.dart';
 import 'package:pennypal_admin/utils/support_manager.dart';
 
 Widget buildApp(Widget home) {
@@ -39,6 +39,18 @@ void main() {
       expect(open.map((query) => query.subject).first, 'Want to export report to Excel');
       expect(open, hasLength(4));
       expect(SupportManager.withStatus(support, SupportStatuses.resolved), hasLength(2));
+    });
+
+    test('a request with an unknown status is listed as open, like the Overview count and badge', () {
+      final Map<String, List<SupportQuery>> support = {
+        'student1': [
+          SupportQuery(id: 'odd', userEmail: 'a@test.vn', subject: 'Odd', message: 'm', status: 'pending'),
+          SupportQuery(id: 'done', userEmail: 'a@test.vn', subject: 'Done', message: 'm', status: SupportStatuses.resolved),
+        ],
+      };
+
+      expect(SupportManager.withStatus(support, SupportStatuses.open).map((query) => query.id), ['odd']);
+      expect(SupportManager.withStatus(support, SupportStatuses.resolved).map((query) => query.id), ['done']);
     });
 
     test('SP-04: an empty or blank reply cannot be sent', () {

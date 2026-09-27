@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/app_settings.dart';
 import '../models/transaction_record.dart';
-import '../utils/sample_data.dart';
+import '../models/admin_data.dart';
 import 'feedback_service.dart';
 import 'learning_service.dart';
 import 'settings_service.dart';

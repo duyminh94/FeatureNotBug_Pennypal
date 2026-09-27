@@ -5,7 +5,7 @@ import '../models/transaction_record.dart';
 import '../models/user_profile.dart';
 import 'analytics_calculator.dart';
 import 'constants.dart';
-import 'sample_data.dart';
+import '../models/admin_data.dart';
 
 class OverviewStats {
   final int totalStudents;

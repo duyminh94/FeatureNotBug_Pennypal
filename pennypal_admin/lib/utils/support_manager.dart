@@ -7,11 +7,14 @@ enum RatingFilter { all, five, four, three, lowest }
 /// Rules for the admin's support inbox.
 class SupportManager {
   /// Requests with one status (open or resolved) from every student, newest first.
+  /// "Open" means "not resolved", the same rule as the Overview count and the menu badge,
+  /// so a request with a missing or unknown status still shows up and can be answered.
   static List<SupportQuery> withStatus(Map<String, List<SupportQuery>> supportByUser, String status) {
+    final bool wantsResolved = status == SupportStatuses.resolved;
     final List<SupportQuery> result = [];
     for (final List<SupportQuery> queries in supportByUser.values) {
       for (final SupportQuery query in queries) {
-        if (query.status == status) result.add(query);
+        if (query.isResolved == wantsResolved) result.add(query);
       }
     }
     result.sort((a, b) => (b.submittedAt ?? 0).compareTo(a.submittedAt ?? 0));

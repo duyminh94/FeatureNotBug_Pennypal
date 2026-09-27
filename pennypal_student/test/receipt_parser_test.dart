@@ -150,6 +150,13 @@ void main() {
       expect(impossible.date, now);
     });
 
+    test('a 3-digit year from a bad OCR read is not used as a date', () {
+      final result = ReceiptParser.parse('Shop ABC\n01/02/202\nTotal 10.000', now: now);
+
+      expect(result.date, now);
+      expect(result.isDateFromReceipt, isFalse);
+    });
+
     test('text without a money amount keeps amount empty (BR-96)', () {
       final result = ReceiptParser.parse('Thank you\nSee you again', now: now);
 
