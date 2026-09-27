@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../models/category.dart';
 import 'app_theme.dart';
 import 'constants.dart';
 
@@ -73,9 +74,31 @@ class StudentStatusDisplay {
   }
 }
 
-/// Name, icon and colors of a default category, used by lists and cards.
+/// Name, icon and colors of a category, used by lists and cards.
 class CategoryDisplay {
+  /// The signed-in student's custom categories, kept up to date by MainShell.
+  static List<Category> customCategories = [];
+
+  static Category? findCustom(String categoryId) {
+    for (final Category category in customCategories) {
+      if (category.id == categoryId) return category;
+    }
+    return null;
+  }
+
+  /// Ids a student can pick for a transaction or budget: default ones first, then their own.
+  static List<String> selectableIds(String type) {
+    final List<String> ids = [...(type == TransactionTypes.income ? CategoryKeys.income : CategoryKeys.selectableExpense)];
+    for (final Category category in customCategories) {
+      if (category.type == type) ids.add(category.id);
+    }
+    return ids;
+  }
+
   static String name(AppLocalizations l10n, String categoryId) {
+    final Category? custom = findCustom(categoryId);
+    if (custom != null) return custom.name ?? '';
+
     return switch (categoryId) {
       CategoryKeys.food => l10n.categoryFood,
       CategoryKeys.transport => l10n.categoryTransport,
@@ -95,6 +118,9 @@ class CategoryDisplay {
   }
 
   static String iconName(String categoryId) {
+    final Category? custom = findCustom(categoryId);
+    if (custom != null) return custom.icon;
+
     return switch (categoryId) {
       CategoryKeys.food => 'restaurant',
       CategoryKeys.transport => 'directions_bus',

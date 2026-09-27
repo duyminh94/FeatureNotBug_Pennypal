@@ -1,3 +1,4 @@
+import 'category_display.dart';
 import 'constants.dart';
 
 /// Pure checks for form input (business.md: email, password, mobile rules).
@@ -45,8 +46,6 @@ class Validators {
   /// BR-04 and BR-05: the category must match the type, and savings cannot be picked by hand.
   static bool isCategoryAllowed(String? categoryId, String type) {
     if (categoryId == null) return false;
-    final List<String> allowed =
-        type == TransactionTypes.income ? CategoryKeys.income : CategoryKeys.selectableExpense;
-    return allowed.contains(categoryId);
+    return CategoryDisplay.selectableIds(type).contains(categoryId);
   }
 }

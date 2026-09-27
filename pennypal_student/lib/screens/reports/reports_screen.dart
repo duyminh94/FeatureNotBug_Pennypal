@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -5,6 +7,8 @@ import 'package:intl/intl.dart';
 
 import '../../models/budget.dart';
 import '../../models/transaction_record.dart';
+import '../../services/budget_service.dart';
+import '../../services/transaction_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/budget_calculator.dart';
 import '../../utils/category_display.dart';
@@ -13,16 +17,24 @@ import '../../utils/formatters.dart';
 import '../../utils/report_calculator.dart';
 import '../../widgets/app_progress_bar.dart';
 import '../../widgets/category_icon.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/month_picker.dart';
 import '../../widgets/summary_card.dart';
 import '../transactions/transaction_form_screen.dart';
 
 /// Reports for one month: totals, balance, spending or income by category, 6-month trend and budget vs actual.
+/// Listens to Firebase while open, so a transaction added from here shows up right away.
 class ReportsScreen extends StatefulWidget {
-  final List<TransactionRecord> transactions;
-  final List<Budget> budgets;
+  final String uid;
+  final Stream<List<TransactionRecord>> Function(String uid) watchTransactions;
+  final Stream<List<Budget>> Function(String uid) watchBudgets;
 
-  const ReportsScreen({super.key, this.transactions = const [], this.budgets = const []});
+  const ReportsScreen({
+    super.key,
+    required this.uid,
+    this.watchTransactions = TransactionService.watch,
+    this.watchBudgets = BudgetService.watch,
+  });
 
   @override
   State<ReportsScreen> createState() => _ReportsScreenState();
@@ -31,10 +43,68 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> {
   static const int _topCount = 3;
 
-  late final List<TransactionRecord> _transactions = widget.transactions;
+  List<TransactionRecord> _transactions = [];
+  List<Budget> _budgets = [];
+  bool _hasTransactions = false;
+  bool _hasBudgets = false;
+  bool _hasError = false;
+  StreamSubscription<List<TransactionRecord>>? _transactionSubscription;
+  StreamSubscription<List<Budget>>? _budgetSubscription;
+
   DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
   // Filter by transaction type: false = spending by category, true = income by source.
   bool _showIncome = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _listenData();
+  }
+
+  @override
+  void dispose() {
+    _transactionSubscription?.cancel();
+    _budgetSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _listenData() {
+    _transactionSubscription?.cancel();
+    _budgetSubscription?.cancel();
+    try {
+      _transactionSubscription = widget.watchTransactions(widget.uid).listen(
+        (transactions) => setState(() {
+          _transactions = transactions;
+          _hasTransactions = true;
+        }),
+        onError: _onDataError,
+      );
+      _budgetSubscription = widget.watchBudgets(widget.uid).listen(
+        (budgets) => setState(() {
+          _budgets = budgets;
+          _hasBudgets = true;
+        }),
+        onError: _onDataError,
+      );
+    } catch (e) {
+      _onDataError(e);
+    }
+  }
+
+  void _onDataError(Object error) {
+    debugPrint('ReportsScreen data failed: $error');
+    if (!mounted) return;
+    setState(() => _hasError = true);
+  }
+
+  void _retry() {
+    setState(() {
+      _hasError = false;
+      _hasTransactions = false;
+      _hasBudgets = false;
+    });
+    _listenData();
+  }
 
   void _openAddExpense() {
     Navigator.of(context).push(
@@ -45,16 +115,23 @@ class _ReportsScreenState extends State<ReportsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final AppBar appBar = AppBar(
+      centerTitle: true,
+      title: Text(l10n.menuReports, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+    );
+
+    if (_hasError) return Scaffold(appBar: appBar, body: ErrorState(onRetry: _retry));
+    if (!_hasTransactions || !_hasBudgets) {
+      return Scaffold(appBar: appBar, body: const Center(child: CircularProgressIndicator()));
+    }
+
     final String languageCode = Localizations.localeOf(context).languageCode;
     final MonthSummary summary = ReportCalculator.summary(_transactions, _month);
     List<CategoryTotal> byCategory = ReportCalculator.spendingByCategory(_transactions, _month);
     if (_showIncome) byCategory = ReportCalculator.incomeByCategory(_transactions, _month);
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(l10n.menuReports, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-      ),
+      appBar: appBar,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         children: [
@@ -155,9 +232,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildBudgetCard(AppLocalizations l10n) {
     final String monthKey = BudgetCalculator.monthKey(_month);
     final List<Budget> budgets = [];
-    final Budget? total = BudgetCalculator.totalBudget(widget.budgets, monthKey);
+    final Budget? total = BudgetCalculator.totalBudget(_budgets, monthKey);
     if (total != null) budgets.add(total);
-    budgets.addAll(BudgetCalculator.categoryBudgets(widget.budgets, monthKey));
+    budgets.addAll(BudgetCalculator.categoryBudgets(_budgets, monthKey));
 
     final List<Widget> rows = [];
     for (final Budget budget in budgets) {

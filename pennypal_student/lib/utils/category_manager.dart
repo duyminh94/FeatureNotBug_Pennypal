@@ -4,22 +4,6 @@ import '../models/transaction_record.dart';
 import 'constants.dart';
 import 'text_normalizer.dart';
 
-class MergeResult {
-  final List<TransactionRecord> transactions;
-  final List<Budget> budgets;
-  final int movedTransactions;
-  final int movedBudgets;
-  final List<String> keptTargetMonths;
-
-  const MergeResult({
-    required this.transactions,
-    required this.budgets,
-    required this.movedTransactions,
-    required this.movedBudgets,
-    required this.keptTargetMonths,
-  });
-}
-
 class CategoryManager {
   static const int nameMin = 2;
   static const int nameMax = 30;
@@ -55,76 +39,8 @@ class CategoryManager {
     return budgets.where((budget) => budget.categoryId == categoryId).length;
   }
 
-  static bool canChangeType(String categoryId, List<TransactionRecord> transactions) {
-    return transactionCount(categoryId, transactions) == 0;
-  }
-
-  static List<String> mergeTargets(Category deleting, List<Category> customCategories) {
-    final List<String> customIds = customCategories
-        .where((category) => category.type == deleting.type && category.id != deleting.id)
-        .map((category) => category.id)
-        .toList();
-    return [...defaultKeys(deleting.type), ...customIds];
-  }
-
-  static MergeResult merge({
-    required String fromId,
-    required String toId,
-    required List<TransactionRecord> transactions,
-    required List<Budget> budgets,
-  }) {
-    int movedTransactions = 0;
-    final List<TransactionRecord> newTransactions = transactions.map((transaction) {
-      if (transaction.categoryId != fromId) return transaction;
-      movedTransactions++;
-      return _withCategory(transaction, toId);
-    }).toList();
-
-    final Set<String> targetMonths =
-        budgets.where((budget) => budget.categoryId == toId).map((budget) => budget.month).toSet();
-    final List<String> keptTargetMonths = [];
-    int movedBudgets = 0;
-    final List<Budget> newBudgets = [];
-    for (final Budget budget in budgets) {
-      if (budget.categoryId != fromId) {
-        newBudgets.add(budget);
-      } else if (targetMonths.contains(budget.month)) {
-        keptTargetMonths.add(budget.month);
-      } else {
-        movedBudgets++;
-        newBudgets.add(Budget(
-          month: budget.month,
-          categoryId: toId,
-          limitAmount: budget.limitAmount,
-          alertThreshold: budget.alertThreshold,
-          alertLevel: AlertLevels.none,
-          createdAt: budget.createdAt,
-        ));
-      }
-    }
-
-    return MergeResult(
-      transactions: newTransactions,
-      budgets: newBudgets,
-      movedTransactions: movedTransactions,
-      movedBudgets: movedBudgets,
-      keptTargetMonths: keptTargetMonths,
-    );
-  }
-
-  static TransactionRecord _withCategory(TransactionRecord transaction, String categoryId) {
-    return TransactionRecord(
-      id: transaction.id,
-      type: transaction.type,
-      amount: transaction.amount,
-      categoryId: categoryId,
-      description: transaction.description,
-      date: transaction.date,
-      paymentMode: transaction.paymentMode,
-      goalId: transaction.goalId,
-      receiptLocalPath: transaction.receiptLocalPath,
-      createdAt: transaction.createdAt,
-      updatedAt: DateTime.now().millisecondsSinceEpoch,
-    );
+  /// An income budget or transaction must never point at an expense category, so the type is locked once it is used.
+  static bool canChangeType(String categoryId, List<TransactionRecord> transactions, List<Budget> budgets) {
+    return transactionCount(categoryId, transactions) == 0 && budgetCount(categoryId, budgets) == 0;
   }
 }

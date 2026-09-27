@@ -281,7 +281,7 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
   /// Expense categories the student can budget (income categories and savings are not listed).
   List<DropdownMenuItem<String>> _categoryItems(AppLocalizations l10n) {
     final List<DropdownMenuItem<String>> items = [];
-    for (final String categoryId in CategoryKeys.selectableExpense) {
+    for (final String categoryId in CategoryDisplay.selectableIds(TransactionTypes.expense)) {
       items.add(DropdownMenuItem(
         value: categoryId,
         child: Row(

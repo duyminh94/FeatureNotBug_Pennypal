@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../models/receipt_scan_result.dart';
 import '../../models/transaction_record.dart';
+import '../../services/category_service.dart';
 import '../../services/receipt_scan_service.dart';
 import '../../services/transaction_service.dart';
 import '../../utils/app_theme.dart';
@@ -15,6 +16,7 @@ import '../../utils/validators.dart';
 import '../../widgets/category_icon.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/labeled_text_field.dart';
+import '../categories/categories_screen.dart';
 import 'receipt_scan_widgets.dart';
 import 'scan_reading_screen.dart';
 
@@ -103,6 +105,14 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
   void _showMessage(String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  Future<void> _openCategories() async {
+    final String? uid = CategoryService.currentUid();
+    if (uid == null) return;
+    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => CategoriesScreen(uid: uid)));
+    // A category made there is added to the grid when coming back.
+    if (mounted) setState(() {});
   }
 
   Future<void> _startScan() async {
@@ -249,7 +259,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final List<String> categoryIds = _isIncome ? CategoryKeys.income : CategoryKeys.selectableExpense;
+    final List<String> categoryIds = CategoryDisplay.selectableIds(widget.type);
 
     return Scaffold(
       appBar: AppBar(
@@ -281,7 +291,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
               text: _isIncome ? l10n.txIncomeSource : l10n.txCategory,
               hint: _suggestedCategoryId == null ? null : l10n.scanSuggested(CategoryDisplay.name(l10n, _suggestedCategoryId!)),
               actionText: l10n.txManage,
-              onAction: () => _showMessage(l10n.commonComingSoon),
+              onAction: _openCategories,
             ),
             const SizedBox(height: 8),
             GridView.count(

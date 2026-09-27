@@ -1,7 +1,6 @@
 import '../models/app_notification.dart';
 import '../models/app_settings.dart';
 import '../models/budget.dart';
-import '../models/category.dart';
 import '../models/savings_goal.dart';
 import '../models/support_query.dart';
 import '../models/transaction_record.dart';
@@ -228,31 +227,6 @@ class SampleData {
       contribution('t13', 300000, 'goal_ielts', 'IELTS course', daysAgo(60, 20)),
       contribution('t14', 300000, 'goal_ielts', 'IELTS course', daysAgo(90, 20)),
     ];
-  }
-
-  static List<Category> customCategories() {
-    return [
-      Category(id: 'cat_gym', type: TransactionTypes.expense, icon: 'fitness_center', sortOrder: 100, isDefault: false, name: 'Gym'),
-      Category(id: 'cat_coffee', type: TransactionTypes.expense, icon: 'local_cafe', sortOrder: 101, isDefault: false, name: 'Coffee'),
-      Category(id: 'cat_tutoring', type: TransactionTypes.income, icon: 'volunteer_activism', sortOrder: 102, isDefault: false, name: 'Tutoring'),
-    ];
-  }
-
-  static List<TransactionRecord> customCategoryTransactions() {
-    final DateTime now = DateTime.now();
-    int dayOfMonth(int day) => DateTime(now.year, now.month, day, 18).millisecondsSinceEpoch;
-
-    return [
-      TransactionRecord(id: 'gym1', type: TransactionTypes.expense, amount: 300000, categoryId: 'cat_gym', description: 'Monthly gym pass', date: dayOfMonth(1)),
-      TransactionRecord(id: 'gym2', type: TransactionTypes.expense, amount: 60000, categoryId: 'cat_gym', description: 'Protein bar', date: dayOfMonth(1)),
-      TransactionRecord(id: 'gym3', type: TransactionTypes.expense, amount: 45000, categoryId: 'cat_gym', description: 'Water bottle', date: dayOfMonth(1)),
-    ];
-  }
-
-  static List<Budget> customCategoryBudgets() {
-    final DateTime now = DateTime.now();
-    final String month = '${now.year}-${now.month.toString().padLeft(2, '0')}';
-    return [Budget(month: month, categoryId: 'cat_gym', limitAmount: 500000)];
   }
 
   static List<TransactionRecord> pastMonthsTransactions() {
