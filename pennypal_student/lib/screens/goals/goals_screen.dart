@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/savings_goal.dart';
 import '../../models/transaction_record.dart';
@@ -8,7 +8,6 @@ import '../../utils/balance_calculator.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
 import '../../utils/goal_calculator.dart';
-import '../../utils/sample_data.dart';
 import '../../widgets/empty_state.dart';
 import 'goal_cards.dart';
 import 'goal_detail_screen.dart';
@@ -55,13 +54,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
   List<SavingsGoal> _copyGoals() {
     final List<SavingsGoal>? goals = widget.initialGoals;
-    if (goals == null) return List.of(SampleData.goals());
+    if (goals == null) return [];
     return List.of(goals);
   }
 
   List<TransactionRecord> _copyTransactions() {
     final List<TransactionRecord>? transactions = widget.transactions;
-    if (transactions == null) return List.of(SampleData.transactions());
+    if (transactions == null) return [];
     return List.of(transactions);
   }
 

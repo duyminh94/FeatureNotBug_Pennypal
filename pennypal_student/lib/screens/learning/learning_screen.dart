@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/learning_content.dart';
+import '../../services/learning_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/constants.dart';
@@ -21,7 +22,7 @@ class LearningScreen extends StatefulWidget {
 }
 
 class _LearningScreenState extends State<LearningScreen> {
-  late final List<LearningContent> _lessons = widget.lessons ?? SampleLessons.all();
+  late final Stream<List<LearningContent>> _lessonsStream = LearningService.watch();
   String? _topic;
 
   void _openLesson(LearningContent lesson) {
@@ -31,8 +32,24 @@ class _LearningScreenState extends State<LearningScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final List<LearningContent> allVisible = LearningFilter.visible(_lessons);
-    final List<LearningContent> shown = LearningFilter.visible(_lessons, topic: _topic);
+
+    if (widget.lessons != null) {
+      return _buildScaffold(l10n, widget.lessons!);
+    }
+
+    return StreamBuilder<List<LearningContent>>(
+      stream: _lessonsStream,
+      initialData: SampleLessons.all(),
+      builder: (context, snapshot) {
+        final List<LearningContent> lessons = snapshot.data ?? SampleLessons.all();
+        return _buildScaffold(l10n, lessons);
+      },
+    );
+  }
+
+  Widget _buildScaffold(AppLocalizations l10n, List<LearningContent> lessons) {
+    final List<LearningContent> allVisible = LearningFilter.visible(lessons);
+    final List<LearningContent> shown = LearningFilter.visible(lessons, topic: _topic);
 
     return Scaffold(
       appBar: AppBar(

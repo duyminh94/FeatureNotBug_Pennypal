@@ -1,8 +1,8 @@
-import 'package:firebase_core/firebase_core.dart';
+﻿import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import 'firebase_options.dart';
 import 'screens/auth/splash_screen.dart';
@@ -20,7 +20,9 @@ Future<void> main() async {
     );
     // Offline cache only works on Android / iOS (database.md section 8).
     if (!kIsWeb) {
-      FirebaseDatabase.instance.setPersistenceEnabled(true);
+      try {
+        FirebaseDatabase.instance.setPersistenceEnabled(true);
+      } catch (_) {}
     }
   } catch (e) {
     debugPrint('Firebase initialization failed: $e');

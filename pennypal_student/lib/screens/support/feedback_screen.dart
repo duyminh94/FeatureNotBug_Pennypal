@@ -1,11 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
+import '../../models/feedback_entry.dart';
 import '../../models/user_profile.dart';
+import '../../services/feedback_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
-import '../../utils/sample_data.dart';
 import '../../utils/validators.dart';
 import '../../widgets/labeled_text_field.dart';
 import '../../widgets/success_view.dart';
@@ -23,9 +25,26 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   static const int _maxRating = 5;
 
   final _formKey = GlobalKey<FormState>();
-  late final UserProfile _profile = widget.profile ?? SampleData.profile();
+  late final UserProfile _profile = widget.profile ?? _resolveCurrentProfile();
   late final TextEditingController _nameController = TextEditingController(text: _profile.fullName);
   late final TextEditingController _emailController = TextEditingController(text: _profile.email);
+
+  static UserProfile _resolveCurrentProfile() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final String email = user.email ?? '';
+      final String name = (user.displayName != null && user.displayName!.isNotEmpty)
+          ? user.displayName!
+          : (email.contains('@') ? email.split('@').first : 'Sinh viên');
+      return UserProfile(
+        uid: user.uid,
+        fullName: name,
+        email: email,
+        mobileNumber: user.phoneNumber ?? '',
+      );
+    }
+    return UserProfile(uid: '', fullName: '', email: '', mobileNumber: '');
+  }
   final TextEditingController _commentsController = TextEditingController();
   int _rating = 0;
   int? _sentRating;
@@ -54,6 +73,19 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     setState(() => _hasTriedToSend = true);
     final bool isFormValid = _formKey.currentState!.validate();
     if (!isFormValid || _rating == 0) return;
+
+    final int now = DateTime.now().millisecondsSinceEpoch;
+    final FeedbackEntry entry = FeedbackEntry(
+      id: 'fb_$now',
+      userId: _profile.uid,
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      rating: _rating,
+      comments: _commentsController.text.trim(),
+      submittedAt: now,
+    );
+    FeedbackService.send(entry);
+
     setState(() => _sentRating = _rating);
   }
 

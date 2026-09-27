@@ -1,11 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/support_query.dart';
 import '../../models/user_profile.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
-import '../../utils/sample_data.dart';
 import '../../utils/validators.dart';
 
 class SupportFormScreen extends StatefulWidget {
@@ -43,7 +43,7 @@ class _SupportFormScreenState extends State<SupportFormScreen> {
     final int now = DateTime.now().millisecondsSinceEpoch;
     final SupportQuery query = SupportQuery(
       id: 'sq_$now',
-      userEmail: (widget.profile ?? SampleData.profile()).email,
+      userEmail: widget.profile?.email ?? FirebaseAuth.instance.currentUser?.email ?? '',
       subject: _subjectController.text.trim(),
       message: _messageController.text.trim(),
       submittedAt: now,

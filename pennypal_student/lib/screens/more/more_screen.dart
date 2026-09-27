@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/budget.dart';
 import '../../models/savings_goal.dart';
@@ -10,6 +10,7 @@ import '../../services/user_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/chatbot_engine.dart';
+import '../../utils/formatters.dart';
 import '../../widgets/profile_avatar.dart';
 import '../categories/categories_screen.dart';
 import '../chatbot/chatbot_screen.dart';
@@ -80,6 +81,7 @@ class _MoreScreenState extends State<MoreScreen> {
       ),
     );
     if (saved == null || !mounted) return;
+    Formatters.setCurrency(saved.currency);
     setState(() => _profile = saved);
     // MainShell needs the new "notifications on/off" setting for the bell badge.
     widget.onProfileChanged?.call(saved);
@@ -107,14 +109,14 @@ class _MoreScreenState extends State<MoreScreen> {
                 label: l10n.menuReports,
                 color: AppColors.info,
                 background: AppColors.infoSoft,
-                onTap: () => _openScreen(const ReportsScreen()),
+                onTap: () => _openScreen(ReportsScreen(transactions: widget.transactions)),
               ),
               _MenuItem(
                 icon: Icons.sell_outlined,
                 label: l10n.menuCategories,
                 color: AppColors.purple,
                 background: AppColors.purpleSoft,
-                onTap: () => _openScreen(const CategoriesScreen()),
+                onTap: () => _openScreen(CategoriesScreen(transactions: widget.transactions, budgets: widget.budgets)),
               ),
               _MenuItem(
                 icon: Icons.notifications_none,
@@ -146,14 +148,14 @@ class _MoreScreenState extends State<MoreScreen> {
                 label: l10n.dashFeedback,
                 color: AppColors.orange,
                 background: AppColors.orangeSoft,
-                onTap: () => _openScreen(const FeedbackScreen()),
+                onTap: () => _openScreen(FeedbackScreen(profile: _profile)),
               ),
               _MenuItem(
                 icon: Icons.support_outlined,
                 label: l10n.dashSupport,
                 color: AppColors.teal,
                 background: AppColors.tealSoft,
-                onTap: () => _openScreen(const SupportScreen()),
+                onTap: () => _openScreen(SupportScreen(profile: _profile)),
               ),
             ]),
             const SizedBox(height: 16),

@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/transaction_record.dart';
@@ -9,7 +9,6 @@ import '../../utils/category_display.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
 import '../../utils/report_calculator.dart';
-import '../../utils/sample_data.dart';
 import '../../widgets/category_icon.dart';
 import '../../widgets/month_picker.dart';
 import '../../widgets/summary_card.dart';
@@ -27,8 +26,7 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> {
   static const int _topCount = 3;
 
-  late final List<TransactionRecord> _transactions =
-      widget.transactions ?? [...SampleData.transactions(), ...SampleData.pastMonthsTransactions()];
+  late final List<TransactionRecord> _transactions = widget.transactions ?? const [];
   DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
 
   void _openAddExpense() {

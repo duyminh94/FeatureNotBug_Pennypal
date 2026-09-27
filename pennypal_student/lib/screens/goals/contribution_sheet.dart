@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/savings_goal.dart';
 import '../../models/transaction_record.dart';
@@ -239,16 +239,17 @@ class _ContributionSheetState extends State<ContributionSheet> {
                         setState(() {});
                       },
                       style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 34, fontWeight: FontWeight.w800),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: '0',
-                        suffixText: '₫',
+                        prefixText: Formatters.isUsd ? '\$ ' : null,
+                        suffixText: Formatters.isUsd ? null : '₫',
                         filled: false,
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         errorBorder: InputBorder.none,
                         focusedErrorBorder: InputBorder.none,
-                        errorStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        errorStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],

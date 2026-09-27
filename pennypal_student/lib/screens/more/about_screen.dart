@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/app_settings.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
-import '../../utils/sample_data.dart';
 
 class AboutScreen extends StatelessWidget {
   final AppSettings? settings;
@@ -14,7 +13,7 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final String supportEmail = (settings ?? SampleData.appSettings()).supportEmail;
+    final String supportEmail = (settings ?? AppSettings()).supportEmail;
 
     return Scaffold(
       appBar: AppBar(

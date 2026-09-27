@@ -8,57 +8,7 @@ import '../models/transaction_record.dart';
 import '../models/user_profile.dart';
 import 'constants.dart';
 
-/// Temporary demo data for the static UI; replaced by Firebase data later.
-class DashboardData {
-  final String userName;
-  final String? announcement;
-  final double balance;
-  final double monthIncome;
-  final double monthExpense;
-  final double monthSavings;
-  final Budget? totalBudget;
-  final SavingsGoal? activeGoal;
-  final List<TransactionRecord> recentTransactions;
-
-  const DashboardData({
-    required this.userName,
-    this.announcement,
-    required this.balance,
-    required this.monthIncome,
-    required this.monthExpense,
-    required this.monthSavings,
-    this.totalBudget,
-    this.activeGoal,
-    required this.recentTransactions,
-  });
-
-  static DashboardData sample() {
-    final DateTime now = DateTime.now();
-
-    return DashboardData(
-      userName: 'Minh An',
-      announcement: 'Financial literacy week! 3 new budgeting lessons in the Learning corner.',
-      balance: 4235000,
-      monthIncome: 5500000,
-      monthExpense: 3100000,
-      monthSavings: 500000,
-      totalBudget: Budget(month: '${now.year}-${now.month.toString().padLeft(2, '0')}', limitAmount: 4000000),
-      activeGoal: SampleData.goals().first,
-      recentTransactions: SampleData.transactions().take(5).toList(),
-    );
-  }
-
-  static DashboardData empty() {
-    return const DashboardData(
-      userName: 'Minh An',
-      balance: 0,
-      monthIncome: 0,
-      monthExpense: 0,
-      monthSavings: 0,
-      recentTransactions: [],
-    );
-  }
-}
+export '../models/dashboard_data.dart';
 
 /// Temporary list of transactions for the History screen, newest first.
 class SampleData {

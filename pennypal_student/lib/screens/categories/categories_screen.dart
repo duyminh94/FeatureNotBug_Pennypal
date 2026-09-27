@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/budget.dart';
 import '../../models/category.dart';
@@ -10,7 +10,6 @@ import '../../utils/category_display.dart';
 import '../../utils/category_manager.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
-import '../../utils/sample_data.dart';
 import '../../widgets/category_icon.dart';
 import '../../widgets/confirm_dialog.dart';
 import 'category_form_sheet.dart';
@@ -27,10 +26,9 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
-  late final List<Category> _custom = [...(widget.customCategories ?? SampleData.customCategories())];
-  late List<TransactionRecord> _transactions =
-      widget.transactions ?? [...SampleData.transactions(), ...SampleData.customCategoryTransactions()];
-  late List<Budget> _budgets = widget.budgets ?? [...SampleData.budgets(), ...SampleData.customCategoryBudgets()];
+  late final List<Category> _custom = [...(widget.customCategories ?? const [])];
+  late List<TransactionRecord> _transactions = widget.transactions ?? const [];
+  late List<Budget> _budgets = widget.budgets ?? const [];
   String _type = TransactionTypes.expense;
 
   String _nameOf(AppLocalizations l10n, String categoryId) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../services/auth_service.dart';
 import '../../utils/app_theme.dart';
@@ -148,7 +148,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 DropdownButtonFormField<String>(
-                  value: _studentStatus,
+                  initialValue: _studentStatus,
                   decoration: const InputDecoration(
                     prefixIcon: Icon(Icons.school_outlined, color: AppColors.textMuted, size: 22),
                   ),
