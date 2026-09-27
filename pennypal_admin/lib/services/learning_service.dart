@@ -12,15 +12,18 @@ class LearningService {
   static const Duration writeTimeout = Duration(seconds: 15);
 
   /// Turns the raw value of learning_contents into a list of lessons.
-  /// Entries that are not maps (broken data) are skipped instead of crashing the screen.
+  /// Broken entries (not a map, or a field with the wrong type) are skipped instead of crashing the screen.
   static List<LearningContent> listFromValue(Object? value) {
     final List<LearningContent> lessons = [];
     if (value is! Map) return lessons;
 
     for (final key in value.keys) {
       final lessonValue = value[key];
-      if (lessonValue is Map) {
+      if (lessonValue is! Map) continue;
+      try {
         lessons.add(LearningContent.fromMap(key.toString(), lessonValue));
+      } catch (e) {
+        debugPrint('LearningService skipped lesson $key: $e');
       }
     }
     return lessons;

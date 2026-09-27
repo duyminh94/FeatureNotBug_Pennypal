@@ -1,19 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/app_notification.dart';
 import '../models/budget.dart';
+import '../models/category.dart';
 import '../models/savings_goal.dart';
 import '../models/support_query.dart';
 import '../models/transaction_record.dart';
 import '../models/user_profile.dart';
 import '../services/budget_service.dart';
+import '../services/category_service.dart';
 import '../services/goal_service.dart';
 import '../services/notification_service.dart';
 import '../services/support_service.dart';
 import '../services/push_notification_service.dart';
 import '../services/transaction_service.dart';
 import '../utils/app_theme.dart';
+import '../utils/category_display.dart';
 import '../utils/constants.dart';
 import '../utils/notification_builder.dart';
 import '../utils/notification_display.dart';
@@ -33,6 +38,7 @@ class MainShell extends StatefulWidget {
   final Stream<List<SavingsGoal>> Function(String uid) watchGoals;
   final Stream<Set<String>> Function(String uid) watchReadIds;
   final Stream<List<SupportQuery>> Function(String uid) watchSupport;
+  final Stream<List<Category>> Function(String uid) watchCategories;
   final void Function(String uid, List<String> ids) markRead;
 
   const MainShell({
@@ -43,6 +49,7 @@ class MainShell extends StatefulWidget {
     this.watchGoals = GoalService.watch,
     this.watchReadIds = NotificationService.watchReadIds,
     this.watchSupport = SupportService.watch,
+    this.watchCategories = CategoryService.watch,
     this.markRead = NotificationService.markRead,
   });
 
@@ -58,6 +65,7 @@ class _MainShellState extends State<MainShell> {
   late Stream<List<SavingsGoal>> _goalStream = _openGoalStream();
   late Stream<Set<String>> _readIdsStream = _openReadIdsStream();
   late Stream<List<SupportQuery>> _supportStream = _openSupportStream();
+  StreamSubscription<List<Category>>? _categorySubscription;
   // Notification ids already on screen. Null until the first data arrives.
   Set<String>? _knownNotificationIds;
 
@@ -66,6 +74,28 @@ class _MainShellState extends State<MainShell> {
     super.initState();
     // Old accounts sign in without passing the S01 permission screen, so they are asked once here.
     PushNotificationService.requestPermissionIfNeverAsked();
+    _listenCategories();
+  }
+
+  @override
+  void dispose() {
+    _categorySubscription?.cancel();
+    // The next account that signs in must not see these names.
+    CategoryDisplay.customCategories = [];
+    super.dispose();
+  }
+
+  /// Custom categories are extra: if they fail to load, the default ones still work.
+  void _listenCategories() {
+    _categorySubscription?.cancel();
+    try {
+      _categorySubscription = widget.watchCategories(widget.profile.uid).listen(
+        (categories) => setState(() => CategoryDisplay.customCategories = categories),
+        onError: (Object error) => debugPrint('MainShell custom categories failed: $error'),
+      );
+    } catch (e) {
+      debugPrint('MainShell custom categories failed: $e');
+    }
   }
 
   void _openTab(int index) => setState(() => _currentTab = index);
@@ -118,6 +148,7 @@ class _MainShellState extends State<MainShell> {
       _readIdsStream = _openReadIdsStream();
       _supportStream = _openSupportStream();
     });
+    _listenCategories();
   }
 
   /// Saves only the notifications that became read on the Notifications screen.
@@ -204,9 +235,6 @@ class _MainShellState extends State<MainShell> {
         GoalsScreen(initialGoals: goals, transactions: transactions),
         MoreScreen(
           profile: _profile,
-          transactions: transactions,
-          budgets: budgets,
-          goals: goals,
           unreadCount: unreadCount,
           onOpenNotifications: () => _openNotifications(notifications, readIds),
           onProfileChanged: (profile) => setState(() => _profile = profile),

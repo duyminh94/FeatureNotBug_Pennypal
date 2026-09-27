@@ -1,19 +1,39 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../models/budget.dart';
 import '../../models/chat_message.dart';
+import '../../models/savings_goal.dart';
+import '../../models/transaction_record.dart';
+import '../../services/budget_service.dart';
+import '../../services/goal_service.dart';
+import '../../services/transaction_service.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/category_display.dart';
 import '../../utils/chat_intent_matcher.dart';
 import '../../utils/chatbot_engine.dart';
 import '../../utils/constants.dart';
 import '../../widgets/app_progress_bar.dart';
 import '../transactions/transaction_form_screen.dart';
 
+/// Answers from live Firebase data. If the data can't load, tips still work (SRS: fail gracefully).
 class ChatbotScreen extends StatefulWidget {
-  /// Snapshot of the student's real data when the chat is opened.
-  final ChatbotData data;
+  final String uid;
+  final String userName;
+  final Stream<List<TransactionRecord>> Function(String uid) watchTransactions;
+  final Stream<List<Budget>> Function(String uid) watchBudgets;
+  final Stream<List<SavingsGoal>> Function(String uid) watchGoals;
 
-  const ChatbotScreen({super.key, required this.data});
+  const ChatbotScreen({
+    super.key,
+    required this.uid,
+    required this.userName,
+    this.watchTransactions = TransactionService.watch,
+    this.watchBudgets = BudgetService.watch,
+    this.watchGoals = GoalService.watch,
+  });
 
   @override
   State<ChatbotScreen> createState() => _ChatbotScreenState();
@@ -24,12 +44,38 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
 
+  List<TransactionRecord> _transactions = [];
+  List<Budget> _budgets = [];
+  List<SavingsGoal> _goals = [];
+  bool _hasTransactions = false;
+  bool _hasBudgets = false;
+  bool _hasGoals = false;
+  bool _hasError = false;
+  StreamSubscription<List<TransactionRecord>>? _transactionSubscription;
+  StreamSubscription<List<Budget>>? _budgetSubscription;
+  StreamSubscription<List<SavingsGoal>>? _goalSubscription;
+
+  bool get _isLoading => !_hasTransactions || !_hasBudgets || !_hasGoals;
+
   ChatbotEngine _engine() {
+    final ChatbotData data = ChatbotData(
+      userName: widget.userName,
+      transactions: _transactions,
+      budgets: _budgets,
+      goals: _goals,
+      customCategories: CategoryDisplay.customCategories,
+    );
     return ChatbotEngine(
-      data: widget.data,
+      data: data,
       l10n: AppLocalizations.of(context)!,
       languageCode: Localizations.localeOf(context).languageCode,
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _listenData();
   }
 
   @override
@@ -40,16 +86,78 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
   @override
   void dispose() {
+    _transactionSubscription?.cancel();
+    _budgetSubscription?.cancel();
+    _goalSubscription?.cancel();
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _listenData() {
+    _transactionSubscription?.cancel();
+    _budgetSubscription?.cancel();
+    _goalSubscription?.cancel();
+    _hasError = false;
+    try {
+      _transactionSubscription = widget.watchTransactions(widget.uid).listen(
+        (transactions) => setState(() {
+          _transactions = transactions;
+          _hasTransactions = true;
+        }),
+        onError: _onDataError,
+      );
+      _budgetSubscription = widget.watchBudgets(widget.uid).listen(
+        (budgets) => setState(() {
+          _budgets = budgets;
+          _hasBudgets = true;
+        }),
+        onError: _onDataError,
+      );
+      _goalSubscription = widget.watchGoals(widget.uid).listen(
+        (goals) => setState(() {
+          _goals = goals;
+          _hasGoals = true;
+        }),
+        onError: _onDataError,
+      );
+    } catch (e) {
+      _onDataError(e);
+    }
+  }
+
+  void _onDataError(Object error) {
+    debugPrint('ChatbotScreen data failed: $error');
+    if (!mounted) return;
+    setState(() => _hasError = true);
+  }
+
+  bool _needsUserData(ChatIntent intent) {
+    return intent == ChatIntent.topSpending ||
+        intent == ChatIntent.monthSummary ||
+        intent == ChatIntent.budgetRemaining ||
+        intent == ChatIntent.goalProgress ||
+        intent == ChatIntent.compareLastMonth;
+  }
+
+  ChatMessage _answerFor(String text) {
+    final l10n = AppLocalizations.of(context)!;
+    final int now = DateTime.now().millisecondsSinceEpoch;
+    final bool needsData = _needsUserData(ChatIntentMatcher.detect(text));
+
+    if (needsData && _hasError) {
+      _listenData();
+      return ChatMessage(isUser: false, text: l10n.chatDataFailed, sentAt: now);
+    }
+    if (needsData && _isLoading) return ChatMessage(isUser: false, text: l10n.chatDataLoading, sentAt: now);
+    return _engine().reply(text);
   }
 
   void _send(String text) {
     if (!ChatIntentMatcher.canSend(text)) return;
 
     final ChatMessage question = ChatMessage(isUser: true, text: text.trim(), sentAt: DateTime.now().millisecondsSinceEpoch);
-    final ChatMessage answer = _engine().reply(text);
+    final ChatMessage answer = _answerFor(text);
     _inputController.clear();
     setState(() => _messages.addAll([question, answer]));
 
@@ -95,6 +203,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       ),
       body: Column(
         children: [
+          if (_isLoading && !_hasError) const LinearProgressIndicator(),
           Expanded(
             child: ListView.builder(
               controller: _scrollController,

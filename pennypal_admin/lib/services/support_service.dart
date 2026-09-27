@@ -25,8 +25,11 @@ class SupportService {
       final List<SupportQuery> queries = [];
       for (final queryId in userQueries.keys) {
         final queryValue = userQueries[queryId];
-        if (queryValue is Map) {
+        if (queryValue is! Map) continue;
+        try {
           queries.add(SupportQuery.fromMap(queryId.toString(), queryValue));
+        } catch (e) {
+          debugPrint('SupportService skipped query $uid/$queryId: $e');
         }
       }
       result[uid.toString()] = queries;

@@ -58,26 +58,36 @@ class GoalService {
     _update('saveGoal', changes);
   }
 
-  /// Adds or edits a contribution: saves the savings transaction and the goal's new currentAmount together.
-  static void saveContribution(TransactionRecord contribution, SavingsGoal goal) {
+  /// Adds or edits a contribution: saves the savings transaction and adds [change] to currentAmount together (BR-30).
+  static void saveContribution(TransactionRecord contribution, SavingsGoal goal, double change) {
     final String? uid = _signedInUid('saveContribution');
     if (uid == null) return;
 
     final Map<String, Object?> changes = {};
     changes[_transactionPath(uid, contribution.id)] = contribution.toMap();
-    changes[_goalPath(uid, goal.id)] = goal.toMap();
+    _addGoalAmountChanges(changes, uid, goal, change);
     _update('saveContribution', changes);
   }
 
-  /// Removes a contribution: deletes its transaction and saves the goal's lower currentAmount together.
-  static void deleteContribution(String contributionId, SavingsGoal goal) {
+  /// Removes a contribution: deletes its transaction and adds [change] (negative) to currentAmount together.
+  static void deleteContribution(String contributionId, SavingsGoal goal, double change) {
     final String? uid = _signedInUid('deleteContribution');
     if (uid == null) return;
 
     final Map<String, Object?> changes = {};
     changes[_transactionPath(uid, contributionId)] = null;
-    changes[_goalPath(uid, goal.id)] = goal.toMap();
+    _addGoalAmountChanges(changes, uid, goal, change);
     _update('deleteContribution', changes);
+  }
+
+  /// currentAmount is changed with ServerValue.increment, not overwritten, so two contributions
+  /// made at the same time (two phones, or offline then sync) are both counted (BR-31).
+  /// Status and completedAt come from [goal], already updated by GoalCalculator.changeCurrentAmount.
+  static void _addGoalAmountChanges(Map<String, Object?> changes, String uid, SavingsGoal goal, double change) {
+    final String goalPath = _goalPath(uid, goal.id);
+    changes['$goalPath/${DbFields.currentAmount}'] = ServerValue.increment(change);
+    changes['$goalPath/${DbFields.status}'] = goal.status;
+    changes['$goalPath/${DbFields.completedAt}'] = goal.completedAt;
   }
 
   /// Deletes a goal. With the "refund" choice [contributionIds] holds its contributions,

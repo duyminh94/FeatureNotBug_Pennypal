@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/category.dart';
+import '../../services/category_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/category_manager.dart';
@@ -90,7 +91,7 @@ class _CategoryFormSheetState extends State<CategoryFormSheet> {
     final Category? initial = widget.initial;
     final int now = DateTime.now().millisecondsSinceEpoch;
     Navigator.of(context).pop(Category(
-      id: initial?.id ?? 'cat_$now',
+      id: initial?.id ?? CategoryService.newId(),
       type: _type,
       icon: _icon,
       sortOrder: initial?.sortOrder ?? AppDefaults.customCategorySortOrder,

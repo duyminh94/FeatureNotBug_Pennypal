@@ -1,43 +1,118 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/budget.dart';
 import '../../models/category.dart';
 import '../../models/transaction_record.dart';
+import '../../services/budget_service.dart';
+import '../../services/category_service.dart';
+import '../../services/transaction_service.dart';
 import '../../utils/app_theme.dart';
-import '../../utils/budget_calculator.dart';
 import '../../utils/category_display.dart';
 import '../../utils/category_manager.dart';
 import '../../utils/constants.dart';
-import '../../utils/formatters.dart';
-import '../../utils/sample_data.dart';
 import '../../widgets/category_icon.dart';
 import '../../widgets/confirm_dialog.dart';
+import '../../widgets/error_state.dart';
 import 'category_form_sheet.dart';
 
+/// Default categories are locked. Custom ones are saved in Firebase and can only be deleted when nothing uses them.
 class CategoriesScreen extends StatefulWidget {
-  final List<Category>? customCategories;
-  final List<TransactionRecord>? transactions;
-  final List<Budget>? budgets;
+  final String uid;
+  final Stream<List<Category>> Function(String uid) watchCategories;
+  final Stream<List<TransactionRecord>> Function(String uid) watchTransactions;
+  final Stream<List<Budget>> Function(String uid) watchBudgets;
+  final void Function(Category category) saveCategory;
+  final void Function(Category category) deleteCategory;
 
-  const CategoriesScreen({super.key, this.customCategories, this.transactions, this.budgets});
+  const CategoriesScreen({
+    super.key,
+    required this.uid,
+    this.watchCategories = CategoryService.watch,
+    this.watchTransactions = TransactionService.watch,
+    this.watchBudgets = BudgetService.watch,
+    this.saveCategory = CategoryService.save,
+    this.deleteCategory = CategoryService.delete,
+  });
 
   @override
   State<CategoriesScreen> createState() => _CategoriesScreenState();
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
-  late final List<Category> _custom = [...(widget.customCategories ?? SampleData.customCategories())];
-  late List<TransactionRecord> _transactions =
-      widget.transactions ?? [...SampleData.transactions(), ...SampleData.customCategoryTransactions()];
-  late List<Budget> _budgets = widget.budgets ?? [...SampleData.budgets(), ...SampleData.customCategoryBudgets()];
+  List<Category> _custom = [];
+  List<TransactionRecord> _transactions = [];
+  List<Budget> _budgets = [];
+  bool _hasCategories = false;
+  bool _hasTransactions = false;
+  bool _hasBudgets = false;
+  bool _hasError = false;
+  StreamSubscription<List<Category>>? _categorySubscription;
+  StreamSubscription<List<TransactionRecord>>? _transactionSubscription;
+  StreamSubscription<List<Budget>>? _budgetSubscription;
   String _type = TransactionTypes.expense;
 
-  String _nameOf(AppLocalizations l10n, String categoryId) {
-    for (final Category category in _custom) {
-      if (category.id == categoryId) return category.name ?? '';
+  @override
+  void initState() {
+    super.initState();
+    _listenData();
+  }
+
+  @override
+  void dispose() {
+    _categorySubscription?.cancel();
+    _transactionSubscription?.cancel();
+    _budgetSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _listenData() {
+    _categorySubscription?.cancel();
+    _transactionSubscription?.cancel();
+    _budgetSubscription?.cancel();
+    try {
+      _categorySubscription = widget.watchCategories(widget.uid).listen(
+        (categories) => setState(() {
+          _custom = categories;
+          _hasCategories = true;
+        }),
+        onError: _onDataError,
+      );
+      _transactionSubscription = widget.watchTransactions(widget.uid).listen(
+        (transactions) => setState(() {
+          _transactions = transactions;
+          _hasTransactions = true;
+        }),
+        onError: _onDataError,
+      );
+      _budgetSubscription = widget.watchBudgets(widget.uid).listen(
+        (budgets) => setState(() {
+          _budgets = budgets;
+          _hasBudgets = true;
+        }),
+        onError: _onDataError,
+      );
+    } catch (e) {
+      _onDataError(e);
     }
-    return CategoryDisplay.name(l10n, categoryId);
+  }
+
+  void _onDataError(Object error) {
+    debugPrint('CategoriesScreen data failed: $error');
+    if (!mounted) return;
+    setState(() => _hasError = true);
+  }
+
+  void _retry() {
+    setState(() {
+      _hasError = false;
+      _hasCategories = false;
+      _hasTransactions = false;
+      _hasBudgets = false;
+    });
+    _listenData();
   }
 
   void _showMessage(String text) {
@@ -53,19 +128,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       type: _type,
       customCategories: _custom,
       initial: category,
-      canChangeType: category == null || CategoryManager.canChangeType(category.id, _transactions),
+      canChangeType: category == null || CategoryManager.canChangeType(category.id, _transactions, _budgets),
     );
     if (saved == null || !mounted) return;
 
-    setState(() {
-      final int index = _custom.indexWhere((item) => item.id == saved.id);
-      if (index >= 0) {
-        _custom[index] = saved;
-      } else {
-        _custom.add(saved);
-      }
-      _type = saved.type;
-    });
+    widget.saveCategory(saved);
+    setState(() => _type = saved.type);
     _showMessage(l10n.categorySaved);
   }
 
@@ -74,152 +142,51 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final int transactionCount = CategoryManager.transactionCount(category.id, _transactions);
     final int budgetCount = CategoryManager.budgetCount(category.id, _budgets);
 
-    if (transactionCount == 0 && budgetCount == 0) {
-      final bool confirmed = await showConfirmDialog(
-        context,
-        title: l10n.categoryDeleteTitle(category.name ?? ''),
-        message: l10n.categoryDeleteBody,
-        confirmLabel: l10n.commonDelete,
-        isDestructive: true,
-        icon: Icons.delete_outline,
-      );
-      if (!confirmed || !mounted) return;
-      setState(() => _custom.remove(category));
-      _showMessage(l10n.categoryDeleted);
+    if (transactionCount > 0 || budgetCount > 0) {
+      _showMessage(l10n.categoryInUse(transactionCount, budgetCount));
       return;
     }
 
-    final String? targetId = await _pickMergeTarget(l10n, category, transactionCount, budgetCount);
-    if (targetId == null || !mounted) return;
-
-    final MergeResult result = CategoryManager.merge(
-      fromId: category.id,
-      toId: targetId,
-      transactions: _transactions,
-      budgets: _budgets,
+    final bool confirmed = await showConfirmDialog(
+      context,
+      title: l10n.categoryDeleteTitle(category.name ?? ''),
+      message: l10n.categoryDeleteBody,
+      confirmLabel: l10n.commonDelete,
+      isDestructive: true,
+      icon: Icons.delete_outline,
     );
-    setState(() {
-      _transactions = result.transactions;
-      _budgets = result.budgets;
-      _custom.remove(category);
-    });
+    if (!confirmed || !mounted) return;
 
-    final String targetName = _nameOf(l10n, targetId);
-    final String languageCode = Localizations.localeOf(context).languageCode;
-    final String keptMonths = result.keptTargetMonths
-        .map((month) => Formatters.monthLabel(BudgetCalculator.monthFromKey(month), languageCode))
-        .join(', ');
-    final String message = l10n.categoryMerged(result.movedTransactions, result.movedBudgets, targetName);
-    _showMessage(keptMonths.isEmpty ? message : '$message ${l10n.categoryKeptBudgets(targetName, keptMonths)}');
-  }
-
-  Future<String?> _pickMergeTarget(AppLocalizations l10n, Category category, int transactionCount, int budgetCount) {
-    final List<String> targets = CategoryManager.mergeTargets(category, _custom);
-    final String fallback = category.type == TransactionTypes.income ? CategoryKeys.otherIncome : CategoryKeys.miscellaneous;
-
-    return showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: AppColors.surface,
-      builder: (sheetContext) {
-        String selected = fallback;
-        return StatefulBuilder(
-          builder: (sheetContext, setSheetState) {
-            return SafeArea(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(sheetContext).size.height * 0.8),
-                child: ListView(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  children: [
-                    Row(
-                      children: [
-                        _Avatar(category: category, size: 52),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.categoryDeleteTitle(category.name ?? ''),
-                                style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 20, fontWeight: FontWeight.w800),
-                              ),
-                              Text(
-                                l10n.categoryMoveTo(transactionCount, budgetCount),
-                                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ...targets.map((targetId) {
-                      final bool isSelected = targetId == selected;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: InkWell(
-                          onTap: () => setSheetState(() => selected = targetId),
-                          borderRadius: BorderRadius.circular(18),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: isSelected ? AppColors.textPrimary : AppColors.border,
-                                width: isSelected ? 2.5 : 1.5,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                _TargetIcon(categoryId: targetId, custom: _custom),
-                                const SizedBox(width: 12),
-                                Expanded(child: Text(_nameOf(l10n, targetId), style: const TextStyle(fontSize: 16))),
-                                Icon(
-                                  isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                                  color: isSelected ? AppColors.primary : AppColors.border,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 8),
-                    FilledButton(
-                      onPressed: () => Navigator.of(sheetContext).pop(selected),
-                      child: Text(l10n.categoryMoveAndDelete),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
+    widget.deleteCategory(category);
+    _showMessage(l10n.categoryDeleted);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final AppBar appBar = AppBar(
+      centerTitle: true,
+      title: Text(l10n.menuCategories, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+      actions: [
+        IconButton.filled(
+          style: IconButton.styleFrom(backgroundColor: AppColors.textPrimary, foregroundColor: Colors.white),
+          tooltip: l10n.categoryAdd,
+          onPressed: _hasError || !_hasCategories ? null : () => _openForm(),
+          icon: const Icon(Icons.add),
+        ),
+        const SizedBox(width: 12),
+      ],
+    );
+
+    if (_hasError) return Scaffold(appBar: appBar, body: ErrorState(onRetry: _retry));
+    if (!_hasCategories || !_hasTransactions || !_hasBudgets) {
+      return Scaffold(appBar: appBar, body: const Center(child: CircularProgressIndicator()));
+    }
+
     final List<Category> mine = _custom.where((category) => category.type == _type).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(l10n.menuCategories, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        actions: [
-          IconButton.filled(
-            style: IconButton.styleFrom(backgroundColor: AppColors.textPrimary, foregroundColor: Colors.white),
-            tooltip: l10n.categoryAdd,
-            onPressed: () => _openForm(),
-            icon: const Icon(Icons.add),
-          ),
-          const SizedBox(width: 12),
-        ],
-      ),
+      appBar: appBar,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [
@@ -336,32 +303,11 @@ class _Group extends StatelessWidget {
 
 class _Avatar extends StatelessWidget {
   final Category category;
-  final double size;
 
-  const _Avatar({required this.category, this.size = 44});
-
-  @override
-  Widget build(BuildContext context) {
-    return CategoryIcon(iconName: category.icon, color: AppColors.expense, backgroundColor: AppColors.expenseSoft, size: size);
-  }
-}
-
-class _TargetIcon extends StatelessWidget {
-  final String categoryId;
-  final List<Category> custom;
-
-  const _TargetIcon({required this.categoryId, required this.custom});
+  const _Avatar({required this.category});
 
   @override
   Widget build(BuildContext context) {
-    for (final Category category in custom) {
-      if (category.id == categoryId) return _Avatar(category: category, size: 40);
-    }
-    return CategoryIcon(
-      iconName: CategoryDisplay.iconName(categoryId),
-      color: CategoryDisplay.color(categoryId),
-      backgroundColor: CategoryDisplay.softColor(categoryId),
-      size: 40,
-    );
+    return CategoryIcon(iconName: category.icon, color: AppColors.expense, backgroundColor: AppColors.expenseSoft, size: 44);
   }
 }

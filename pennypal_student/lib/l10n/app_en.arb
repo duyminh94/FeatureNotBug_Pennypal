@@ -948,44 +948,18 @@
     }
   },
   "categoryDeleteBody": "This category is not used yet, so nothing else changes.",
+  "categoryInUse": "This category is used by {transactions, plural, =1{1 transaction} other{{transactions} transactions}} and {budgets, plural, =1{1 budget} other{{budgets} budgets}}, so it can't be deleted.",
+  "@categoryInUse": {
+    "placeholders": {
+      "transactions": {
+        "type": "int"
+      },
+      "budgets": {
+        "type": "int"
+      }
+    }
+  },
   "categoryDeleted": "Category deleted",
-  "categoryMoveTo": "Move {transactions, plural, =1{1 transaction} other{{transactions} transactions}} and {budgets, plural, =1{1 budget} other{{budgets} budgets}} to…",
-  "@categoryMoveTo": {
-    "placeholders": {
-      "transactions": {
-        "type": "int"
-      },
-      "budgets": {
-        "type": "int"
-      }
-    }
-  },
-  "categoryMoveAndDelete": "Move and delete",
-  "categoryMerged": "Moved {transactions, plural, =1{1 transaction} other{{transactions} transactions}} and {budgets, plural, =0{no budgets} =1{1 budget} other{{budgets} budgets}} to {name}.",
-  "@categoryMerged": {
-    "placeholders": {
-      "transactions": {
-        "type": "int"
-      },
-      "budgets": {
-        "type": "int"
-      },
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "categoryKeptBudgets": "{name} already had a budget for {months}, so that budget was kept.",
-  "@categoryKeptBudgets": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "months": {
-        "type": "String"
-      }
-    }
-  },
   "chatSubtitle": "Answers from your own data",
   "chatHint": "Ask Penny about your money…",
   "chatSend": "Send",
@@ -1144,7 +1118,7 @@
   },
   "chatPaceUnknown": "Set a monthly contribution so I can estimate when you'll finish.",
   "chatNoGoal": "You have no active goals. Create one in the Goals tab and start saving!",
-  "chatCompareMore": "You spent {current} this month and {last} last month: {percent} more.",
+  "chatCompareMore": "So far this month you spent {current}. By this day last month you had spent {last}: {percent} more.",
   "@chatCompareMore": {
     "placeholders": {
       "current": {
@@ -1158,7 +1132,7 @@
       }
     }
   },
-  "chatCompareLess": "You spent {current} this month and {last} last month: {percent} less. Nice!",
+  "chatCompareLess": "So far this month you spent {current}. By this day last month you had spent {last}: {percent} less. Nice!",
   "@chatCompareLess": {
     "placeholders": {
       "current": {
@@ -1172,8 +1146,16 @@
       }
     }
   },
-  "chatCompareNoLast": "There's no spending last month to compare with. This month you spent {current}.",
+  "chatCompareNoLast": "There's no spending in the same days of last month to compare with. So far this month you spent {current}.",
   "@chatCompareNoLast": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "chatCompareSame": "So far this month you spent {current}, the same as by this day last month.",
+  "@chatCompareSame": {
     "placeholders": {
       "current": {
         "type": "String"
@@ -1184,6 +1166,8 @@
   "chatSavingTips": "Save a fixed part, like 10%, on the day you get money, before spending. Give your savings a name by creating a goal, and wait 24 hours before buying things you don't need.",
   "chatNeedsWants": "Needs are things you must pay for to live and study: meals, rent, transport, textbooks. Wants make life nicer but can wait. Ask yourself: what happens if I don't buy this?",
   "chatUnknown": "I didn't understand that yet. Try one of these:",
+  "chatDataLoading": "I'm still loading your data. Please ask again in a moment.",
+  "chatDataFailed": "I couldn't load your data right now, so I can't answer with your numbers. You can still ask me for budgeting or saving tips.",
   "chatCategorySpending": "In {month} you spent {amount} on {category}, {percent} of your spending.",
   "@chatCategorySpending": {
     "placeholders": {

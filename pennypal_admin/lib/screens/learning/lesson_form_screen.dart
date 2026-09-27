@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/learning_content.dart';
+import '../../services/learning_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../../utils/lesson_editor.dart';
@@ -17,7 +18,10 @@ class LessonFormScreen extends StatefulWidget {
   /// The lesson being edited, null when adding a new one.
   final LearningContent? initial;
 
-  const LessonFormScreen({super.key, required this.lessonId, this.initial});
+  /// Writes the lesson to Firebase; returns false when it fails (tests pass a fake one).
+  final Future<bool> Function(LearningContent lesson) saveLesson;
+
+  const LessonFormScreen({super.key, required this.lessonId, this.initial, this.saveLesson = LearningService.save});
 
   @override
   State<LessonFormScreen> createState() => _LessonFormScreenState();
@@ -33,6 +37,7 @@ class _LessonFormScreenState extends State<LessonFormScreen> with SingleTickerPr
   String _topic = LearningTopics.budgeting;
   String _level = LearningLevels.beginner;
   bool _isActive = true;
+  bool _isSaving = false;
 
   /// Fills the form with the lesson being edited; a new lesson keeps the defaults.
   @override
@@ -79,14 +84,16 @@ class _LessonFormScreenState extends State<LessonFormScreen> with SingleTickerPr
   /// The image link is optional, but when filled it must be a web link.
   bool get _isImageUrlValid => LessonEditor.isValidImageUrl(_imageUrlController.text);
 
-  /// Returns the finished lesson to the list screen, which writes it to Firebase.
+  /// Saves the lesson to Firebase and only closes the form when it worked.
+  /// When saving fails the form stays open with everything typed, so the admin can press Save again.
   /// createdAt is kept when editing so the lesson keeps its place in the list.
-  void _save() {
+  Future<void> _save() async {
+    final l10n = AppLocalizations.of(context)!;
     final LearningContent? initial = widget.initial;
     final int now = DateTime.now().millisecondsSinceEpoch;
     final String imageUrl = _imageUrlController.text.trim();
 
-    Navigator.of(context).pop(LearningContent(
+    final LearningContent lesson = LearningContent(
       id: widget.lessonId,
       titleEn: _titleEnController.text.trim(),
       titleVi: _titleViController.text.trim(),
@@ -98,7 +105,23 @@ class _LessonFormScreenState extends State<LessonFormScreen> with SingleTickerPr
       isActive: _isActive,
       createdAt: initial?.createdAt ?? now,
       updatedAt: now,
-    ));
+    );
+
+    setState(() {
+      _isSaving = true;
+    });
+    final bool isSaved = await widget.saveLesson(lesson);
+    if (!mounted) return;
+
+    setState(() {
+      _isSaving = false;
+    });
+    if (isSaved) {
+      Navigator.of(context).pop(true);
+      return;
+    }
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.learningSaveFailed)));
   }
 
   /// Hint under the tabs telling which language is still missing.
@@ -235,7 +258,7 @@ class _LessonFormScreenState extends State<LessonFormScreen> with SingleTickerPr
               const SizedBox(height: 16),
               FilledButton(
                 style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-                onPressed: canSave ? _save : null,
+                onPressed: canSave && !_isSaving ? _save : null,
                 child: Text(l10n.learningSave),
               ),
             ],

@@ -77,5 +77,53 @@ void main() {
       expect(find.text('Enter a link that starts with http:// or https://'), findsOneWidget);
       expect(saveButton(tester).onPressed, isNull);
     });
+
+    // Opens the form from a button, like the lesson list does, and keeps what the form returns.
+    Future<List<bool?>> openForm(WidgetTester tester, Future<bool> Function(LearningContent lesson) saveLesson) async {
+      final List<bool?> results = [];
+      useScreen(tester, const Size(420, 1600));
+      await tester.pumpWidget(buildApp(Builder(
+        builder: (context) => TextButton(
+          onPressed: () async {
+            final bool? isSaved = await Navigator.of(context).push<bool>(MaterialPageRoute(
+              builder: (context) => LessonFormScreen(lessonId: 'lesson_1', initial: SampleData.adminData().lessons.first, saveLesson: saveLesson),
+            ));
+            results.add(isSaved);
+          },
+          child: const Text('Open form'),
+        ),
+      )));
+      await tester.tap(find.text('Open form'));
+      await tester.pumpAndSettle();
+      return results;
+    }
+
+    testWidgets('a failed save keeps the form open with what was typed', (tester) async {
+      await openForm(tester, (lesson) async => false);
+      await tester.enterText(find.byType(TextField).first, 'My new title');
+      await tester.pump();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Save lesson'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit lesson'), findsOneWidget);
+      expect(find.text('My new title'), findsOneWidget);
+      expect(find.text('Could not save the change. Check the connection and try again.'), findsOneWidget);
+    });
+
+    testWidgets('a successful save closes the form and returns true', (tester) async {
+      final List<LearningContent> saved = [];
+      final List<bool?> results = await openForm(tester, (lesson) async {
+        saved.add(lesson);
+        return true;
+      });
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Save lesson'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit lesson'), findsNothing);
+      expect(results, [true]);
+      expect(saved.single.id, 'lesson_1');
+    });
   });
 }

@@ -68,7 +68,8 @@ class ChatbotEngine {
     final bool usesThisMonthData =
         intent == ChatIntent.topSpending || intent == ChatIntent.monthSummary || intent == ChatIntent.budgetRemaining;
     // The answers below only read the current month, so asking about another month must not show this month's numbers.
-    if (usesThisMonthData && askedMonth != null && askedMonth != now.month) {
+    final bool asksOtherMonth = (askedMonth != null && askedMonth != now.month) || _mentionsLastMonth(message);
+    if (usesThisMonthData && asksOtherMonth) {
       return _botMessage(l10n.chatOnlyThisMonth(_monthLabel));
     }
 
@@ -93,6 +94,12 @@ class ChatbotEngine {
     if (match == null) return null;
     final int month = int.parse(match.group(1)!);
     return month >= 1 && month <= 12 ? month : null;
+  }
+
+  /// "last month" / "tháng trước" (written with or without accents).
+  bool _mentionsLastMonth(String message) {
+    final String text = TextNormalizer.normalize(message);
+    return RegExp(r'\b(last month|thang truoc)\b').hasMatch(text);
   }
 
   String categoryName(String categoryId) {
@@ -197,15 +204,32 @@ class ChatbotEngine {
     );
   }
 
+  /// This month so far against the same days of last month (day 1 to today's day),
+  /// so on the 5th it compares 5 days with 5 days, not 5 days with a whole month.
   ChatMessage _compareLastMonth() {
-    final double current = ReportCalculator.summary(data.transactions, _month).spending;
-    final double last = ReportCalculator.summary(data.transactions, DateTime(_month.year, _month.month - 1)).spending;
+    final DateTime lastMonth = DateTime(_month.year, _month.month - 1);
+    final double current = _spendingUntilDay(_month, now.day);
+    final double last = _spendingUntilDay(lastMonth, now.day);
     if (last == 0) return _botMessage(l10n.chatCompareNoLast(Formatters.money(current)));
+    if (current == last) return _botMessage(l10n.chatCompareSame(Formatters.money(current)));
 
     final double change = (current - last) / last * 100;
     final String percent = _percentText(change.abs());
     return _botMessage(change > 0
         ? l10n.chatCompareMore(Formatters.money(current), Formatters.money(last), percent)
         : l10n.chatCompareLess(Formatters.money(current), Formatters.money(last), percent));
+  }
+
+  /// Spending of [month] from day 1 to [lastDay]. A day past the month's end (31 in a 30-day month) counts the whole month.
+  /// Same rule as BudgetCalculator.spent: only expenses, money put into goals is not spending.
+  double _spendingUntilDay(DateTime month, int lastDay) {
+    double total = 0;
+    for (final TransactionRecord transaction in data.transactions) {
+      final DateTime date = DateTime.fromMillisecondsSinceEpoch(transaction.date);
+      final bool isSpending = transaction.type == TransactionTypes.expense && transaction.categoryId != CategoryKeys.savings;
+      final bool isInMonth = date.year == month.year && date.month == month.month;
+      if (isSpending && isInMonth && date.day <= lastDay) total += transaction.amount;
+    }
+    return total;
   }
 }

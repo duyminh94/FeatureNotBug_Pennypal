@@ -88,6 +88,9 @@ class _AdminShellState extends State<AdminShell> {
       // Data passed in (tests) is shown at once instead of waiting one frame.
       initialData: widget.data,
       builder: (context, snapshot) {
+        // After Retry the builder still holds the old error while the new read runs, so waiting is checked first.
+        final bool isFirstLoad = snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData;
+        if (isFirstLoad) return const Center(child: CircularProgressIndicator());
         if (snapshot.hasError) {
           final l10n = AppLocalizations.of(context)!;
           return Center(
@@ -157,7 +160,7 @@ class _AdminShellState extends State<AdminShell> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final bool isWide = constraints.maxWidth >= AdminLayout.wideBreakpoint;
+        final bool isWide = constraints.maxWidth >= AdminLayout.wideBreakpoint && constraints.maxHeight >= AdminLayout.railMinHeight;
         return isWide ? _buildWide(l10n, openSupport) : _buildNarrow(l10n, openSupport);
       },
     );

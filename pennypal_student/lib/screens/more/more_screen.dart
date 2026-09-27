@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../models/budget.dart';
-import '../../models/savings_goal.dart';
-import '../../models/transaction_record.dart';
 import '../../models/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/user_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
-import '../../utils/chatbot_engine.dart';
 import '../../widgets/profile_avatar.dart';
 import '../categories/categories_screen.dart';
 import '../chatbot/chatbot_screen.dart';
@@ -22,9 +18,6 @@ import 'settings_screen.dart';
 
 class MoreScreen extends StatefulWidget {
   final UserProfile profile;
-  final List<TransactionRecord> transactions;
-  final List<Budget> budgets;
-  final List<SavingsGoal> goals;
   final int unreadCount;
   final VoidCallback? onOpenNotifications;
   final ValueChanged<UserProfile>? onProfileChanged;
@@ -34,9 +27,6 @@ class MoreScreen extends StatefulWidget {
   const MoreScreen({
     super.key,
     required this.profile,
-    this.transactions = const [],
-    this.budgets = const [],
-    this.goals = const [],
     this.unreadCount = 0,
     this.onOpenNotifications,
     this.onProfileChanged,
@@ -61,16 +51,8 @@ class _MoreScreenState extends State<MoreScreen> {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => screen));
   }
 
-  /// Same real data as the dashboard chatbot button (custom categories are not stored online yet).
   void _openChatbot() {
-    final ChatbotData chatbotData = ChatbotData(
-      userName: _profile.fullName,
-      transactions: widget.transactions,
-      budgets: widget.budgets,
-      goals: widget.goals,
-      customCategories: const [],
-    );
-    _openScreen(ChatbotScreen(data: chatbotData));
+    _openScreen(ChatbotScreen(uid: _profile.uid, userName: _profile.fullName));
   }
 
   Future<void> _openSettings() async {
@@ -107,14 +89,14 @@ class _MoreScreenState extends State<MoreScreen> {
                 label: l10n.menuReports,
                 color: AppColors.info,
                 background: AppColors.infoSoft,
-                onTap: () => _openScreen(ReportsScreen(transactions: widget.transactions, budgets: widget.budgets)),
+                onTap: () => _openScreen(ReportsScreen(uid: _profile.uid)),
               ),
               _MenuItem(
                 icon: Icons.sell_outlined,
                 label: l10n.menuCategories,
                 color: AppColors.purple,
                 background: AppColors.purpleSoft,
-                onTap: () => _openScreen(const CategoriesScreen()),
+                onTap: () => _openScreen(CategoriesScreen(uid: _profile.uid)),
               ),
               _MenuItem(
                 icon: Icons.notifications_none,

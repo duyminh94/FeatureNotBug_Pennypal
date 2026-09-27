@@ -21,8 +21,11 @@ class UserService {
 
     for (final uid in value.keys) {
       final userValue = value[uid];
-      if (userValue is Map) {
+      if (userValue is! Map) continue;
+      try {
         users.add(UserProfile.fromMap(uid.toString(), userValue));
+      } catch (e) {
+        debugPrint('UserService skipped user $uid: $e');
       }
     }
     return users;
