@@ -1,3 +1,5 @@
+import 'budget_plan_proposal.dart';
+
 class ChatProgress {
   final String label;
   final int percent;
@@ -12,6 +14,7 @@ class ChatMessage {
   final List<String> suggestions;
   final ChatProgress? progress;
   final bool showAddExpense;
+  final BudgetPlanProposal? budgetPlan;
   final int sentAt;
 
   const ChatMessage({
@@ -20,6 +23,7 @@ class ChatMessage {
     this.suggestions = const [],
     this.progress,
     this.showAddExpense = false,
+    this.budgetPlan,
     required this.sentAt,
   });
 }

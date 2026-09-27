@@ -4,27 +4,35 @@ import 'package:flutter/material.dart';
 import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/budget.dart';
+import '../../models/budget_plan_proposal.dart';
 import '../../models/chat_message.dart';
+import '../../models/recurring_item.dart';
 import '../../models/savings_goal.dart';
 import '../../models/transaction_record.dart';
 import '../../services/budget_service.dart';
+import '../../services/gemini_advisor_service.dart';
 import '../../services/goal_service.dart';
+import '../../services/recurring_service.dart';
 import '../../services/transaction_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/chat_intent_matcher.dart';
 import '../../utils/chatbot_engine.dart';
 import '../../utils/constants.dart';
+import '../../utils/formatters.dart';
 import '../../widgets/app_progress_bar.dart';
+import '../../widgets/category_icon.dart';
 import '../transactions/transaction_form_screen.dart';
 
-/// Answers from live Firebase data. If the data can't load, tips still work (SRS: fail gracefully).
+/// Answers from live Firebase data and optional Gemini AI.
+/// If data fails or Gemini is unavailable, falls back gracefully to offline engine.
 class ChatbotScreen extends StatefulWidget {
   final String uid;
   final String userName;
   final Stream<List<TransactionRecord>> Function(String uid) watchTransactions;
   final Stream<List<Budget>> Function(String uid) watchBudgets;
   final Stream<List<SavingsGoal>> Function(String uid) watchGoals;
+  final Stream<List<RecurringItem>> Function(String uid) watchRecurring;
 
   const ChatbotScreen({
     super.key,
@@ -33,7 +41,16 @@ class ChatbotScreen extends StatefulWidget {
     this.watchTransactions = TransactionService.watch,
     this.watchBudgets = BudgetService.watch,
     this.watchGoals = GoalService.watch,
+    this.watchRecurring = _defaultWatchRecurring,
   });
+
+  static Stream<List<RecurringItem>> _defaultWatchRecurring(String uid) {
+    try {
+      return RecurringService.watch(uid);
+    } catch (_) {
+      return Stream.value(<RecurringItem>[]);
+    }
+  }
 
   @override
   State<ChatbotScreen> createState() => _ChatbotScreenState();
@@ -47,13 +64,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   List<TransactionRecord> _transactions = [];
   List<Budget> _budgets = [];
   List<SavingsGoal> _goals = [];
+  List<RecurringItem> _recurringItems = [];
+
   bool _hasTransactions = false;
   bool _hasBudgets = false;
   bool _hasGoals = false;
   bool _hasError = false;
+  bool _isAiTyping = false;
+  bool _hasConfiguredGemini = false;
+
   StreamSubscription<List<TransactionRecord>>? _transactionSubscription;
   StreamSubscription<List<Budget>>? _budgetSubscription;
   StreamSubscription<List<SavingsGoal>>? _goalSubscription;
+  StreamSubscription<List<RecurringItem>>? _recurringSubscription;
 
   bool get _isLoading => !_hasTransactions || !_hasBudgets || !_hasGoals;
 
@@ -64,6 +87,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       budgets: _budgets,
       goals: _goals,
       customCategories: CategoryDisplay.customCategories,
+      recurringItems: _recurringItems,
     );
     return ChatbotEngine(
       data: data,
@@ -75,7 +99,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   @override
   void initState() {
     super.initState();
+    _checkGeminiConfig();
     _listenData();
+  }
+
+  void _checkGeminiConfig() {
+    GeminiAdvisorService.isConfigured().then((configured) {
+      if (mounted) setState(() => _hasConfiguredGemini = configured);
+    }).catchError((_) {});
   }
 
   @override
@@ -89,6 +120,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     _transactionSubscription?.cancel();
     _budgetSubscription?.cancel();
     _goalSubscription?.cancel();
+    _recurringSubscription?.cancel();
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -98,7 +130,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     _transactionSubscription?.cancel();
     _budgetSubscription?.cancel();
     _goalSubscription?.cancel();
+    _recurringSubscription?.cancel();
     _hasError = false;
+
     try {
       _transactionSubscription = widget.watchTransactions(widget.uid).listen(
         (transactions) => setState(() {
@@ -121,6 +155,16 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         }),
         onError: _onDataError,
       );
+      try {
+        _recurringSubscription = widget.watchRecurring(widget.uid).listen(
+          (items) => setState(() {
+            _recurringItems = items;
+          }),
+          onError: (err) => debugPrint('Recurring items watch failed: $err'),
+        );
+      } catch (err) {
+        debugPrint('Recurring items watch init error: $err');
+      }
     } catch (e) {
       _onDataError(e);
     }
@@ -137,7 +181,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         intent == ChatIntent.monthSummary ||
         intent == ChatIntent.budgetRemaining ||
         intent == ChatIntent.goalProgress ||
-        intent == ChatIntent.compareLastMonth;
+        intent == ChatIntent.compareLastMonth ||
+        intent == ChatIntent.planBudget;
   }
 
   ChatMessage _answerFor(String text) {
@@ -156,11 +201,65 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void _send(String text) {
     if (!ChatIntentMatcher.canSend(text)) return;
 
-    final ChatMessage question = ChatMessage(isUser: true, text: text.trim(), sentAt: DateTime.now().millisecondsSinceEpoch);
-    final ChatMessage answer = _answerFor(text);
+    final String query = text.trim();
+    final bool isPlanning = GeminiAdvisorService.isBudgetPlanningRequest(query);
+
+    // If requesting budget planning or Gemini API is configured, run asynchronously
+    if (isPlanning || _hasConfiguredGemini) {
+      _sendAsync(query);
+      return;
+    }
+
+    // Default fast synchronous flow for offline / local engine (preserves exact test semantics)
+    final ChatMessage question = ChatMessage(
+      isUser: true,
+      text: query,
+      sentAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    final ChatMessage answer = _answerFor(query);
     _inputController.clear();
     setState(() => _messages.addAll([question, answer]));
+    _scrollToBottom();
+  }
 
+  Future<void> _sendAsync(String query) async {
+    final ChatMessage userMsg = ChatMessage(
+      isUser: true,
+      text: query,
+      sentAt: DateTime.now().millisecondsSinceEpoch,
+    );
+
+    _inputController.clear();
+    setState(() {
+      _messages.add(userMsg);
+      _isAiTyping = true;
+    });
+    _scrollToBottom();
+
+    ChatMessage answer;
+    try {
+      final String languageCode = Localizations.localeOf(context).languageCode;
+      final ChatbotData data = _engine().data;
+      answer = await GeminiAdvisorService.generateResponse(
+        query: query,
+        data: data,
+        languageCode: languageCode,
+        now: DateTime.now(),
+      );
+    } catch (e) {
+      debugPrint('Chatbot response error, falling back to local engine: $e');
+      answer = _answerFor(query);
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _messages.add(answer);
+      _isAiTyping = false;
+    });
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
       _scrollController.animateTo(
@@ -174,6 +273,151 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void _openAddExpense() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const TransactionFormScreen(type: TransactionTypes.expense)),
+    );
+  }
+
+  void _applyBudgetPlan(BudgetPlanProposal plan) {
+    // Save each category budget to Firebase
+    for (final item in plan.items) {
+      if (item.amount > 0) {
+        BudgetService.save(Budget(
+          month: plan.month,
+          categoryId: item.categoryId,
+          limitAmount: item.amount,
+        ));
+      }
+    }
+
+    // Also update/save total monthly budget
+    if (plan.totalPlanned > 0) {
+      BudgetService.save(Budget(
+        month: plan.month,
+        categoryId: null, // Total month budget
+        limitAmount: plan.totalPlanned,
+      ));
+    }
+
+    final bool isVi = Localizations.localeOf(context).languageCode == 'vi';
+
+    setState(() {
+      plan.isApplied = true;
+      _messages.add(ChatMessage(
+        isUser: false,
+        text: isVi
+            ? '🎉 Tuyệt vời! Penny đã tự động lưu các ngân sách tháng ${plan.month} vào hệ thống của bạn. Bạn có thể mở tab "Ngân sách" để xem và theo dõi nhé!'
+            : '🎉 Great! Penny has saved the budget allocations for month ${plan.month} into your system. You can view and track them in the "Budget" tab!',
+        sentAt: DateTime.now().millisecondsSinceEpoch,
+      ));
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: AppColors.primary,
+        content: Text(isVi ? 'Đã áp dụng ngân sách thành công!' : 'Budget applied successfully!'),
+      ),
+    );
+
+    _scrollToBottom();
+  }
+
+  void _editPlanItem(BudgetPlanItem item) {
+    final controller = TextEditingController(text: item.amount.toInt().toString());
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(item.categoryName, style: const TextStyle(fontWeight: FontWeight.w800)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Điều chỉnh số tiền ngân sách:', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Số tiền',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Huỷ')),
+          FilledButton(
+            onPressed: () {
+              final parsed = double.tryParse(controller.text.replaceAll(RegExp(r'[^0-9]'), ''));
+              if (parsed != null && parsed >= 0) {
+                setState(() => item.amount = parsed);
+              }
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Cập nhật'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showGeminiSettingsDialog() async {
+    final currentKey = await GeminiAdvisorService.getApiKey();
+    final controller = TextEditingController(text: currentKey);
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
+            SizedBox(width: 8),
+            Text('Trợ lý Gemini AI', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Nhập Google Gemini API Key để kích hoạt AI phân tích tài chính thông minh, tư vấn chi tiêu và lập ngân sách tự động.',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Gemini API Key',
+                hintText: 'AIzaSy...',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Ghi chú: Nếu để trống, Penny vẫn tự động lập ngân sách và tư vấn chi tiêu thông minh bằng công cụ quy tắc 50/30/20 offline.',
+              style: TextStyle(fontSize: 11, color: AppColors.textMuted, fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Đóng')),
+          FilledButton(
+            onPressed: () async {
+              await GeminiAdvisorService.saveApiKey(controller.text.trim());
+              _checkGeminiConfig();
+              if (ctx.mounted) Navigator.of(ctx).pop();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Đã cập nhật cài đặt Gemini AI!')),
+                );
+              }
+            },
+            child: const Text('Lưu'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -200,6 +444,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
+            tooltip: 'Cấu hình Gemini AI',
+            onPressed: _showGeminiSettingsDialog,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -213,9 +464,40 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 message: _messages[index],
                 onSuggestion: _send,
                 onAddExpense: _openAddExpense,
+                onApplyBudgetPlan: _applyBudgetPlan,
+                onEditPlanItem: _editPlanItem,
               ),
             ),
           ),
+          if (_isAiTyping)
+            Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: Row(
+                children: [
+                  const _PennyAvatar(size: 26),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.auto_awesome_rounded, size: 14, color: AppColors.primary),
+                        SizedBox(width: 8),
+                        Text(
+                          'Penny đang tính toán...',
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
@@ -261,7 +543,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         disabledBackgroundColor: AppColors.fill,
                       ),
                       tooltip: l10n.chatSend,
-                      onPressed: canSend ? () => _send(_inputController.text) : null,
+                      onPressed: canSend && !_isAiTyping ? () => _send(_inputController.text) : null,
                       icon: const Icon(Icons.send_outlined),
                     ),
                   ),
@@ -300,8 +582,16 @@ class _MessageBubble extends StatelessWidget {
   final ChatMessage message;
   final ValueChanged<String> onSuggestion;
   final VoidCallback onAddExpense;
+  final ValueChanged<BudgetPlanProposal> onApplyBudgetPlan;
+  final ValueChanged<BudgetPlanItem> onEditPlanItem;
 
-  const _MessageBubble({required this.message, required this.onSuggestion, required this.onAddExpense});
+  const _MessageBubble({
+    required this.message,
+    required this.onSuggestion,
+    required this.onAddExpense,
+    required this.onApplyBudgetPlan,
+    required this.onEditPlanItem,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -319,11 +609,12 @@ class _MessageBubble extends StatelessWidget {
 
     final l10n = AppLocalizations.of(context)!;
     final ChatProgress? progress = message.progress;
+    final BudgetPlanProposal? plan = message.budgetPlan;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12, right: 24),
+      padding: const EdgeInsets.only(bottom: 12, right: 16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const _PennyAvatar(),
           const SizedBox(width: 8),
@@ -334,7 +625,7 @@ class _MessageBubble extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(message.text, style: const TextStyle(fontSize: 16, height: 1.4)),
+                  Text(message.text, style: const TextStyle(fontSize: 15, height: 1.4)),
                   if (progress != null) ...[
                     const SizedBox(height: 12),
                     Container(
@@ -355,6 +646,14 @@ class _MessageBubble extends StatelessWidget {
                           ),
                         ],
                       ),
+                    ),
+                  ],
+                  if (plan != null) ...[
+                    const SizedBox(height: 12),
+                    _BudgetPlanProposalCard(
+                      plan: plan,
+                      onApply: () => onApplyBudgetPlan(plan),
+                      onEditItem: onEditPlanItem,
                     ),
                   ],
                   if (message.suggestions.isNotEmpty) ...[
@@ -395,6 +694,168 @@ class _MessageBubble extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BudgetPlanProposalCard extends StatelessWidget {
+  final BudgetPlanProposal plan;
+  final VoidCallback onApply;
+  final ValueChanged<BudgetPlanItem> onEditItem;
+
+  const _BudgetPlanProposalCard({
+    required this.plan,
+    required this.onApply,
+    required this.onEditItem,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.auto_awesome, color: AppColors.primary, size: 18),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Kế hoạch tháng ${plan.month}',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.mintSoft,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '+${Formatters.money(plan.estimatedIncome)}',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (plan.fixedExpensesTotal > 0 || plan.savingsTotal > 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  if (plan.fixedExpensesTotal > 0)
+                    _pill(
+                      'Chi cố định: -${Formatters.money(plan.fixedExpensesTotal)}',
+                      AppColors.expenseSoft,
+                      AppColors.expense,
+                    ),
+                  if (plan.savingsTotal > 0)
+                    _pill(
+                      'Tiết kiệm mục tiêu: -${Formatters.money(plan.savingsTotal)}',
+                      AppColors.honeySoft,
+                      Colors.orange.shade800,
+                    ),
+                ],
+              ),
+            ),
+          const Divider(height: 12, color: AppColors.border),
+          ...plan.items.map((item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    CategoryIcon(iconName: CategoryDisplay.iconName(item.categoryId), size: 32),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(item.categoryName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                          if (item.note != null && item.note!.isNotEmpty)
+                            Text(item.note!, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      Formatters.money(item.amount),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+                    ),
+                    if (!plan.isApplied)
+                      InkWell(
+                        onTap: () => onEditItem(item),
+                        borderRadius: BorderRadius.circular(12),
+                        child: const Padding(
+                          padding: EdgeInsets.only(left: 6, top: 4, bottom: 4),
+                          child: Icon(Icons.edit_outlined, size: 16, color: AppColors.textSecondary),
+                        ),
+                      ),
+                  ],
+                ),
+              )),
+          const Divider(height: 14, color: AppColors.border),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Tổng ngân sách dự kiến:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              Text(
+                Formatters.money(plan.totalPlanned),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (plan.isApplied)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.mintSoft,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.primary, width: 1.2),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.check_circle, color: AppColors.primary, size: 18),
+                  SizedBox(width: 6),
+                  Text(
+                    'Đã áp dụng vào Ngân sách',
+                    style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary),
+                  ),
+                ],
+              ),
+            )
+          else
+            FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: onApply,
+              icon: const Icon(Icons.done_all_rounded, size: 18),
+              label: const Text('Áp dụng vào Ngân sách', style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pill(String label, Color bg, Color textColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
+      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: textColor)),
     );
   }
 }
