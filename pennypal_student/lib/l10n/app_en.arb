@@ -232,7 +232,7 @@
   "commonUndo": "Undo",
   "historySearchHint": "Search by description, e.g. lunch",
   "historyAddTransaction": "Add transaction",
-  "filterAllTypes": "All types",
+  "filterAllTypes": "All",
   "filterExpense": "Expense",
   "filterIncome": "Income",
   "filterAllCategories": "All categories",

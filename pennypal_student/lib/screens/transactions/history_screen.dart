@@ -17,7 +17,8 @@ import 'transaction_detail_screen.dart';
 import 'transaction_form_screen.dart';
 
 /// S06 Transaction history: month-scoped navigation, monthly financial summary,
-/// search, category/type/day filters, day-grouped transactions, swipe to delete with undo.
+/// direct buttons for Income / Expense / All types, search, category & day filters,
+/// day-grouped transactions, swipe to delete with undo.
 class HistoryScreen extends StatefulWidget {
   final List<TransactionRecord>? initialTransactions;
   final DateTime? initialMonth;
@@ -177,21 +178,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Future<void> _pickType() async {
-    final l10n = AppLocalizations.of(context)!;
-    final String? picked = await _pickOption(
-      l10n.detailType,
-      {
-        _allValue: l10n.filterAllTypes,
-        TransactionTypes.expense: l10n.filterExpense,
-        TransactionTypes.income: l10n.filterIncome,
-      },
-      _type ?? _allValue,
-    );
-    if (picked == null) return;
-    setState(() => _type = picked == _allValue ? null : picked);
-  }
-
   Future<void> _pickCategory() async {
     final l10n = AppLocalizations.of(context)!;
     final List<String> categoryIds = [...CategoryKeys.selectableExpense, CategoryKeys.savings, ...CategoryKeys.income];
@@ -252,12 +238,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     final List<DayGroup> groups = TransactionFilter.groupByDay(filtered);
 
-    final String typeLabel = switch (_type) {
-      TransactionTypes.expense => l10n.filterExpense,
-      TransactionTypes.income => l10n.filterIncome,
-      _ => l10n.filterAllTypes,
-    };
-
     final String dayLabel = _selectedDay == null
         ? l10n.historyAllDays
         : DateFormat('dd/MM').format(_selectedDay!);
@@ -274,19 +254,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
             // Month Navigation Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
               child: MonthPicker(
                 month: _selectedMonth,
                 onChanged: _onMonthChanged,
               ),
             ),
 
-            // Month Overview Summary Card
+            // Month Overview Summary Card (Clickable to filter income/expense)
             _buildMonthSummaryCard(l10n),
+
+            // Direct Buttons for All / Expense / Income
+            _buildTypeSegmentedButtons(l10n),
 
             // Search Box
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
               child: TextField(
                 controller: _searchController,
                 onChanged: (value) => setState(() => _query = value),
@@ -310,10 +293,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
 
-            // Filter Chips
+            // Filter Chips (Category, Day in month, Clear filters if active)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 4),
+              padding: const EdgeInsets.fromLTRB(20, 6, 20, 4),
               child: Row(
                 children: [
                   if (_hasActiveFilters) ...[
@@ -330,8 +313,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                     const SizedBox(width: 8),
                   ],
-                  _FilterButton(icon: Icons.expand_more, label: typeLabel, isActive: _type != null, onTap: _pickType),
-                  const SizedBox(width: 8),
                   _FilterButton(
                     icon: Icons.sell_outlined,
                     label: _categoryId == null ? l10n.txCategory : CategoryDisplay.name(l10n, _categoryId!),
@@ -359,7 +340,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       onAction: _hasActiveFilters ? _clearFilters : _openAddForm,
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 6, 20, 24),
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                       itemCount: groups.length,
                       itemBuilder: (context, index) => _buildDayGroup(l10n, groups[index]),
                     ),
@@ -372,7 +353,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildHeader(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 2),
       child: Row(
         children: [
           Expanded(
@@ -419,9 +400,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final double net = _monthNet;
     final int count = _monthTransactions.length;
 
+    final bool isIncomeSelected = _type == TransactionTypes.income;
+    final bool isExpenseSelected = _type == TransactionTypes.expense;
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 6, 20, 6),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.fromLTRB(20, 4, 20, 4),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
@@ -431,131 +415,234 @@ class _HistoryScreenState extends State<HistoryScreen> {
         children: [
           Row(
             children: [
+              // Income box - Tappable
               Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
+                child: Material(
+                  color: isIncomeSelected ? AppColors.mintSoft : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      setState(() {
+                        _type = isIncomeSelected ? null : TransactionTypes.income;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.mintSoft,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isIncomeSelected ? AppColors.primary : Colors.transparent,
+                          width: 1.5,
+                        ),
                       ),
-                      child: const Icon(Icons.arrow_downward_rounded, size: 18, color: AppColors.primary),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Text(
-                            l10n.dashMonthIncome,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                          Container(
+                            padding: const EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: isIncomeSelected ? AppColors.surface : AppColors.mintSoft,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.arrow_downward_rounded, size: 18, color: AppColors.primary),
                           ),
-                          const SizedBox(height: 2),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              '+${Formatters.money(income)}',
-                              style: const TextStyle(
-                                fontFamily: AppFonts.heading,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
-                              ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.dashMonthIncome,
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                ),
+                                const SizedBox(height: 2),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    '+${Formatters.money(income)}',
+                                    style: const TextStyle(
+                                      fontFamily: AppFonts.heading,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
               Container(width: 1, height: 38, color: AppColors.border),
-              const SizedBox(width: 12),
+              const SizedBox(width: 6),
+              // Expense box - Tappable
               Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
+                child: Material(
+                  color: isExpenseSelected ? AppColors.expenseSoft : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      setState(() {
+                        _type = isExpenseSelected ? null : TransactionTypes.expense;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.expenseSoft,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isExpenseSelected ? AppColors.expense : Colors.transparent,
+                          width: 1.5,
+                        ),
                       ),
-                      child: const Icon(Icons.arrow_upward_rounded, size: 18, color: AppColors.expense),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Text(
-                            l10n.dashMonthExpense,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                          Container(
+                            padding: const EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: isExpenseSelected ? AppColors.surface : AppColors.expenseSoft,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.arrow_upward_rounded, size: 18, color: AppColors.expense),
                           ),
-                          const SizedBox(height: 2),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              '-${Formatters.money(expense)}',
-                              style: const TextStyle(
-                                fontFamily: AppFonts.heading,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.expense,
-                              ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.dashMonthExpense,
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                ),
+                                const SizedBox(height: 2),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    '-${Formatters.money(expense)}',
+                                    style: const TextStyle(
+                                      fontFamily: AppFonts.heading,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.expense,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: BoxDecoration(
-              color: AppColors.fill,
+          const SizedBox(height: 8),
+          Material(
+            color: AppColors.fill,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
               borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          '${l10n.reportsBalance}: ',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                        ),
+              onTap: () {
+                if (_type != null) setState(() => _type = null);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              '${l10n.reportsBalance}: ',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                            ),
+                          ),
+                          Text(
+                            Formatters.signedMoney(net.abs(), isIncome: net >= 0),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: net >= 0 ? AppColors.primary : AppColors.expense,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        Formatters.signedMoney(net.abs(), isIncome: net >= 0),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: net >= 0 ? AppColors.primary : AppColors.expense,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.historyTxCount(count),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.historyTxCount(count),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted),
-                ),
-              ],
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTypeSegmentedButtons(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+      child: SegmentedButton<String?>(
+        showSelectedIcon: false,
+        style: ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.selected)) {
+              if (_type == TransactionTypes.expense) return AppColors.expenseSoft;
+              if (_type == TransactionTypes.income) return AppColors.mintSoft;
+              return AppColors.textPrimary;
+            }
+            return AppColors.surface;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.selected)) {
+              if (_type == TransactionTypes.expense) return AppColors.expense;
+              if (_type == TransactionTypes.income) return AppColors.primary;
+              return Colors.white;
+            }
+            return AppColors.textSecondary;
+          }),
+          side: WidgetStateProperty.all(const BorderSide(color: AppColors.border)),
+        ),
+        segments: [
+          ButtonSegment<String?>(
+            value: null,
+            label: Text(l10n.filterAllTypes, style: const TextStyle(fontWeight: FontWeight.w700)),
+            icon: const Icon(Icons.list_alt_rounded, size: 16),
+          ),
+          ButtonSegment<String?>(
+            value: TransactionTypes.expense,
+            label: Text(l10n.filterExpense, style: const TextStyle(fontWeight: FontWeight.w700)),
+            icon: const Icon(Icons.arrow_upward_rounded, size: 16),
+          ),
+          ButtonSegment<String?>(
+            value: TransactionTypes.income,
+            label: Text(l10n.filterIncome, style: const TextStyle(fontWeight: FontWeight.w700)),
+            icon: const Icon(Icons.arrow_downward_rounded, size: 16),
+          ),
+        ],
+        selected: {_type},
+        onSelectionChanged: (selected) {
+          setState(() => _type = selected.first);
+        },
       ),
     );
   }

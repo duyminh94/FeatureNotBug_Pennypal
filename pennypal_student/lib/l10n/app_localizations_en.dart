@@ -534,7 +534,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyAddTransaction => 'Add transaction';
 
   @override
-  String get filterAllTypes => 'All types';
+  String get filterAllTypes => 'All';
 
   @override
   String get filterExpense => 'Expense';

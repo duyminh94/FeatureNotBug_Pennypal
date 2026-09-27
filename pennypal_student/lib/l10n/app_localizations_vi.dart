@@ -534,10 +534,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get filterAllTypes => 'Tất cả';
 
   @override
-  String get filterExpense => 'Chi';
+  String get filterExpense => 'Chi tiêu';
 
   @override
-  String get filterIncome => 'Thu';
+  String get filterIncome => 'Thu nhập';
 
   @override
   String get filterAllCategories => 'Tất cả danh mục';

@@ -1097,7 +1097,7 @@ abstract class AppLocalizations {
   /// No description provided for @filterAllTypes.
   ///
   /// In en, this message translates to:
-  /// **'All types'**
+  /// **'All'**
   String get filterAllTypes;
 
   /// No description provided for @filterExpense.

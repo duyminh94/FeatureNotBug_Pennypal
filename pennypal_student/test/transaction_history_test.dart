@@ -154,5 +154,39 @@ void main() {
       expect(find.text('Tien tieu vat'), findsOneWidget);
       expect(find.text('Sach giao khoa'), findsNothing);
     });
+
+    testWidgets('filtering by type using segmented buttons shows only matching transactions', (tester) async {
+      final all = [txSept1, txSept2, txAug, txOct];
+      await openHistory(tester, transactions: all, initialMonth: DateTime(2026, 9));
+
+      // Initially both Sept transactions visible
+      expect(find.text('Pho bo'), findsOneWidget);
+      expect(find.text('Tien tieu vat'), findsOneWidget);
+
+      final segmentedFinder = find.byType(SegmentedButton<String?>);
+      expect(segmentedFinder, findsOneWidget);
+
+      // Tap 'Expense' segment within SegmentedButton
+      await tester.tap(find.descendant(of: segmentedFinder, matching: find.text('Expense')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pho bo'), findsOneWidget);
+      expect(find.text('Tien tieu vat'), findsNothing);
+
+      // Tap 'Income' segment within SegmentedButton
+      await tester.tap(find.descendant(of: segmentedFinder, matching: find.text('Income')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pho bo'), findsNothing);
+      expect(find.text('Tien tieu vat'), findsOneWidget);
+
+      // Tap 'All' segment within SegmentedButton
+      await tester.tap(find.descendant(of: segmentedFinder, matching: find.text('All')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pho bo'), findsOneWidget);
+      expect(find.text('Tien tieu vat'), findsOneWidget);
+    });
   });
 }
+
