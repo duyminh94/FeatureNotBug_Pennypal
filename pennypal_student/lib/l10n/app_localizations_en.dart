@@ -166,6 +166,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryInternship => 'Internship';
 
   @override
+  String get categoryGift => 'Gift';
+
+  @override
   String get categoryOtherIncome => 'Other';
 
   @override
@@ -365,6 +368,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashMonthSavings => 'Savings';
+
+  @override
+  String get dashSavedInGoals => 'Saved';
 
   @override
   String dashBudgetTitle(String month) {
@@ -1538,50 +1544,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'This category is not used yet, so nothing else changes.';
 
   @override
+  String categoryInUse(int transactions, int budgets) {
+    String _temp0 = intl.Intl.pluralLogic(
+      transactions,
+      locale: localeName,
+      other: '$transactions transactions',
+      one: '1 transaction',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      budgets,
+      locale: localeName,
+      other: '$budgets budgets',
+      one: '1 budget',
+    );
+    return 'This category is used by $_temp0 and $_temp1, so it can\'t be deleted.';
+  }
+
+  @override
   String get categoryDeleted => 'Category deleted';
-
-  @override
-  String categoryMoveTo(int transactions, int budgets) {
-    String _temp0 = intl.Intl.pluralLogic(
-      transactions,
-      locale: localeName,
-      other: '$transactions transactions',
-      one: '1 transaction',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      budgets,
-      locale: localeName,
-      other: '$budgets budgets',
-      one: '1 budget',
-    );
-    return 'Move $_temp0 and $_temp1 to…';
-  }
-
-  @override
-  String get categoryMoveAndDelete => 'Move and delete';
-
-  @override
-  String categoryMerged(int transactions, int budgets, String name) {
-    String _temp0 = intl.Intl.pluralLogic(
-      transactions,
-      locale: localeName,
-      other: '$transactions transactions',
-      one: '1 transaction',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      budgets,
-      locale: localeName,
-      other: '$budgets budgets',
-      one: '1 budget',
-      zero: 'no budgets',
-    );
-    return 'Moved $_temp0 and $_temp1 to $name.';
-  }
-
-  @override
-  String categoryKeptBudgets(String name, String months) {
-    return '$name already had a budget for $months, so that budget was kept.';
-  }
 
   @override
   String get chatSubtitle => 'Answers from your own data';
@@ -1688,17 +1668,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String chatCompareMore(String current, String last, String percent) {
-    return 'You spent $current this month and $last last month: $percent more.';
+    return 'So far this month you spent $current. By this day last month you had spent $last: $percent more.';
   }
 
   @override
   String chatCompareLess(String current, String last, String percent) {
-    return 'You spent $current this month and $last last month: $percent less. Nice!';
+    return 'So far this month you spent $current. By this day last month you had spent $last: $percent less. Nice!';
   }
 
   @override
   String chatCompareNoLast(String current) {
-    return 'There\'s no spending last month to compare with. This month you spent $current.';
+    return 'There\'s no spending in the same days of last month to compare with. So far this month you spent $current.';
+  }
+
+  @override
+  String chatCompareSame(String current) {
+    return 'So far this month you spent $current, the same as by this day last month.';
   }
 
   @override
@@ -1717,6 +1702,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatUnknown => 'I didn\'t understand that yet. Try one of these:';
 
   @override
+  String get chatDataLoading =>
+      'I\'m still loading your data. Please ask again in a moment.';
+
+  @override
+  String get chatDataFailed =>
+      'I couldn\'t load your data right now, so I can\'t answer with your numbers. You can still ask me for budgeting or saving tips.';
+
+  @override
   String chatCategorySpending(
       String month, String amount, String category, String percent) {
     return 'In $month you spent $amount on $category, $percent of your spending.';
@@ -1725,5 +1718,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String chatOnlyThisMonth(String month) {
     return 'I can only answer about $month. To see another month, open Reports.';
+  }
+
+  @override
+  String get reportsTypeSpending => 'Spending';
+
+  @override
+  String get reportsTypeIncome => 'Income';
+
+  @override
+  String get reportsIncomeByCategory => 'Income by source';
+
+  @override
+  String get reportsTotalIncome => 'Total income';
+
+  @override
+  String get reportsTopIncome => 'Biggest income sources';
+
+  @override
+  String get reportsNoIncome => 'No income this month yet.';
+
+  @override
+  String get reportsBalance => 'Balance (income − expenses)';
+
+  @override
+  String get reportsBudgetTitle => 'Budget vs actual';
+
+  @override
+  String get reportsNoBudget => 'No budget set for this month.';
+
+  @override
+  String reportsBudgetUsed(String spent, String limit, int percent) {
+    return '$spent of $limit · $percent%';
   }
 }

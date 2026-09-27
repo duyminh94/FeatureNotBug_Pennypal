@@ -6,7 +6,6 @@ import '../../services/learning_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/constants.dart';
-import '../../services/learning_service.dart';
 import '../../utils/learning_filter.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';

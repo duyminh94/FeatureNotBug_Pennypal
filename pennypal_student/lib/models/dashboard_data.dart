@@ -9,7 +9,8 @@ class DashboardData {
   final double balance;
   final double monthIncome;
   final double monthExpense;
-  final double monthSavings;
+  final double savedInGoals;
+  double get monthSavings => savedInGoals;
   final Budget? totalBudget;
   final SavingsGoal? activeGoal;
   final List<TransactionRecord> recentTransactions;
@@ -20,7 +21,7 @@ class DashboardData {
     required this.balance,
     required this.monthIncome,
     required this.monthExpense,
-    required this.monthSavings,
+    required this.savedInGoals,
     this.totalBudget,
     this.activeGoal,
     required this.recentTransactions,
@@ -32,7 +33,7 @@ class DashboardData {
       balance: 0,
       monthIncome: 0,
       monthExpense: 0,
-      monthSavings: 0,
+      savedInGoals: 0,
       recentTransactions: const [],
     );
   }

@@ -404,6 +404,12 @@ abstract class AppLocalizations {
   /// **'Internship'**
   String get categoryInternship;
 
+  /// No description provided for @categoryGift.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift'**
+  String get categoryGift;
+
   /// No description provided for @categoryOtherIncome.
   ///
   /// In en, this message translates to:
@@ -787,6 +793,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Savings'**
   String get dashMonthSavings;
+
+  /// No description provided for @dashSavedInGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get dashSavedInGoals;
 
   /// No description provided for @dashBudgetTitle.
   ///
@@ -2660,35 +2672,17 @@ abstract class AppLocalizations {
   /// **'This category is not used yet, so nothing else changes.'**
   String get categoryDeleteBody;
 
+  /// No description provided for @categoryInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This category is used by {transactions, plural, =1{1 transaction} other{{transactions} transactions}} and {budgets, plural, =1{1 budget} other{{budgets} budgets}}, so it can\'t be deleted.'**
+  String categoryInUse(int transactions, int budgets);
+
   /// No description provided for @categoryDeleted.
   ///
   /// In en, this message translates to:
   /// **'Category deleted'**
   String get categoryDeleted;
-
-  /// No description provided for @categoryMoveTo.
-  ///
-  /// In en, this message translates to:
-  /// **'Move {transactions, plural, =1{1 transaction} other{{transactions} transactions}} and {budgets, plural, =1{1 budget} other{{budgets} budgets}} to…'**
-  String categoryMoveTo(int transactions, int budgets);
-
-  /// No description provided for @categoryMoveAndDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Move and delete'**
-  String get categoryMoveAndDelete;
-
-  /// No description provided for @categoryMerged.
-  ///
-  /// In en, this message translates to:
-  /// **'Moved {transactions, plural, =1{1 transaction} other{{transactions} transactions}} and {budgets, plural, =0{no budgets} =1{1 budget} other{{budgets} budgets}} to {name}.'**
-  String categoryMerged(int transactions, int budgets, String name);
-
-  /// No description provided for @categoryKeptBudgets.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} already had a budget for {months}, so that budget was kept.'**
-  String categoryKeptBudgets(String name, String months);
 
   /// No description provided for @chatSubtitle.
   ///
@@ -2841,20 +2835,26 @@ abstract class AppLocalizations {
   /// No description provided for @chatCompareMore.
   ///
   /// In en, this message translates to:
-  /// **'You spent {current} this month and {last} last month: {percent} more.'**
+  /// **'So far this month you spent {current}. By this day last month you had spent {last}: {percent} more.'**
   String chatCompareMore(String current, String last, String percent);
 
   /// No description provided for @chatCompareLess.
   ///
   /// In en, this message translates to:
-  /// **'You spent {current} this month and {last} last month: {percent} less. Nice!'**
+  /// **'So far this month you spent {current}. By this day last month you had spent {last}: {percent} less. Nice!'**
   String chatCompareLess(String current, String last, String percent);
 
   /// No description provided for @chatCompareNoLast.
   ///
   /// In en, this message translates to:
-  /// **'There\'s no spending last month to compare with. This month you spent {current}.'**
+  /// **'There\'s no spending in the same days of last month to compare with. So far this month you spent {current}.'**
   String chatCompareNoLast(String current);
+
+  /// No description provided for @chatCompareSame.
+  ///
+  /// In en, this message translates to:
+  /// **'So far this month you spent {current}, the same as by this day last month.'**
+  String chatCompareSame(String current);
 
   /// No description provided for @chatBudgetingTips.
   ///
@@ -2880,6 +2880,18 @@ abstract class AppLocalizations {
   /// **'I didn\'t understand that yet. Try one of these:'**
   String get chatUnknown;
 
+  /// No description provided for @chatDataLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m still loading your data. Please ask again in a moment.'**
+  String get chatDataLoading;
+
+  /// No description provided for @chatDataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'I couldn\'t load your data right now, so I can\'t answer with your numbers. You can still ask me for budgeting or saving tips.'**
+  String get chatDataFailed;
+
   /// No description provided for @chatCategorySpending.
   ///
   /// In en, this message translates to:
@@ -2892,6 +2904,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I can only answer about {month}. To see another month, open Reports.'**
   String chatOnlyThisMonth(String month);
+
+  /// No description provided for @reportsTypeSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending'**
+  String get reportsTypeSpending;
+
+  /// No description provided for @reportsTypeIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get reportsTypeIncome;
+
+  /// No description provided for @reportsIncomeByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Income by source'**
+  String get reportsIncomeByCategory;
+
+  /// No description provided for @reportsTotalIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Total income'**
+  String get reportsTotalIncome;
+
+  /// No description provided for @reportsTopIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Biggest income sources'**
+  String get reportsTopIncome;
+
+  /// No description provided for @reportsNoIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'No income this month yet.'**
+  String get reportsNoIncome;
+
+  /// No description provided for @reportsBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance (income − expenses)'**
+  String get reportsBalance;
+
+  /// No description provided for @reportsBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget vs actual'**
+  String get reportsBudgetTitle;
+
+  /// No description provided for @reportsNoBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'No budget set for this month.'**
+  String get reportsNoBudget;
+
+  /// No description provided for @reportsBudgetUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{spent} of {limit} · {percent}%'**
+  String reportsBudgetUsed(String spent, String limit, int percent);
 }
 
 class _AppLocalizationsDelegate

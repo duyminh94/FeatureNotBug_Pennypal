@@ -165,6 +165,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get categoryInternship => 'Thực tập';
 
   @override
+  String get categoryGift => 'Quà tặng';
+
+  @override
   String get categoryOtherIncome => 'Khác';
 
   @override
@@ -363,6 +366,9 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get dashMonthSavings => 'Tiết kiệm';
+
+  @override
+  String get dashSavedInGoals => 'Đã tiết kiệm';
 
   @override
   String dashBudgetTitle(String month) {
@@ -1472,25 +1478,12 @@ class AppLocalizationsVi extends AppLocalizations {
       'Danh mục chưa được dùng nên không ảnh hưởng gì khác.';
 
   @override
+  String categoryInUse(int transactions, int budgets) {
+    return 'Danh mục đang được dùng cho $transactions giao dịch và $budgets ngân sách nên không xoá được.';
+  }
+
+  @override
   String get categoryDeleted => 'Đã xoá danh mục';
-
-  @override
-  String categoryMoveTo(int transactions, int budgets) {
-    return 'Chuyển $transactions giao dịch và $budgets ngân sách sang…';
-  }
-
-  @override
-  String get categoryMoveAndDelete => 'Chuyển và xoá';
-
-  @override
-  String categoryMerged(int transactions, int budgets, String name) {
-    return 'Đã chuyển $transactions giao dịch và $budgets ngân sách sang $name.';
-  }
-
-  @override
-  String categoryKeptBudgets(String name, String months) {
-    return '$name đã có ngân sách tháng $months nên giữ nguyên ngân sách đó.';
-  }
 
   @override
   String get chatSubtitle => 'Trả lời từ dữ liệu của bạn';
@@ -1597,17 +1590,22 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String chatCompareMore(String current, String last, String percent) {
-    return 'Tháng này bạn chi $current, tháng trước $last: nhiều hơn $percent.';
+    return 'Tháng này tới hôm nay bạn chi $current, cùng kỳ tháng trước $last: nhiều hơn $percent.';
   }
 
   @override
   String chatCompareLess(String current, String last, String percent) {
-    return 'Tháng này bạn chi $current, tháng trước $last: ít hơn $percent. Tốt lắm!';
+    return 'Tháng này tới hôm nay bạn chi $current, cùng kỳ tháng trước $last: ít hơn $percent. Tốt lắm!';
   }
 
   @override
   String chatCompareNoLast(String current) {
-    return 'Tháng trước chưa có khoản chi nào để so sánh. Tháng này bạn chi $current.';
+    return 'Cùng kỳ tháng trước chưa có khoản chi nào để so sánh. Tháng này tới hôm nay bạn chi $current.';
+  }
+
+  @override
+  String chatCompareSame(String current) {
+    return 'Tháng này tới hôm nay bạn chi $current, bằng đúng cùng kỳ tháng trước.';
   }
 
   @override
@@ -1627,6 +1625,14 @@ class AppLocalizationsVi extends AppLocalizations {
       'Mình chưa hiểu câu này. Bạn thử hỏi một trong các câu sau nhé:';
 
   @override
+  String get chatDataLoading =>
+      'Mình đang tải dữ liệu của bạn. Bạn hỏi lại sau giây lát nhé.';
+
+  @override
+  String get chatDataFailed =>
+      'Mình chưa tải được dữ liệu của bạn nên chưa trả lời bằng số liệu được. Bạn vẫn có thể hỏi mẹo lập ngân sách hoặc tiết kiệm nhé.';
+
+  @override
   String chatCategorySpending(
       String month, String amount, String category, String percent) {
     return '$month bạn đã chi $amount cho $category, chiếm $percent chi tiêu.';
@@ -1635,5 +1641,37 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String chatOnlyThisMonth(String month) {
     return 'Mình chỉ trả lời được số liệu $month. Muốn xem tháng khác, bạn mở mục Báo cáo nhé.';
+  }
+
+  @override
+  String get reportsTypeSpending => 'Chi tiêu';
+
+  @override
+  String get reportsTypeIncome => 'Thu nhập';
+
+  @override
+  String get reportsIncomeByCategory => 'Thu nhập theo nguồn';
+
+  @override
+  String get reportsTotalIncome => 'Tổng thu';
+
+  @override
+  String get reportsTopIncome => 'Nguồn thu lớn nhất';
+
+  @override
+  String get reportsNoIncome => 'Tháng này chưa có khoản thu.';
+
+  @override
+  String get reportsBalance => 'Cân bằng thu – chi';
+
+  @override
+  String get reportsBudgetTitle => 'So sánh ngân sách';
+
+  @override
+  String get reportsNoBudget => 'Tháng này chưa đặt ngân sách.';
+
+  @override
+  String reportsBudgetUsed(String spent, String limit, int percent) {
+    return '$spent / $limit · $percent%';
   }
 }
