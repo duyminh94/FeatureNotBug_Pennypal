@@ -131,7 +131,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
         _contributions.remove(contribution);
         _goal = GoalCalculator.changeCurrentAmount(_goal, -oldAmount, _now);
       });
-      GoalService.deleteContribution(contribution.id, _goal);
+      GoalService.deleteContribution(contribution.id, _goal, -oldAmount);
       _notify();
       _showMessage(l10n.goalContributionDeleted);
       return;
@@ -152,7 +152,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
       }
       _sortContributions();
     });
-    GoalService.saveContribution(saved, _goal);
+    GoalService.saveContribution(saved, _goal, saved.amount - oldAmount);
     _notify();
 
     if (contribution != null) {

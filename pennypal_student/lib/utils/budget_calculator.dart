@@ -32,10 +32,12 @@ class BudgetCalculator {
     return total;
   }
 
-  /// Percent of the limit already spent, rounded. A limit of 0 gives 0 instead of dividing by zero.
+  /// Percent of the limit already spent, rounded down. A limit of 0 gives 0 instead of dividing by zero.
+  /// Rounding down keeps "shown % >= threshold" equal to "real spending >= threshold": 995k of 1M is 99%, not over.
+  /// spent * 100 is divided last, because spent / limit * 100 gives 28.999… for 290k of 1M.
   static int percent(double spent, double limitAmount) {
     if (limitAmount <= 0) return 0;
-    return (spent / limitAmount * 100).round();
+    return (spent * 100 / limitAmount).floor();
   }
 
   /// Money left before the limit; negative means the student is over budget.

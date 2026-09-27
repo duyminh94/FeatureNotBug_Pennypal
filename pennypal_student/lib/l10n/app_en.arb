@@ -1144,7 +1144,7 @@
   },
   "chatPaceUnknown": "Set a monthly contribution so I can estimate when you'll finish.",
   "chatNoGoal": "You have no active goals. Create one in the Goals tab and start saving!",
-  "chatCompareMore": "You spent {current} this month and {last} last month: {percent} more.",
+  "chatCompareMore": "So far this month you spent {current}. By this day last month you had spent {last}: {percent} more.",
   "@chatCompareMore": {
     "placeholders": {
       "current": {
@@ -1158,7 +1158,7 @@
       }
     }
   },
-  "chatCompareLess": "You spent {current} this month and {last} last month: {percent} less. Nice!",
+  "chatCompareLess": "So far this month you spent {current}. By this day last month you had spent {last}: {percent} less. Nice!",
   "@chatCompareLess": {
     "placeholders": {
       "current": {
@@ -1172,8 +1172,16 @@
       }
     }
   },
-  "chatCompareNoLast": "There's no spending last month to compare with. This month you spent {current}.",
+  "chatCompareNoLast": "There's no spending in the same days of last month to compare with. So far this month you spent {current}.",
   "@chatCompareNoLast": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "chatCompareSame": "So far this month you spent {current}, the same as by this day last month.",
+  "@chatCompareSame": {
     "placeholders": {
       "current": {
         "type": "String"
