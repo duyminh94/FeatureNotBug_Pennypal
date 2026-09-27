@@ -88,6 +88,7 @@ class CategoryDisplay {
       CategoryKeys.scholarship => l10n.categoryScholarship,
       CategoryKeys.partTime => l10n.categoryPartTime,
       CategoryKeys.internship => l10n.categoryInternship,
+      CategoryKeys.gift => l10n.categoryGift,
       CategoryKeys.otherIncome => l10n.categoryOtherIncome,
       _ => l10n.categoryMiscellaneous,
     };
@@ -106,6 +107,7 @@ class CategoryDisplay {
       CategoryKeys.scholarship => 'emoji_events',
       CategoryKeys.partTime => 'work',
       CategoryKeys.internship => 'badge',
+      CategoryKeys.gift => 'card_giftcard',
       CategoryKeys.otherIncome => 'attach_money',
       _ => 'more_horiz',
     };

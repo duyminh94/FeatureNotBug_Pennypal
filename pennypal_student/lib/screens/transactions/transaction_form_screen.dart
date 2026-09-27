@@ -8,6 +8,7 @@ import '../../services/receipt_scan_service.dart';
 import '../../services/transaction_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
+import '../../utils/category_keywords.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
 import '../../utils/validators.dart';
@@ -42,6 +43,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   ScanNoticeType _scanNotice = ScanNoticeType.none;
   final Set<String> _filledFields = {};
   String? _suggestedCategoryId;
+  late bool _isCategoryPickedByUser;
 
   static const String _amountField = 'amount';
   static const String _descriptionField = 'description';
@@ -61,6 +63,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     _dateController = TextEditingController(text: Formatters.fullDate(_date));
     _paymentMode = initial?.paymentMode ?? PaymentModes.cash;
     _categoryId = initial?.categoryId;
+    _isCategoryPickedByUser = initial != null;
     _receiptPath = initial?.receiptLocalPath;
   }
 
@@ -165,6 +168,18 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
         _showCategoryError = false;
       }
       _scanNotice = amount == null ? ScanNoticeType.noAmount : ScanNoticeType.filled;
+    });
+  }
+
+  /// Suggests an expense category from the description; it only picks the category while the student has not picked one.
+  void _onDescriptionChanged(String text) {
+    if (_isIncome) return;
+    final String? categoryId = CategoryKeywords.findCategory(text);
+    setState(() {
+      _suggestedCategoryId = categoryId;
+      if (categoryId == null || _isCategoryPickedByUser) return;
+      _categoryId = categoryId;
+      _showCategoryError = false;
     });
   }
 
@@ -283,6 +298,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                         isSelected: categoryId == _categoryId,
                         onTap: () => setState(() {
                           _categoryId = categoryId;
+                          _isCategoryPickedByUser = true;
                           _showCategoryError = false;
                         }),
                       ))
@@ -318,6 +334,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
               maxLength: AppDefaults.descriptionMaxLength,
               textInputAction: TextInputAction.done,
               isHighlighted: _filledFields.contains(_descriptionField),
+              onChanged: _onDescriptionChanged,
             ),
             const SizedBox(height: 8),
             _SectionLabel(text: l10n.txPaymentMode),

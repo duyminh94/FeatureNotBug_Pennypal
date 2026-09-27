@@ -6,6 +6,7 @@ import 'text_normalizer.dart';
 /// Turns the text read from a receipt into form values (BR-91 to BR-95). Pure Dart, no ML Kit here.
 class ReceiptParser {
   /// Longer phrases first, compared after removing accents (words.md section 10).
+  /// "tong" alone is left out: on a blurry photo it also matches lines like "Tong so luong hang".
   static const List<String> _totalKeywords = [
     'can thanh toan',
     'grand total',
@@ -16,8 +17,10 @@ class ReceiptParser {
     'thanh tien',
     'total',
     'amount',
-    'tong',
   ];
+
+  /// A line with these words counts items, not money ("Tong so luong hang 1.000"), so it is never a total line.
+  static const List<String> _quantityWords = ['so luong', 'sl', 'qty', 'quantity'];
 
   /// Header words printed on almost every receipt; they are not a description or a category hint.
   static const List<String> _headerWords = ['hoa don', 'receipt', 'invoice', 'phieu tinh tien', 'phieu thanh toan'];
@@ -80,25 +83,54 @@ class ReceiptParser {
     return numbers;
   }
 
-  static bool _hasTotalKeyword(String normalizedLine) {
-    return _totalKeywords.any((keyword) => RegExp('\\b${RegExp.escape(keyword)}\\b').hasMatch(normalizedLine));
+  /// Only numbers printed like money (10.200 · 10,200.00); quantities and VAT rates like "1" or "10" are skipped.
+  static Set<double> _formattedNumbersInLine(String line) {
+    final String withoutDates = line.replaceAll(_datePattern, ' ').replaceAll(_timePattern, ' ');
+    final Set<double> numbers = {};
+    for (final RegExpMatch match in _numberPattern.allMatches(withoutDates)) {
+      final String token = match.group(0)!.replaceAll(RegExp(r'[.,]+$'), '');
+      if (!token.contains('.') && !token.contains(',')) continue;
+      final double? value = parseNumber(token);
+      if (value != null) numbers.add(value);
+    }
+    return numbers;
   }
 
-  /// BR-91: prefer numbers on a "total" line (or the line right after it); otherwise the largest number.
+  static bool _hasWord(String normalizedLine, List<String> words) {
+    return words.any((word) => RegExp('\\b${RegExp.escape(word)}\\b').hasMatch(normalizedLine));
+  }
+
+  static bool _hasTotalKeyword(String normalizedLine) {
+    if (_hasWord(normalizedLine, _quantityWords)) return false;
+    return _hasWord(normalizedLine, _totalKeywords);
+  }
+
+  /// BR-91: prefer numbers on a "total" line (or the line right after it);
+  /// then a money amount printed on 2+ lines (total, cash paid… repeat the same value);
+  /// otherwise the largest number.
   static double? _findAmount(List<String> lines) {
     final List<double> totalLineNumbers = [];
     final List<double> allNumbers = [];
+    final Map<double, int> lineCountByAmount = {};
 
     for (int index = 0; index < lines.length; index++) {
       final List<double> numbers = _numbersInLine(lines[index]);
       allNumbers.addAll(numbers);
+      for (final double amount in _formattedNumbersInLine(lines[index])) {
+        lineCountByAmount[amount] = (lineCountByAmount[amount] ?? 0) + 1;
+      }
       if (!_hasTotalKeyword(TextNormalizer.normalize(lines[index]))) continue;
 
       final bool valueIsOnNextLine = numbers.isEmpty && index + 1 < lines.length;
       totalLineNumbers.addAll(valueIsOnNextLine ? _numbersInLine(lines[index + 1]) : numbers);
     }
 
-    final List<double> candidates = (totalLineNumbers.isNotEmpty ? totalLineNumbers : allNumbers)
+    final List<double> repeatedAmounts = [
+      for (final MapEntry<double, int> entry in lineCountByAmount.entries)
+        if (entry.value >= 2 && entry.key > 0 && entry.key <= AppDefaults.maxAmount) entry.key,
+    ];
+    final List<double> fallbackNumbers = repeatedAmounts.isNotEmpty ? repeatedAmounts : allNumbers;
+    final List<double> candidates = (totalLineNumbers.isNotEmpty ? totalLineNumbers : fallbackNumbers)
         .where((amount) => amount > 0 && amount <= AppDefaults.maxAmount)
         .toList();
     if (candidates.isEmpty) return null;
