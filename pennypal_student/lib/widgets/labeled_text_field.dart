@@ -16,6 +16,7 @@ class LabeledTextField extends StatelessWidget {
   final String? hintText;
   final int? maxLength;
   final bool isHighlighted;
+  final ValueChanged<String>? onChanged;
 
   const LabeledTextField({
     super.key,
@@ -31,6 +32,7 @@ class LabeledTextField extends StatelessWidget {
     this.hintText,
     this.maxLength,
     this.isHighlighted = false,
+    this.onChanged,
   });
 
   @override
@@ -52,6 +54,7 @@ class LabeledTextField extends StatelessWidget {
           textInputAction: textInputAction,
           obscureText: obscureText,
           maxLength: maxLength,
+          onChanged: onChanged,
           style: const TextStyle(fontSize: 16),
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: AppColors.textMuted, size: 22),
