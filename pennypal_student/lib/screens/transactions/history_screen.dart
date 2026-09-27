@@ -316,6 +316,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 4),
               child: Row(
                 children: [
+                  if (_hasActiveFilters) ...[
+                    ActionChip(
+                      avatar: const Icon(Icons.close, size: 16, color: AppColors.expense),
+                      label: Text(
+                        l10n.commonClearFilter,
+                        style: const TextStyle(fontSize: 13, color: AppColors.expense, fontWeight: FontWeight.w600),
+                      ),
+                      backgroundColor: AppColors.expenseSoft,
+                      side: BorderSide.none,
+                      shape: const StadiumBorder(),
+                      onPressed: _clearFilters,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   _FilterButton(icon: Icons.expand_more, label: typeLabel, isActive: _type != null, onTap: _pickType),
                   const SizedBox(width: 8),
                   _FilterButton(
@@ -331,20 +345,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     isActive: _selectedDay != null,
                     onTap: _pickDay,
                   ),
-                  if (_hasActiveFilters) ...[
-                    const SizedBox(width: 8),
-                    ActionChip(
-                      avatar: const Icon(Icons.close, size: 16, color: AppColors.expense),
-                      label: Text(
-                        l10n.commonClearFilter,
-                        style: const TextStyle(fontSize: 13, color: AppColors.expense, fontWeight: FontWeight.w600),
-                      ),
-                      backgroundColor: AppColors.expenseSoft,
-                      side: BorderSide.none,
-                      shape: const StadiumBorder(),
-                      onPressed: _clearFilters,
-                    ),
-                  ],
                 ],
               ),
             ),
