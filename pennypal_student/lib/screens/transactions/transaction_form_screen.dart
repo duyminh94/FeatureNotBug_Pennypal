@@ -3,11 +3,14 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../models/receipt_scan_result.dart';
+import '../../models/recurring_item.dart';
 import '../../models/transaction_record.dart';
 import '../../services/category_service.dart';
 import '../../services/receipt_scan_service.dart';
+import '../../services/recurring_service.dart';
 import '../../services/transaction_service.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/budget_calculator.dart';
 import '../../utils/category_display.dart';
 import '../../utils/category_keywords.dart';
 import '../../utils/constants.dart';
@@ -46,6 +49,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   final Set<String> _filledFields = {};
   String? _suggestedCategoryId;
   late bool _isCategoryPickedByUser;
+  bool _isRecurring = false;
 
   static const String _amountField = 'amount';
   static const String _descriptionField = 'description';
@@ -235,9 +239,30 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     });
     if (!isFormValid || !isCategoryValid) return;
 
-    TransactionService.save(_buildTransaction());
+    if (_isRecurring) {
+      _saveRecurring();
+    } else {
+      TransactionService.save(_buildTransaction());
+    }
     _showMessage(l10n.txSaved);
     Navigator.of(context).pop(FormResults.saved);
+  }
+
+  // This month is the transaction being saved now, so the next one is created next month.
+  void _saveRecurring() {
+    final TransactionRecord transaction = _buildTransaction();
+    final RecurringItem item = RecurringItem(
+      id: RecurringService.newId(),
+      type: transaction.type,
+      amount: transaction.amount,
+      categoryId: transaction.categoryId,
+      description: transaction.description,
+      paymentMode: transaction.paymentMode,
+      dayOfMonth: _date.day,
+      lastCreatedMonth: BudgetCalculator.monthKey(_date),
+      createdAt: transaction.createdAt,
+    );
+    RecurringService.create(item, transaction);
   }
 
   Future<void> _delete() async {
@@ -369,6 +394,10 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                 );
               }).toList(),
             ),
+            if (!_isEditing) ...[
+              const SizedBox(height: 16),
+              _buildRecurringSwitch(l10n),
+            ],
           ],
         ),
       ),
@@ -431,6 +460,21 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
             if (isAmountMissing) _AmountHint(icon: Icons.warning_amber_rounded, text: l10n.scanNoAmount),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildRecurringSwitch(AppLocalizations l10n) {
+    String hint = l10n.recurringSwitchHint(_date.day);
+    if (_date.day > 28) hint = '$hint ${l10n.recurringMonthEndNote}';
+
+    return Card(
+      child: SwitchListTile(
+        value: _isRecurring,
+        onChanged: (value) => setState(() => _isRecurring = value),
+        secondary: const Icon(Icons.event_repeat, color: AppColors.primary),
+        title: Text(l10n.recurringSwitch, style: const TextStyle(fontWeight: FontWeight.w700)),
+        subtitle: Text(hint),
       ),
     );
   }

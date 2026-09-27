@@ -10,6 +10,7 @@ import '../../widgets/profile_avatar.dart';
 import '../categories/categories_screen.dart';
 import '../chatbot/chatbot_screen.dart';
 import '../learning/learning_screen.dart';
+import '../recurring/recurring_screen.dart';
 import '../reports/reports_screen.dart';
 import '../support/feedback_screen.dart';
 import '../support/support_screen.dart';
@@ -97,6 +98,13 @@ class _MoreScreenState extends State<MoreScreen> {
                 color: AppColors.purple,
                 background: AppColors.purpleSoft,
                 onTap: () => _openScreen(CategoriesScreen(uid: _profile.uid)),
+              ),
+              _MenuItem(
+                icon: Icons.event_repeat,
+                label: l10n.menuRecurring,
+                color: AppColors.teal,
+                background: AppColors.tealSoft,
+                onTap: () => _openScreen(RecurringScreen(uid: _profile.uid)),
               ),
               _MenuItem(
                 icon: Icons.notifications_none,

@@ -11,6 +11,7 @@ class DbNodes {
   static const String supportQueries = 'support_queries';
   static const String feedbacks = 'feedbacks';
   static const String appSettings = 'app_settings';
+  static const String recurring = 'recurring';
 
   /// Key of the overall budget under budgets/{uid}/{month}/.
   static const String budgetTotalKey = 'total';
@@ -50,6 +51,10 @@ class DbFields {
   static const String paymentMode = 'paymentMode';
   static const String goalId = 'goalId';
   static const String receiptLocalPath = 'receiptLocalPath';
+
+  // recurring
+  static const String dayOfMonth = 'dayOfMonth';
+  static const String lastCreatedMonth = 'lastCreatedMonth';
 
   // budgets
   static const String limitAmount = 'limitAmount';

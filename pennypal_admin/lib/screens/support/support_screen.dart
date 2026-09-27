@@ -5,7 +5,9 @@ import '../../models/support_query.dart';
 import '../../services/support_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
+import '../../utils/pager.dart';
 import '../../utils/support_manager.dart';
+import '../../widgets/page_controls.dart';
 import 'support_detail_screen.dart';
 import 'support_widgets.dart';
 
@@ -23,6 +25,7 @@ class _SupportScreenState extends State<SupportScreen> {
 
   // Tab being shown: open requests first because they need an answer.
   String _status = SupportStatuses.open;
+  int _pageIndex = 0;
 
   @override
   void initState() {
@@ -84,8 +87,9 @@ class _SupportScreenState extends State<SupportScreen> {
     List<SupportQuery> shown = open;
     if (_status == SupportStatuses.resolved) shown = resolved;
 
+    final int pageIndex = Pager.safePage(_pageIndex, shown.length);
     final List<Widget> requestCards = [];
-    for (final SupportQuery query in shown) {
+    for (final SupportQuery query in Pager.page(shown, pageIndex)) {
       requestCards.add(_RequestCard(
         query: query,
         languageCode: languageCode,
@@ -110,11 +114,22 @@ class _SupportScreenState extends State<SupportScreen> {
               onSelectionChanged: (selected) {
                 setState(() {
                   _status = selected.first;
+                  _pageIndex = 0;
                 });
               },
             ),
             const SizedBox(height: 16),
             if (shown.isEmpty) _buildEmpty(l10n) else ...requestCards,
+            if (Pager.pageCount(shown.length) > 1)
+              PageControls(
+                pageIndex: pageIndex,
+                total: shown.length,
+                onPageChanged: (newPage) {
+                  setState(() {
+                    _pageIndex = newPage;
+                  });
+                },
+              ),
           ],
         ),
       ),

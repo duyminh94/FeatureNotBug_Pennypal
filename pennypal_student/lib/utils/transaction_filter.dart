@@ -54,4 +54,25 @@ class TransactionFilter {
       return DayGroup(day: entry.key, transactions: entry.value, netTotal: netTotal);
     }).toList();
   }
+
+  // Whole days are added until at least minTransactions are shown, so a day is never cut in half
+  // and its total stays right.
+  static List<DayGroup> firstGroups(List<DayGroup> groups, int minTransactions) {
+    final List<DayGroup> result = [];
+    int count = 0;
+    for (final DayGroup group in groups) {
+      if (count >= minTransactions) break;
+      result.add(group);
+      count += group.transactions.length;
+    }
+    return result;
+  }
+
+  static int countTransactions(List<DayGroup> groups) {
+    int count = 0;
+    for (final DayGroup group in groups) {
+      count += group.transactions.length;
+    }
+    return count;
+  }
 }

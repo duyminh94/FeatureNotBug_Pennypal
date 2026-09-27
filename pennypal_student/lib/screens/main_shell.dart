@@ -16,6 +16,7 @@ import '../services/goal_service.dart';
 import '../services/notification_service.dart';
 import '../services/support_service.dart';
 import '../services/push_notification_service.dart';
+import '../services/recurring_service.dart';
 import '../services/transaction_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/category_display.dart';
@@ -41,6 +42,7 @@ class MainShell extends StatefulWidget {
   final Stream<List<Category>> Function(String uid) watchCategories;
   final void Function(String uid, List<String> ids) markRead;
   final void Function(String uid, String queryId) markSupportNotified;
+  final Future<void> Function(String uid) createDueRecurring;
 
   const MainShell({
     super.key,
@@ -53,6 +55,7 @@ class MainShell extends StatefulWidget {
     this.watchCategories = CategoryService.watch,
     this.markRead = NotificationService.markRead,
     this.markSupportNotified = SupportService.markNotified,
+    this.createDueRecurring = RecurringService.createDue,
   });
 
   @override
@@ -79,6 +82,7 @@ class _MainShellState extends State<MainShell> {
     // Old accounts sign in without passing the S01 permission screen, so they are asked once here.
     PushNotificationService.requestPermissionIfNeverAsked();
     _listenCategories();
+    unawaited(widget.createDueRecurring(widget.profile.uid));
   }
 
   @override

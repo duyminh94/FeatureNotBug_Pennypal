@@ -158,7 +158,7 @@
   "usersNoMatch": "No students match your search.",
   "usersLoadFailed": "Could not load accounts. Check the connection and try again.",
   "usersSaveFailed": "Could not change the account. Check the connection and try again.",
-  "usersShowing": "Showing {from}–{to} of {total} students",
+  "usersShowing": "Showing {from}-{to} of {total} students",
   "@usersShowing": {
     "placeholders": {
       "from": {
@@ -174,6 +174,20 @@
   },
   "commonPrevious": "Previous",
   "commonNext": "Next",
+  "commonShowing": "Showing {from}-{to} of {total}",
+  "@commonShowing": {
+    "placeholders": {
+      "from": {
+        "type": "int"
+      },
+      "to": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "commonNever": "Never",
   "commonTodayAt": "Today {time}",
   "@commonTodayAt": {
@@ -219,7 +233,7 @@
   "commonDelete": "Delete",
   "commonClose": "Close",
   "learningDeleteTitle": "Delete this lesson?",
-  "learningDeleteBody": "“{title}” will be removed for all students. To hide it temporarily, turn off Active instead.",
+  "learningDeleteBody": "\"{title}\" will be removed for all students. To hide it temporarily, turn off Active instead.",
   "@learningDeleteBody": {
     "placeholders": {
       "title": {
@@ -229,7 +243,7 @@
   },
   "learningDeleted": "Lesson deleted",
   "learningSaved": "Lesson saved",
-  "learningShown": "“{title}” is now visible to students",
+  "learningShown": "\"{title}\" is now visible to students",
   "@learningShown": {
     "placeholders": {
       "title": {
@@ -237,7 +251,7 @@
       }
     }
   },
-  "learningHiddenMessage": "“{title}” is now hidden",
+  "learningHiddenMessage": "\"{title}\" is now hidden",
   "@learningHiddenMessage": {
     "placeholders": {
       "title": {
@@ -287,7 +301,7 @@
   "supportEmptyResolved": "No resolved requests yet.",
   "supportRequestTitle": "Support request",
   "supportYourReply": "Your reply",
-  "supportReplyHint": "Write a clear answer for the student…",
+  "supportReplyHint": "Write a clear answer for the student...",
   "supportMarksResolved": "Marks request as Resolved",
   "supportSendReply": "Send reply",
   "supportReplySent": "Reply sent. The request is now resolved.",

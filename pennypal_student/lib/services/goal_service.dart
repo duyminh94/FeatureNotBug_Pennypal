@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../models/savings_goal.dart';
 import '../models/transaction_record.dart';
 import '../utils/constants.dart';
+import '../utils/recurring_calculator.dart';
 
 /// Reads and writes savings goals at savings_goals/{uid}/{goalId}.
 ///
@@ -65,7 +66,7 @@ class GoalService {
 
     final Map<String, Object?> changes = {};
     changes[_transactionPath(uid, contribution.id)] = contribution.toMap();
-    _addGoalAmountChanges(changes, uid, goal, change);
+    addGoalAmountChanges(changes, uid, goal, change);
     _update('saveContribution', changes);
   }
 
@@ -76,14 +77,14 @@ class GoalService {
 
     final Map<String, Object?> changes = {};
     changes[_transactionPath(uid, contributionId)] = null;
-    _addGoalAmountChanges(changes, uid, goal, change);
+    addGoalAmountChanges(changes, uid, goal, change);
     _update('deleteContribution', changes);
   }
 
   /// currentAmount is changed with ServerValue.increment, not overwritten, so two contributions
   /// made at the same time (two phones, or offline then sync) are both counted (BR-31).
   /// Status and completedAt come from [goal], already updated by GoalCalculator.changeCurrentAmount.
-  static void _addGoalAmountChanges(Map<String, Object?> changes, String uid, SavingsGoal goal, double change) {
+  static void addGoalAmountChanges(Map<String, Object?> changes, String uid, SavingsGoal goal, double change) {
     final String goalPath = _goalPath(uid, goal.id);
     changes['$goalPath/${DbFields.currentAmount}'] = ServerValue.increment(change);
     changes['$goalPath/${DbFields.status}'] = goal.status;
@@ -99,6 +100,7 @@ class GoalService {
 
     final Map<String, Object?> changes = {};
     changes[_goalPath(uid, goalId)] = null;
+    changes['${DbNodes.recurring}/$uid/${RecurringCalculator.goalItemId(goalId)}'] = null;
     for (final String contributionId in contributionIds) {
       changes[_transactionPath(uid, contributionId)] = null;
     }

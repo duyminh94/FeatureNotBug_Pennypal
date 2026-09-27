@@ -11,7 +11,7 @@
   "commonSearch": "Search",
   "commonFilter": "Filter",
   "commonClearFilter": "Clear filters",
-  "commonLoading": "Loading…",
+  "commonLoading": "Loading...",
   "commonNoData": "No data yet",
   "commonDeleteConfirm": "Are you sure you want to delete this?",
   "commonSubmitSuccess": "Submitted successfully",
@@ -23,7 +23,7 @@
   "validationEmail": "Invalid email address",
   "validationPassword": "At least 8 characters with letters and numbers",
   "validationPasswordMatch": "Passwords do not match",
-  "validationMobile": "Mobile number must be 9–15 digits",
+  "validationMobile": "Mobile number must be 9-15 digits",
   "validationAmountPositive": "Amount must be greater than 0",
   "validationAmountMax": "Amount is too large",
   "validationDateFuture": "Date cannot be in the future",
@@ -63,7 +63,7 @@
   "commonComingSoon": "This screen is coming soon",
   "commonBack": "Back",
   "splashTagline": "A cheerful money diary for students",
-  "splashSubtitle": "Track spending, set budgets and save up — a little every day.",
+  "splashSubtitle": "Track spending, set budgets and save up, a little every day.",
   "splashGetStarted": "Get started",
   "authEmail": "Email",
   "authPassword": "Password",
@@ -214,9 +214,38 @@
   "txSaveIncome": "Save income",
   "txSaveChanges": "Save changes",
   "txSaved": "Saved",
+  "recurringSwitch": "Repeat every month",
+  "recurringSwitchHint": "Added automatically on day {day} of each month.",
+  "@recurringSwitchHint": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringMonthEndNote": "Shorter months use their last day.",
+  "menuRecurring": "Fixed items",
+  "recurringEmpty": "No fixed items yet. Turn on \"Repeat every month\" when you add an income or expense.",
+  "recurringNote": "These are added automatically when you open the app on or after their day.",
+  "recurringDay": "day {day} every month",
+  "@recurringDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringStopped": "Stopped",
+  "recurringEditAmount": "Change amount",
+  "recurringAmountSaved": "Amount changed. It applies from the next time it is added.",
+  "recurringStoppedMessage": "Stopped. Transactions already added are kept.",
+  "recurringResumedMessage": "Turned back on. Months while it was stopped are not added.",
+  "recurringDeleteTitle": "Delete this fixed item?",
+  "recurringDeleteBody": "It will not be added any more. Transactions already added are kept.",
+  "recurringDeleted": "Fixed item deleted",
   "txDeleted": "Transaction deleted",
   "txDeleteTitle": "Delete this transaction?",
-  "txDeleteBody": "“{name}” {amount} will be deleted. Your balance and budgets will be recalculated.",
+  "txDeleteBody": "\"{name}\" {amount} will be deleted. Your balance and budgets will be recalculated.",
   "@txDeleteBody": {
     "placeholders": {
       "name": {
@@ -238,7 +267,15 @@
   "filterAllCategories": "All categories",
   "filterAllDates": "All dates",
   "historyEmpty": "No transactions match your filters",
-  "historyDeletedNamed": "Deleted “{name}”",
+  "historyShowMore": "Show more ({count} left)",
+  "@historyShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyDeletedNamed": "Deleted \"{name}\"",
   "@historyDeletedNamed": {
     "placeholders": {
       "name": {
@@ -251,13 +288,13 @@
   "typeExpense": "Expense",
   "typeIncome": "Income",
   "detailEdit": "Edit transaction",
-  "detailContributionLocked": "Goal contribution — edit or delete it in the Goals tab.",
+  "detailContributionLocked": "Goal contribution. Edit or delete it in the Goals tab.",
   "scanSheetBody": "Penny reads the text right on your phone and never uploads the photo.",
   "scanFromCamera": "Take photo",
   "scanFromCameraHint": "Use the camera to capture a receipt",
   "scanFromGallery": "Choose from gallery",
   "scanFromGalleryHint": "A receipt photo you already have",
-  "scanReading": "Reading receipt…",
+  "scanReading": "Reading receipt...",
   "scanFilledHint": "Please check the highlighted fields",
   "scanFilledFromReceipt": "Filled from receipt",
   "scanSuggested": "suggested: {name}",
@@ -271,7 +308,7 @@
   "scanNoText": "Couldn't read this receipt",
   "scanNoTextBody": "The photo is still attached. Enter the details yourself, or retake it in better light.",
   "scanNoAmount": "Couldn't find the amount",
-  "scanNoAmountBody": "Other fields are filled in — enter the amount and check again.",
+  "scanNoAmountBody": "Other fields are filled in. Enter the amount and check again.",
   "scanEnterAmount": "Enter amount",
   "scanAgain": "Scan again",
   "scanPermissionDenied": "Camera permission is needed to scan receipts",
@@ -434,11 +471,42 @@
   "goalNameHint": "e.g. New laptop",
   "goalTargetAmount": "Target amount",
   "goalCurrentSavings": "Current savings",
-  "goalCurrentSavingsHelp": "Money you have already saved. It is not a transaction and does not change your balance.",
+  "goalCurrentSavingsHelp": "Money you saved before using the app. It is not a transaction and does not change your balance.",
   "goalCurrentSavingsLocked": "Current savings can't be changed after you have contributed to this goal.",
   "goalTargetDate": "Target date",
   "goalMonthlyContribution": "Monthly contribution",
-  "goalMonthlyContributionHelp": "Only used for the estimate. The app never takes money automatically.",
+  "goalMonthlyContributionHelp": "Used for the estimate. You can also have it contributed automatically.",
+  "goalAutoContribute": "Contribute automatically",
+  "goalAutoContributeNewHint": "{amount} goes into this goal on day {day} of each month, starting next month.",
+  "@goalAutoContributeNewHint": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "goalAutoContributeHint": "{amount} goes into this goal on day {day} of each month.",
+  "@goalAutoContributeHint": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringGoalName": "Save for {name}",
+  "@recurringGoalName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "goalEstimateTitle": "Penny's estimate",
   "goalRemainingMonths": "{amount} left · {months, plural, =1{1 month} other{{months} months}}",
   "@goalRemainingMonths": {
@@ -518,7 +586,8 @@
   },
   "goalDelete": "Delete goal",
   "goalContribute": "Contribute",
-  "goalContributeTo": "Contribute to “{name}”",
+  "goalContributionTitle": "Contribution",
+  "goalContributeTo": "Contribute to \"{name}\"",
   "@goalContributeTo": {
     "placeholders": {
       "name": {
@@ -575,7 +644,7 @@
     }
   },
   "goalDeleteTitle": "Delete this goal?",
-  "goalDeleteBody": "“{name}” will be removed.",
+  "goalDeleteBody": "\"{name}\" will be removed.",
   "@goalDeleteBody": {
     "placeholders": {
       "name": {
@@ -584,7 +653,7 @@
     }
   },
   "goalHasContributionsTitle": "This goal has contributions",
-  "goalHasContributionsBody": "You have put {amount} into “{name}”. What should happen to this money?",
+  "goalHasContributionsBody": "You have put {amount} into \"{name}\". What should happen to this money?",
   "@goalHasContributionsBody": {
     "placeholders": {
       "amount": {
@@ -624,7 +693,7 @@
   },
   "goalMovedToHistory": "Goal moved to History",
   "goalCompletedTitle": "Well done!",
-  "goalCompletedBody": "You saved the full {amount} for “{name}”. Great discipline!",
+  "goalCompletedBody": "You saved the full {amount} for \"{name}\". Great discipline!",
   "@goalCompletedBody": {
     "placeholders": {
       "amount": {
@@ -671,7 +740,7 @@
   "aboutData4": "Admins only see summary numbers, never your individual transactions.",
   "aboutContactTitle": "Contact",
   "aboutTeamTitle": "Development team",
-  "aboutTeamBody": "{team} · TechWiz 7 — Multi-Platform App Computing",
+  "aboutTeamBody": "{team} · TechWiz 7 · Multi-Platform App Computing",
   "@aboutTeamBody": {
     "placeholders": {
       "team": {
@@ -856,7 +925,7 @@
       }
     }
   },
-  "inboxGoalMilestone": "“{goal}” reached {percent}%! Keep going.",
+  "inboxGoalMilestone": "\"{goal}\" reached {percent}%! Keep going.",
   "@inboxGoalMilestone": {
     "placeholders": {
       "goal": {
@@ -867,7 +936,7 @@
       }
     }
   },
-  "inboxGoalCompleted": "You completed “{goal}”! 🎉",
+  "inboxGoalCompleted": "You completed \"{goal}\"!",
   "@inboxGoalCompleted": {
     "placeholders": {
       "goal": {
@@ -875,7 +944,7 @@
       }
     }
   },
-  "inboxSupportReplied": "Support replied to “{subject}”.",
+  "inboxSupportReplied": "Support replied to \"{subject}\".",
   "@inboxSupportReplied": {
     "placeholders": {
       "subject": {
@@ -928,19 +997,19 @@
       }
     }
   },
-  "categorySavingsNote": "“Savings” is created automatically when you contribute to a goal.",
+  "categorySavingsNote": "\"Savings\" is created automatically when you contribute to a goal.",
   "categoryAdd": "Add category",
   "categoryEdit": "Edit category",
   "categoryName": "Category name",
-  "categoryNameHelp": "2–30 characters, not the same as another category of this type",
-  "categoryNameLength": "Name must be 2–30 characters",
+  "categoryNameHelp": "2-30 characters, not the same as another category of this type",
+  "categoryNameLength": "Name must be 2-30 characters",
   "categoryNameExists": "This name already exists",
   "categoryType": "Type",
   "categoryTypeLocked": "This category already has transactions, so its type can't change.",
   "categoryIcon": "Icon",
   "categorySave": "Save category",
   "categorySaved": "Category saved",
-  "categoryDeleteTitle": "Delete “{name}”?",
+  "categoryDeleteTitle": "Delete \"{name}\"?",
   "@categoryDeleteTitle": {
     "placeholders": {
       "name": {
@@ -962,7 +1031,7 @@
   },
   "categoryDeleted": "Category deleted",
   "chatSubtitle": "Answers from your own data",
-  "chatHint": "Ask Penny about your money…",
+  "chatHint": "Ask Penny about your money...",
   "chatSend": "Send",
   "chatDisclaimer": "Educational guidance only, not professional financial advice.",
   "chatChipTop": "What did I spend most on?",
@@ -1078,7 +1147,7 @@
       }
     }
   },
-  "chatGoalProgress": "“{goal}”: {current} of {target} ({percent}%). {pace}",
+  "chatGoalProgress": "\"{goal}\": {current} of {target} ({percent}%). {pace}",
   "@chatGoalProgress": {
     "placeholders": {
       "goal": {

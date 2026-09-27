@@ -28,6 +28,7 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   static const String _allValue = '';
+  static const int _pageSize = 20;
 
   final _searchController = TextEditingController();
   late List<TransactionRecord> _transactions = [...(widget.initialTransactions ?? SampleData.transactions())];
@@ -35,6 +36,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String? _type;
   String? _categoryId;
   DateTimeRange? _dateRange = _currentMonthRange();
+  int _visibleCount = _pageSize;
 
   static DateTimeRange _currentMonthRange() {
     final DateTime today = DateTime.now();
@@ -55,9 +57,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
     super.dispose();
   }
 
+  // Any filter change starts again from the newest transactions.
+  void _changeFilter(VoidCallback change) {
+    setState(() {
+      change();
+      _visibleCount = _pageSize;
+    });
+  }
+
   void _clearFilters() {
     _searchController.clear();
-    setState(() {
+    _changeFilter(() {
       _query = '';
       _type = null;
       _categoryId = null;
@@ -149,7 +159,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       _type ?? _allValue,
     );
     if (picked == null) return;
-    setState(() => _type = picked == _allValue ? null : picked);
+    _changeFilter(() => _type = picked == _allValue ? null : picked);
   }
 
   Future<void> _pickCategory() async {
@@ -161,7 +171,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
     final String? picked = await _pickOption(l10n.txCategory, options, _categoryId ?? _allValue);
     if (picked == null) return;
-    setState(() => _categoryId = picked == _allValue ? null : picked);
+    _changeFilter(() => _categoryId = picked == _allValue ? null : picked);
   }
 
   Future<void> _pickDateRange() async {
@@ -173,7 +183,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       initialDateRange: _dateRange,
     );
     if (picked == null) return;
-    setState(() => _dateRange = picked);
+    _changeFilter(() => _dateRange = picked);
   }
 
   String _dayLabel(AppLocalizations l10n, DateTime day) {
@@ -198,7 +208,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       from: _dateRange?.start,
       to: _dateRange?.end,
     );
-    final List<DayGroup> groups = TransactionFilter.groupByDay(filtered);
+    final List<DayGroup> groups = TransactionFilter.firstGroups(TransactionFilter.groupByDay(filtered), _visibleCount);
+    final int hiddenCount = filtered.length - TransactionFilter.countTransactions(groups);
     final String typeLabel = switch (_type) {
       TransactionTypes.expense => l10n.filterExpense,
       TransactionTypes.income => l10n.filterIncome,
@@ -241,7 +252,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               child: TextField(
                 controller: _searchController,
-                onChanged: (value) => setState(() => _query = value),
+                onChanged: (value) => _changeFilter(() => _query = value),
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: l10n.historySearchHint,
@@ -255,7 +266,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           icon: const Icon(Icons.close),
                           onPressed: () {
                             _searchController.clear();
-                            setState(() => _query = '');
+                            _changeFilter(() => _query = '');
                           },
                         ),
                 ),
@@ -289,12 +300,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                      itemCount: groups.length,
-                      itemBuilder: (context, index) => _buildDayGroup(l10n, groups[index]),
+                      itemCount: hiddenCount > 0 ? groups.length + 1 : groups.length,
+                      itemBuilder: (context, index) {
+                        if (index < groups.length) return _buildDayGroup(l10n, groups[index]);
+                        return _buildShowMore(l10n, hiddenCount);
+                      },
                     ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildShowMore(AppLocalizations l10n, int hiddenCount) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: OutlinedButton.icon(
+        onPressed: () => setState(() => _visibleCount += _pageSize),
+        icon: const Icon(Icons.expand_more),
+        label: Text(l10n.historyShowMore(hiddenCount)),
       ),
     );
   }

@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../models/recurring_item.dart';
 import '../../models/savings_goal.dart';
 import '../../services/goal_service.dart';
+import '../../services/recurring_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
 import '../../utils/goal_calculator.dart';
+import '../../utils/recurring_calculator.dart';
 import '../../utils/validators.dart';
 import '../../widgets/labeled_text_field.dart';
 import 'goal_cards.dart';
 
 /// Create or edit a savings goal.
 /// Rules: a name, a target above 0, money already saved must be below the target,
-/// the target date must be after today. The monthly amount is optional and only used for the estimate.
+/// the target date must be after today. The monthly amount is optional: it gives the estimate and can be
+/// contributed automatically every month.
 class GoalFormScreen extends StatefulWidget {
   /// The goal being edited, null when creating.
   final SavingsGoal? initial;
@@ -21,7 +25,9 @@ class GoalFormScreen extends StatefulWidget {
   /// True when the edited goal already has contributions (the target cannot go below the money saved).
   final bool hasContributions;
 
-  const GoalFormScreen({super.key, this.initial, this.hasContributions = false});
+  final Future<RecurringItem?> Function(String itemId) loadRecurringItem;
+
+  const GoalFormScreen({super.key, this.initial, this.hasContributions = false, this.loadRecurringItem = RecurringService.load});
 
   @override
   State<GoalFormScreen> createState() => _GoalFormScreenState();
@@ -40,6 +46,10 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
 
   // Errors appear only after the first Save press.
   bool _hasTriedToSave = false;
+
+  // The goal's monthly auto contribution (recurring/{uid}/goal_{goalId}), null when there is none.
+  RecurringItem? _autoItem;
+  bool _isAutoContribute = false;
 
   bool get _isEditing {
     return widget.initial != null;
@@ -86,6 +96,22 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     final DateTime targetDate = DateTime.fromMillisecondsSinceEpoch(initial.targetDate);
     _targetDate = targetDate;
     _dateController.text = Formatters.fullDate(targetDate);
+    _loadAutoItem(initial.id);
+  }
+
+  Future<void> _loadAutoItem(String goalId) async {
+    final RecurringItem? item = await widget.loadRecurringItem(RecurringCalculator.goalItemId(goalId));
+    if (!mounted) return;
+    setState(() {
+      _autoItem = item;
+      _isAutoContribute = item?.isActive ?? false;
+    });
+  }
+
+  // Auto contribution only makes sense for a running goal with a monthly amount.
+  bool get _canAutoContribute {
+    final bool isGoalActive = widget.initial?.isActive ?? true;
+    return isGoalActive && _monthlyContribution > 0;
   }
 
   @override
@@ -196,10 +222,42 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
       createdAt: createdAt,
     );
     GoalService.saveGoal(goal);
+    _saveAutoContribution(goal, l10n);
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.goalSaved)));
     Navigator.of(context).pop(goal);
+  }
+
+  void _saveAutoContribution(SavingsGoal goal, AppLocalizations l10n) {
+    final bool wantsAuto = _isAutoContribute && _canAutoContribute;
+    final String description = l10n.recurringGoalName(goal.name);
+    final DateTime now = DateTime.now();
+
+    final RecurringItem? existing = _autoItem;
+    if (existing == null) {
+      if (wantsAuto) RecurringService.save(RecurringCalculator.newGoalItem(goal, description, now));
+      return;
+    }
+    final Map<String, Object?> fields = RecurringCalculator.goalItemUpdate(existing, goal, description, wantsAuto, now);
+    if (fields.isNotEmpty) RecurringService.update(existing.id, fields);
+  }
+
+  Widget _buildAutoContributeSwitch(AppLocalizations l10n) {
+    final String amount = Formatters.money(_monthlyContribution);
+    final RecurringItem? existing = _autoItem;
+    String hint = l10n.goalAutoContributeNewHint(amount, DateTime.now().day);
+    if (existing != null && existing.isActive) hint = l10n.goalAutoContributeHint(amount, existing.dayOfMonth);
+
+    return Card(
+      child: SwitchListTile(
+        value: _isAutoContribute,
+        onChanged: (value) => setState(() => _isAutoContribute = value),
+        secondary: const Icon(Icons.event_repeat, color: AppColors.primary),
+        title: Text(l10n.goalAutoContribute, style: const TextStyle(fontWeight: FontWeight.w700)),
+        subtitle: Text(hint),
+      ),
+    );
   }
 
   @override
@@ -279,6 +337,10 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
                 setState(() {});
               },
             ),
+            if (_canAutoContribute) ...[
+              const SizedBox(height: 12),
+              _buildAutoContributeSwitch(l10n),
+            ],
             const SizedBox(height: 16),
             _buildEstimate(l10n),
           ],

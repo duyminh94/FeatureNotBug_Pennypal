@@ -66,6 +66,7 @@ void main() {
           watchCategories: (uid) => Stream.value(<Category>[]),
           markRead: (uid, ids) {},
           markSupportNotified: (uid, queryId) => marked.add(queryId),
+          createDueRecurring: (uid) async {},
         ),
       ));
       await tester.pumpAndSettle();

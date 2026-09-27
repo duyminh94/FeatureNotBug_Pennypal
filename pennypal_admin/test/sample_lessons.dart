@@ -13,7 +13,7 @@ class SampleLessons {
         createdAt: daysAgo(1),
         titleEn: 'The 50/30/20 rule for students: how to split your money',
         titleVi: 'Quy tắc 50/30/20 cho sinh viên: chia tiền sao cho đủ?',
-        bodyEn: '''Every time you receive money — allowance, scholarship or part-time pay — split it into three parts before you spend anything. This stops the "broke by the middle of the month" feeling.
+        bodyEn: '''Every time you receive money (allowance, scholarship or part-time pay), split it into three parts before you spend anything. This stops the "broke by the middle of the month" feeling.
 
 50% for needs: food, transport, rent and textbooks. 30% for wants: coffee, movies and shopping. 20% for savings: put it into a goal or an emergency fund.
 
@@ -22,7 +22,7 @@ Example: you receive 5,000,000 VND a month. Needs get 2,500,000, wants get 1,500
 The numbers are not fixed. If your rent is high, 60/20/20 is fine. What matters is that savings are paid first, not whatever is left over.
 
 Try it: create a total budget for this month equal to 80% of the money you receive.''',
-        bodyVi: '''Mỗi khi nhận tiền — trợ cấp, học bổng hay lương làm thêm — hãy chia ngay thành 3 phần trước khi tiêu. Cách này giúp bạn không bị "hết tiền giữa tháng".
+        bodyVi: '''Mỗi khi nhận tiền (trợ cấp, học bổng hay lương làm thêm), hãy chia ngay thành 3 phần trước khi tiêu. Cách này giúp bạn không bị "hết tiền giữa tháng".
 
 50% cho nhu cầu thiết yếu: tiền ăn, đi lại, tiền nhà, giáo trình. 30% cho mong muốn: cà phê, xem phim, mua sắm. 20% cho tiết kiệm: góp vào mục tiêu hoặc quỹ dự phòng.
 
@@ -36,15 +36,15 @@ Thử ngay: tạo ngân sách tổng tháng này bằng 80% số tiền bạn nh
         id: 'lesson_save_10',
         topic: LearningTopics.saving,
         createdAt: daysAgo(2),
-        titleEn: 'Save 10% every time you get paid — a small habit with big results',
-        titleVi: 'Để dành 10% mỗi khi nhận tiền — thói quen nhỏ, kết quả lớn',
+        titleEn: 'Save 10% every time you get paid: a small habit with big results',
+        titleVi: 'Để dành 10% mỗi khi nhận tiền: thói quen nhỏ, kết quả lớn',
         bodyEn: '''You do not need a lot of money to start saving. You need a habit.
 
 Each time money comes in, move 10% into savings on the same day. If you get 3,000,000 VND, save 300,000 before buying anything else.
 
 Why the same day? Money that stays in your wallet gets spent. Moving it right away makes saving automatic.
 
-After one year, 300,000 VND a month becomes 3,600,000 VND — enough for a new phone or a short trip.
+After one year, 300,000 VND a month becomes 3,600,000 VND, enough for a new phone or a short trip.
 
 Give your savings a name. "New laptop" is easier to protect than "savings". Create a goal in PennyPal and add a contribution each time you get paid.''',
         bodyVi: '''Không cần nhiều tiền mới bắt đầu tiết kiệm được. Bạn chỉ cần một thói quen.
@@ -53,7 +53,7 @@ Mỗi lần có tiền vào, chuyển ngay 10% sang tiết kiệm trong ngày. N
 
 Vì sao phải làm ngay trong ngày? Tiền nằm trong ví sẽ bị tiêu. Chuyển đi ngay thì việc tiết kiệm trở thành tự động.
 
-Sau một năm, 300.000 đ mỗi tháng thành 3.600.000 đ — đủ cho một chiếc điện thoại mới hoặc một chuyến đi ngắn.
+Sau một năm, 300.000 đ mỗi tháng thành 3.600.000 đ, đủ cho một chiếc điện thoại mới hoặc một chuyến đi ngắn.
 
 Hãy đặt tên cho khoản tiết kiệm. "Laptop mới" dễ giữ hơn "tiền tiết kiệm". Tạo một mục tiêu trong PennyPal và góp tiền mỗi lần nhận lương.''',
       ),
@@ -114,14 +114,14 @@ Cuối mỗi tháng, so thu với chi. Nếu chi nhiều hơn, hãy xem lại c�
 
 Most impulse purchases feel important for a few minutes and much less the next day. If you still want it after 24 hours and it fits your budget, buy it without guilt.
 
-Other simple tricks: remove saved cards from shopping apps, turn off sale notifications, and check the price per use — a 300,000 VND jacket you wear 100 times is cheaper than a 100,000 VND shirt you wear twice.
+Other simple tricks: remove saved cards from shopping apps, turn off sale notifications, and check the price per use. A 300,000 VND jacket you wear 100 times is cheaper than a 100,000 VND shirt you wear twice.
 
 Snap a photo of receipts in PennyPal. Seeing where your money went is the first step to spending it better.''',
         bodyVi: '''Thấy món đồ muốn mua trên mạng? Hãy đợi 24 giờ rồi mới quyết định.
 
 Phần lớn món mua bốc đồng chỉ có vẻ quan trọng trong vài phút và bớt hấp dẫn hẳn vào hôm sau. Nếu sau 24 giờ vẫn muốn và vẫn nằm trong ngân sách, cứ mua mà không cần áy náy.
 
-Vài mẹo đơn giản khác: xoá thẻ đã lưu khỏi app mua sắm, tắt thông báo khuyến mãi, và tính giá theo số lần dùng — áo khoác 300.000 đ mặc 100 lần rẻ hơn áo phông 100.000 đ chỉ mặc 2 lần.
+Vài mẹo đơn giản khác: xoá thẻ đã lưu khỏi app mua sắm, tắt thông báo khuyến mãi, và tính giá theo số lần dùng. Áo khoác 300.000 đ mặc 100 lần rẻ hơn áo phông 100.000 đ chỉ mặc 2 lần.
 
 Chụp hoá đơn bằng PennyPal. Thấy rõ tiền đã đi đâu là bước đầu tiên để tiêu tiền khôn ngoan hơn.''',
       ),

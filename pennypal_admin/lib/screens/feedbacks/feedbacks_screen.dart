@@ -6,7 +6,9 @@ import '../../models/feedback_entry.dart';
 import '../../services/feedback_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/overview_calculator.dart';
+import '../../utils/pager.dart';
 import '../../utils/support_manager.dart';
+import '../../widgets/page_controls.dart';
 import '../../widgets/star_rating.dart';
 
 /// Feedbacks page: loads every rating students gave the app from Firebase.
@@ -76,6 +78,7 @@ class FeedbackListView extends StatefulWidget {
 
 class _FeedbackListViewState extends State<FeedbackListView> {
   RatingFilter _filter = RatingFilter.all;
+  int _pageIndex = 0;
 
   /// Chip text of each star filter; 1 and 2 stars are grouped as the lowest.
   String _filterLabel(AppLocalizations l10n, RatingFilter filter) {
@@ -106,13 +109,15 @@ class _FeedbackListViewState extends State<FeedbackListView> {
         onSelected: (_) {
           setState(() {
             _filter = filter;
+            _pageIndex = 0;
           });
         },
       ));
     }
 
+    final int pageIndex = Pager.safePage(_pageIndex, shown.length);
     final List<Widget> feedbackCards = [];
-    for (final FeedbackEntry feedback in shown) {
+    for (final FeedbackEntry feedback in Pager.page(shown, pageIndex)) {
       feedbackCards.add(_FeedbackCard(feedback: feedback, languageCode: languageCode));
     }
 
@@ -134,6 +139,16 @@ class _FeedbackListViewState extends State<FeedbackListView> {
                 child: Text(l10n.feedbackEmptyFilter, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
               ),
             ...feedbackCards,
+            if (Pager.pageCount(shown.length) > 1)
+              PageControls(
+                pageIndex: pageIndex,
+                total: shown.length,
+                onPageChanged: (newPage) {
+                  setState(() {
+                    _pageIndex = newPage;
+                  });
+                },
+              ),
           ],
         ),
       ),
@@ -159,7 +174,11 @@ class _FeedbackListViewState extends State<FeedbackListView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                StarRating(rating: average, size: 22),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: StarRating(rating: average, size: 22),
+                ),
                 const SizedBox(height: 4),
                 Text(l10n.feedbackFrom(widget.feedbacks.length), style: const TextStyle(color: AppColors.textSecondary)),
               ],

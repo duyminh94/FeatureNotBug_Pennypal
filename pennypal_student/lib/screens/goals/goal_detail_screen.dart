@@ -498,7 +498,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
       onTap = () => _openContributionSheet(contribution: contribution);
     }
 
-    String title = l10n.goalContribute;
+    String title = l10n.goalContributionTitle;
     if (contribution.description.isNotEmpty) title = contribution.description;
 
     return ListTile(
