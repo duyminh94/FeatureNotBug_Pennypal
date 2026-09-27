@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../models/receipt_scan_result.dart';
@@ -416,7 +416,9 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
               decoration: InputDecoration(
                 hintText: isAmountMissing ? l10n.scanEnterAmount : '0',
                 hintStyle: const TextStyle(fontFamily: AppFonts.heading, fontSize: 38, fontWeight: FontWeight.w800, color: AppColors.border),
-                suffixText: '₫',
+                prefixText: Formatters.isUsd ? '\$ ' : null,
+                prefixStyle: TextStyle(fontFamily: AppFonts.heading, fontSize: 30, fontWeight: FontWeight.w800, color: amountColor),
+                suffixText: Formatters.isUsd ? null : '₫',
                 suffixStyle: TextStyle(fontFamily: AppFonts.heading, fontSize: 30, fontWeight: FontWeight.w800, color: amountColor),
                 filled: false,
                 border: InputBorder.none,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/savings_goal.dart';
 import '../../services/goal_service.dart';
@@ -410,7 +410,8 @@ class _AmountField extends StatelessWidget {
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: AppColors.textMuted, size: 22),
             suffixIcon: isReadOnly ? const Icon(Icons.lock_outline, color: AppColors.textMuted, size: 20) : null,
-            suffixText: '₫',
+            prefixText: Formatters.isUsd ? '\$ ' : null,
+            suffixText: Formatters.isUsd ? null : '₫',
             hintText: '0',
             helperText: helperText,
             helperMaxLines: 2,

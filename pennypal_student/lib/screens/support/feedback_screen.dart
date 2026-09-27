@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
+import '../../models/feedback_entry.dart';
 import '../../models/user_profile.dart';
 import '../../services/feedback_service.dart';
 import '../../utils/app_theme.dart';
@@ -22,7 +24,6 @@ class FeedbackScreen extends StatefulWidget {
 class _FeedbackScreenState extends State<FeedbackScreen> {
   static const int _maxRating = 5;
 
-  final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController = TextEditingController(text: widget.profile?.fullName ?? '');
   late final TextEditingController _emailController = TextEditingController(text: widget.profile?.email ?? '');
   final TextEditingController _commentsController = TextEditingController();

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/app_settings.dart';
 import '../../models/support_query.dart';
+import '../../models/user_profile.dart';
 import '../../services/app_settings_service.dart';
 import '../../services/support_service.dart';
 import '../../utils/app_theme.dart';
@@ -14,7 +15,9 @@ import 'support_widgets.dart';
 
 /// The student's help requests from Firebase; the admin's reply shows up here live.
 class SupportScreen extends StatefulWidget {
-  const SupportScreen({super.key});
+  final UserProfile? profile;
+
+  const SupportScreen({super.key, this.profile});
 
   @override
   State<SupportScreen> createState() => _SupportScreenState();
@@ -177,33 +180,33 @@ class _QueryCard extends StatelessWidget {
                 ],
               ),
               if (isOpened) ...[
-                const SizedBox(height: 10),
-                Text(query.message, style: const TextStyle(fontSize: 15)),
-              ],
-              if (response != null && response.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: AppColors.mintSoft, borderRadius: BorderRadius.circular(16)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.support_outlined, size: 18, color: AppColors.primary),
-                          const SizedBox(width: 6),
-                          Text(
-                            l10n.supportReplyFrom(_shortDate(query.respondedAt)),
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(response, style: const TextStyle(fontSize: 15)),
-                    ],
+                Text(query.message, style: const TextStyle(fontSize: 15, color: AppColors.textPrimary)),
+                if (response != null && response.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: AppColors.fill, borderRadius: BorderRadius.circular(12)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.support_outlined, size: 18, color: AppColors.primary),
+                            const SizedBox(width: 6),
+                            Text(
+                              l10n.supportReplyFrom(_shortDate(query.respondedAt)),
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(response, style: const TextStyle(fontSize: 14)),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ],
             ],
           ),

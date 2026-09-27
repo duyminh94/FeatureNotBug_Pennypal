@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/budget.dart';
 import '../../models/transaction_record.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/budget_calculator.dart';
 import '../../utils/constants.dart';
-import '../../utils/sample_data.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/month_picker.dart';
 import 'budget_cards.dart';
@@ -52,12 +51,12 @@ class _BudgetScreenState extends State<BudgetScreen> {
   /// Own copy of the budget list, so updating the screen right after saving does not change MainShell's list.
   List<Budget> _copyBudgets() {
     final List<Budget>? budgets = widget.initialBudgets;
-    if (budgets == null) return List.of(SampleData.budgets());
+    if (budgets == null) return [];
     return List.of(budgets);
   }
 
   List<TransactionRecord> get _transactions {
-    return widget.transactions ?? SampleData.transactions();
+    return widget.transactions ?? const [];
   }
 
   String get _monthKey {

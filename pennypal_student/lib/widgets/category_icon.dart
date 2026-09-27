@@ -57,7 +57,7 @@ class CategoryIcon extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: backgroundColor ?? mainColor.withOpacity(0.12),
+        color: backgroundColor ?? mainColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(size * 0.32),
       ),
       child: Icon(categoryIconData(iconName), color: mainColor, size: size * 0.55),

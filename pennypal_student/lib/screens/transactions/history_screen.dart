@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/transaction_record.dart';
@@ -8,7 +8,6 @@ import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
-import '../../utils/sample_data.dart';
 import '../../utils/transaction_filter.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
@@ -30,7 +29,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   static const String _allValue = '';
 
   final _searchController = TextEditingController();
-  late List<TransactionRecord> _transactions = [...(widget.initialTransactions ?? SampleData.transactions())];
+  late List<TransactionRecord> _transactions = [...(widget.initialTransactions ?? const [])];
   String _query = '';
   String? _type;
   String? _categoryId;
@@ -45,7 +44,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void didUpdateWidget(covariant HistoryScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialTransactions != oldWidget.initialTransactions) {
-      _transactions = [...(widget.initialTransactions ?? SampleData.transactions())];
+      _transactions = [...(widget.initialTransactions ?? const [])];
     }
   }
 

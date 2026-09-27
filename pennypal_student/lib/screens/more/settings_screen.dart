@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/user_profile.dart';
 import '../../services/auth_service.dart';
@@ -8,6 +8,7 @@ import '../../services/user_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/constants.dart';
+import '../../utils/formatters.dart';
 import '../../utils/validators.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/labeled_text_field.dart';
@@ -75,7 +76,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(isSaved ? l10n.settingsSaved : l10n.errorUnknown)));
-    if (isSaved) Navigator.of(context).pop(saved);
+    if (isSaved) {
+      Formatters.setCurrency(saved.currency);
+      Navigator.of(context).pop(saved);
+    }
   }
 
   Future<void> _logout() async {
@@ -142,7 +146,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 16),
             _Label(icon: Icons.school_outlined, text: l10n.settingsStudentStatus),
             DropdownButtonFormField<String>(
-              value: _studentStatus ?? _noStatus,
+              initialValue: _studentStatus ?? _noStatus,
               onChanged: (value) => setState(() => _studentStatus = value == _noStatus ? null : value),
               items: [
                 DropdownMenuItem(value: _noStatus, child: Text(l10n.settingsNoStatus)),

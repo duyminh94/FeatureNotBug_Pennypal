@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/budget.dart';
@@ -50,7 +50,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
   bool _hasError = false;
   StreamSubscription<List<TransactionRecord>>? _transactionSubscription;
   StreamSubscription<List<Budget>>? _budgetSubscription;
-
   DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
   // Filter by transaction type: false = spending by category, true = income by source.
   bool _showIncome = false;
