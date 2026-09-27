@@ -25,6 +25,17 @@ class TransactionService {
     return _listRef(uid).onValue.map((event) => listFromValue(event.snapshot.value));
   }
 
+  static Stream<List<TransactionRecord>> watchMonth(String uid, DateTime month) {
+    final int startMillis = DateTime(month.year, month.month, 1).millisecondsSinceEpoch;
+    final int endMillis = DateTime(month.year, month.month + 1, 0, 23, 59, 59, 999).millisecondsSinceEpoch;
+    return _listRef(uid)
+        .orderByChild(DbFields.date)
+        .startAt(startMillis)
+        .endAt(endMillis)
+        .onValue
+        .map((event) => listFromValue(event.snapshot.value));
+  }
+
   static String newId() {
     try {
       final String? uid = _currentUid;

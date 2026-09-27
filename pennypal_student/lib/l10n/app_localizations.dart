@@ -1118,17 +1118,35 @@ abstract class AppLocalizations {
   /// **'All categories'**
   String get filterAllCategories;
 
-  /// No description provided for @filterAllDates.
-  ///
-  /// In en, this message translates to:
-  /// **'All dates'**
-  String get filterAllDates;
-
   /// No description provided for @historyEmpty.
   ///
   /// In en, this message translates to:
   /// **'No transactions match your filters'**
   String get historyEmpty;
+
+  /// No description provided for @historyMonthEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions in {month}'**
+  String historyMonthEmpty(String month);
+
+  /// No description provided for @historyTxCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction} other{{count} transactions}}'**
+  String historyTxCount(int count);
+
+  /// No description provided for @historyAllDays.
+  ///
+  /// In en, this message translates to:
+  /// **'All days'**
+  String get historyAllDays;
+
+  /// No description provided for @historyThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get historyThisMonth;
 
   /// No description provided for @historyDeletedNamed.
   ///

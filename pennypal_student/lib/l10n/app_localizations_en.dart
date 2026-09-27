@@ -546,10 +546,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterAllCategories => 'All categories';
 
   @override
-  String get filterAllDates => 'All dates';
+  String get historyEmpty => 'No transactions match your filters';
 
   @override
-  String get historyEmpty => 'No transactions match your filters';
+  String historyMonthEmpty(String month) {
+    return 'No transactions in $month';
+  }
+
+  @override
+  String historyTxCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions',
+      one: '1 transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get historyAllDays => 'All days';
+
+  @override
+  String get historyThisMonth => 'This month';
 
   @override
   String historyDeletedNamed(String name) {

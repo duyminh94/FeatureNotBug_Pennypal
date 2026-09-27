@@ -543,10 +543,23 @@ class AppLocalizationsVi extends AppLocalizations {
   String get filterAllCategories => 'Tất cả danh mục';
 
   @override
-  String get filterAllDates => 'Mọi ngày';
+  String get historyEmpty => 'Không có giao dịch phù hợp';
 
   @override
-  String get historyEmpty => 'Không có giao dịch phù hợp';
+  String historyMonthEmpty(String month) {
+    return 'Không có giao dịch nào trong $month';
+  }
+
+  @override
+  String historyTxCount(int count) {
+    return '$count giao dịch';
+  }
+
+  @override
+  String get historyAllDays => 'Tất cả các ngày';
+
+  @override
+  String get historyThisMonth => 'Tháng này';
 
   @override
   String historyDeletedNamed(String name) {
