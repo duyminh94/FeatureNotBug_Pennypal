@@ -40,6 +40,19 @@ class SupportService {
     }
   }
 
+  /// BR-65: the student was told about the admin's reply, so it is not announced again.
+  /// Only studentNotified changes; Security Rules do not let the student touch the reply itself.
+  static void markNotified(String uid, String queryId) {
+    try {
+      final DatabaseReference queryRef = FirebaseDatabase.instance.ref('${DbNodes.supportQueries}/$uid/$queryId');
+      queryRef.update({DbFields.studentNotified: true}).catchError((Object error) {
+        debugPrint('SupportService.markNotified failed: $error');
+      });
+    } catch (e) {
+      debugPrint('SupportService.markNotified failed: $e');
+    }
+  }
+
   /// Sends a new request (status "open", no reply yet) and returns it with its new id.
   /// Returns null when nobody is signed in.
   static SupportQuery? send(String subject, String message) {

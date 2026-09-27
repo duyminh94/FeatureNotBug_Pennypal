@@ -48,6 +48,17 @@ class NotificationBuilder {
     return notifications;
   }
 
+  /// BR-65: help requests the admin answered and the student was not told about yet (studentNotified false).
+  /// After the phone notification is shown the app sets studentNotified to true, so each reply is announced once.
+  static List<SupportQuery> supportRepliesToAnnounce(List<SupportQuery> supportQueries) {
+    final List<SupportQuery> result = [];
+    for (final SupportQuery query in supportQueries) {
+      final String response = query.adminResponse ?? '';
+      if (query.isResolved && response.isNotEmpty && !query.studentNotified) result.add(query);
+    }
+    return result;
+  }
+
   /// One alert per budget, only for its current level:
   /// spent >= 100% of the limit -> exceeded, spent >= alert threshold -> warning, otherwise nothing.
   static AppNotification? _budgetAlert(Budget budget, List<TransactionRecord> transactions, Set<String> readIds) {

@@ -40,6 +40,7 @@ class MainShell extends StatefulWidget {
   final Stream<List<SupportQuery>> Function(String uid) watchSupport;
   final Stream<List<Category>> Function(String uid) watchCategories;
   final void Function(String uid, List<String> ids) markRead;
+  final void Function(String uid, String queryId) markSupportNotified;
 
   const MainShell({
     super.key,
@@ -51,6 +52,7 @@ class MainShell extends StatefulWidget {
     this.watchSupport = SupportService.watch,
     this.watchCategories = CategoryService.watch,
     this.markRead = NotificationService.markRead,
+    this.markSupportNotified = SupportService.markNotified,
   });
 
   @override
@@ -68,6 +70,8 @@ class _MainShellState extends State<MainShell> {
   StreamSubscription<List<Category>>? _categorySubscription;
   // Notification ids already on screen. Null until the first data arrives.
   Set<String>? _knownNotificationIds;
+  // Help replies announced in this session, so one is not shown twice while studentNotified is being saved.
+  final Set<String> _announcedSupportIds = {};
 
   @override
   void initState() {
@@ -187,6 +191,8 @@ class _MainShellState extends State<MainShell> {
 
     final AppLocalizations l10n = AppLocalizations.of(context)!;
     for (final AppNotification notification in notifications) {
+      // Help replies are announced by _announceSupportReplies, using studentNotified in the database.
+      if (notification.type == NotificationTypes.supportReplied) continue;
       final bool isNew = !knownIds.contains(notification.id);
       if (isNew && !notification.isRead) {
         PushNotificationService.show(
@@ -195,6 +201,30 @@ class _MainShellState extends State<MainShell> {
           NotificationDisplay.message(l10n, notification),
         );
       }
+    }
+  }
+
+  /// BR-65: each admin reply gives one phone notification, then studentNotified is saved as true,
+  /// so opening the app again does not announce it again. The reply always stays in the in-app list.
+  void _announceSupportReplies(List<AppNotification> notifications, List<SupportQuery> supportQueries) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    for (final SupportQuery query in NotificationBuilder.supportRepliesToAnnounce(supportQueries)) {
+      if (_announcedSupportIds.contains(query.id)) continue;
+      _announcedSupportIds.add(query.id);
+
+      final String notificationId = 'support_${query.id}';
+      for (final AppNotification notification in notifications) {
+        final bool shouldShow = notification.id == notificationId && !notification.isRead && _profile.notificationsEnabled;
+        if (shouldShow) {
+          PushNotificationService.show(
+            notification.id,
+            NotificationDisplay.title(l10n, notification),
+            NotificationDisplay.message(l10n, notification),
+          );
+        }
+      }
+      // Saved even when alerts are off, so turning them on later does not bring back old replies.
+      widget.markSupportNotified(widget.profile.uid, query.id);
     }
   }
 
@@ -213,6 +243,7 @@ class _MainShellState extends State<MainShell> {
       readIds: readIds,
     );
     _pushNewNotifications(notifications);
+    _announceSupportReplies(notifications, supportQueries);
     // The student can turn alerts off in Settings: the list stays, only the badge is hidden.
     int unreadCount = 0;
     if (_profile.notificationsEnabled) unreadCount = NotificationDisplay.unreadCount(notifications);
