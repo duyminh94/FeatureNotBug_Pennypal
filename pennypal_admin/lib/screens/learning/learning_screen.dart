@@ -73,24 +73,17 @@ class _LearningScreenState extends State<LearningScreen> {
     }
   }
 
-  /// Opens the form for a new lesson (no [lesson]) or an existing one, then saves the result.
-  /// A new lesson gets its id here so the form does not need to know about Firebase.
+  /// Opens the form for a new lesson (no [lesson]) or an existing one.
+  /// The form saves by itself and returns true only when the lesson is in Firebase.
   Future<void> _openForm({LearningContent? lesson}) async {
     final l10n = AppLocalizations.of(context)!;
     final String lessonId = lesson?.id ?? LearningService.newId();
-    final LearningContent? edited = await Navigator.of(context).push<LearningContent>(
+    final bool? isSaved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (context) => LessonFormScreen(lessonId: lessonId, initial: lesson)),
     );
-    if (edited == null || !mounted) return;
+    if (isSaved != true || !mounted) return;
 
-    final bool isSaved = await LearningService.save(edited);
-    if (!mounted) return;
-
-    if (isSaved) {
-      _showMessage(l10n.learningSaved);
-    } else {
-      _showMessage(l10n.learningSaveFailed);
-    }
+    _showMessage(l10n.learningSaved);
   }
 
   /// Deletes a lesson after the admin confirms; students lose it right away.

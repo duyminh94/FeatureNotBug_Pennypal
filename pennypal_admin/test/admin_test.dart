@@ -229,5 +229,32 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(LoginScreen), findsOneWidget);
     });
+
+    testWidgets('a phone turned sideways (800x360) uses the drawer, does not overflow and can log out', (tester) async {
+      useScreen(tester, const Size(800, 360));
+      await tester.pumpWidget(buildApp(shell()));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(NavigationRail), findsNothing);
+
+      await tester.tap(find.byTooltip('Open navigation menu'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Log out'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Log out'));
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOneWidget);
+    });
+
+    testWidgets('a wide but not very tall window (1280x700) still uses the rail', (tester) async {
+      useScreen(tester, const Size(1280, 700));
+      await tester.pumpWidget(buildApp(shell()));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(NavigationRail), findsOneWidget);
+    });
   });
 }

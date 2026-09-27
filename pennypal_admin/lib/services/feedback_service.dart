@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/feedback_entry.dart';
 
@@ -15,8 +16,11 @@ class FeedbackService {
 
     for (final key in value.keys) {
       final feedbackValue = value[key];
-      if (feedbackValue is Map) {
+      if (feedbackValue is! Map) continue;
+      try {
         feedbacks.add(FeedbackEntry.fromMap(key.toString(), feedbackValue));
+      } catch (e) {
+        debugPrint('FeedbackService skipped feedback $key: $e');
       }
     }
     return feedbacks;

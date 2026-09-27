@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/app_settings.dart';
 import '../models/transaction_record.dart';
@@ -37,7 +38,13 @@ class AdminDataService {
       final List<TransactionRecord> transactions = [];
       for (final id in userTransactions.keys) {
         final item = userTransactions[id];
-        if (item is Map) transactions.add(TransactionRecord.fromMap(id.toString(), item));
+        if (item is! Map) continue;
+        // One record with a wrong type (e.g. amount "abc") is skipped so the whole Overview still loads.
+        try {
+          transactions.add(TransactionRecord.fromMap(id.toString(), item));
+        } catch (e) {
+          debugPrint('AdminDataService skipped transaction $uid/$id: $e');
+        }
       }
       result[uid.toString()] = transactions;
     }
@@ -57,23 +64,27 @@ class AdminDataService {
   }
 
   /// Reads users, transactions, goals, help requests, feedback, lessons and settings once.
+  /// All reads start together (Future.wait), so the wait is the slowest read, not the 7 reads added up.
   /// Throws when a read fails, so the screen can show "Try again".
   static Future<AdminData> load() async {
-    final Object? users = await _read(UserService.node);
-    final Object? transactions = await _read(transactionsNode);
-    final Object? goals = await _read(goalsNode);
-    final Object? support = await _read(SupportService.node);
-    final Object? feedbacks = await _read(FeedbackService.node);
-    final Object? lessons = await _read(LearningService.node);
-    final AppSettings settings = await SettingsService.load() ?? AppSettings();
+    final Future<AppSettings?> settingsFuture = SettingsService.load();
+    final List<Object?> values = await Future.wait([
+      _read(UserService.node),
+      _read(transactionsNode),
+      _read(goalsNode),
+      _read(SupportService.node),
+      _read(FeedbackService.node),
+      _read(LearningService.node),
+    ]);
+    final AppSettings settings = await settingsFuture ?? AppSettings();
 
     return AdminData(
-      users: UserService.listFromValue(users),
-      transactionsByUser: transactionsByUserFromValue(transactions),
-      supportByUser: SupportService.byUserFromValue(support),
-      goalCountByUser: goalCountByUserFromValue(goals),
-      feedbacks: FeedbackService.listFromValue(feedbacks),
-      lessons: LearningService.listFromValue(lessons),
+      users: UserService.listFromValue(values[0]),
+      transactionsByUser: transactionsByUserFromValue(values[1]),
+      goalCountByUser: goalCountByUserFromValue(values[2]),
+      supportByUser: SupportService.byUserFromValue(values[3]),
+      feedbacks: FeedbackService.listFromValue(values[4]),
+      lessons: LearningService.listFromValue(values[5]),
       settings: settings,
     );
   }
