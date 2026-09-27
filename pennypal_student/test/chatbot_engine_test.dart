@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:pennypal_student/models/transaction_record.dart';
 import 'package:pennypal_student/utils/chatbot_engine.dart';
 import 'package:pennypal_student/utils/constants.dart';

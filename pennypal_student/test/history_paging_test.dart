@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pennypal_student/models/transaction_record.dart';
 import 'package:pennypal_student/screens/transactions/history_screen.dart';
@@ -7,13 +7,14 @@ import 'package:pennypal_student/utils/app_theme.dart';
 import 'package:pennypal_student/utils/constants.dart';
 import 'package:pennypal_student/utils/transaction_filter.dart';
 
-// 3 expenses a day, day 0 is today, day 11 is 11 days ago: 36 transactions.
+final DateTime testMonth = DateTime(2026, 3);
+
+// 3 expenses a day inside testMonth, day 0 is 28/03, day 11 is 17/03: 36 transactions.
 List<TransactionRecord> threePerDay(int days) {
-  final DateTime today = DateTime.now();
   final List<TransactionRecord> transactions = [];
   for (int day = 0; day < days; day++) {
     for (int i = 1; i <= 3; i++) {
-      final DateTime date = DateTime(today.year, today.month, today.day - day, 10 + i);
+      final DateTime date = DateTime(testMonth.year, testMonth.month, 28 - day, 10 + i);
       transactions.add(TransactionRecord(
         id: 'd$day-$i',
         type: TransactionTypes.expense,
@@ -58,14 +59,8 @@ void main() {
       locale: const Locale('en'),
       supportedLocales: const [Locale('en'), Locale('vi')],
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: HistoryScreen(initialTransactions: threePerDay(12)),
+      home: HistoryScreen(initialTransactions: threePerDay(12), initialMonth: testMonth),
     ));
-    await tester.pumpAndSettle();
-
-    // The screen starts on this month only; a search with no result shows "Clear filters", which also removes the dates.
-    await tester.enterText(find.byType(TextField), 'nothing matches');
-    await tester.pump();
-    await tester.tap(find.text('Clear filters'));
     await tester.pumpAndSettle();
 
     expect(find.text('Day6-3'), findsOneWidget);

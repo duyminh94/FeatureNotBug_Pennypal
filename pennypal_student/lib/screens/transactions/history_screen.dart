@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/transaction_record.dart';
 import '../../services/transaction_service.dart';
@@ -8,19 +8,22 @@ import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
-import '../../utils/sample_data.dart';
 import '../../utils/transaction_filter.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/month_picker.dart';
 import '../../widgets/transaction_tile.dart';
 import 'transaction_detail_screen.dart';
 import 'transaction_form_screen.dart';
 
-/// S06 Transaction history: search, filters, days with totals, swipe to delete with undo.
+/// S06 Transaction history: month-scoped navigation, monthly financial summary,
+/// direct buttons for Income / Expense / All types, search, category & day filters,
+/// day-grouped transactions, swipe to delete with undo.
 class HistoryScreen extends StatefulWidget {
   final List<TransactionRecord>? initialTransactions;
+  final DateTime? initialMonth;
 
-  const HistoryScreen({super.key, this.initialTransactions});
+  const HistoryScreen({super.key, this.initialTransactions, this.initialMonth});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -30,24 +33,47 @@ class _HistoryScreenState extends State<HistoryScreen> {
   static const String _allValue = '';
   static const int _pageSize = 20;
 
-  final _searchController = TextEditingController();
-  late List<TransactionRecord> _transactions = [...(widget.initialTransactions ?? SampleData.transactions())];
+  final TextEditingController _searchController = TextEditingController();
+  late List<TransactionRecord> _transactions = [...(widget.initialTransactions ?? const [])];
+  late DateTime _selectedMonth = widget.initialMonth ?? DateTime(DateTime.now().year, DateTime.now().month);
+  DateTime? _selectedDay;
   String _query = '';
   String? _type;
   String? _categoryId;
-  DateTimeRange? _dateRange = _currentMonthRange();
   int _visibleCount = _pageSize;
 
-  static DateTimeRange _currentMonthRange() {
-    final DateTime today = DateTime.now();
-    return DateTimeRange(start: DateTime(today.year, today.month, 1), end: DateTime(today.year, today.month, today.day));
+  bool get _isCurrentMonth {
+    final DateTime now = DateTime.now();
+    return _selectedMonth.year == now.year && _selectedMonth.month == now.month;
   }
+
+  bool get _hasActiveFilters =>
+      _query.isNotEmpty || _type != null || _categoryId != null || _selectedDay != null;
+
+  /// All transactions in the currently selected month.
+  List<TransactionRecord> get _monthTransactions {
+    return TransactionFilter.forMonth(_transactions, _selectedMonth);
+  }
+
+  double get _monthIncome {
+    return _monthTransactions
+        .where((t) => t.isIncome)
+        .fold(0.0, (sum, t) => sum + t.amount);
+  }
+
+  double get _monthExpense {
+    return _monthTransactions
+        .where((t) => !t.isIncome)
+        .fold(0.0, (sum, t) => sum + t.amount);
+  }
+
+  double get _monthNet => _monthIncome - _monthExpense;
 
   @override
   void didUpdateWidget(covariant HistoryScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialTransactions != oldWidget.initialTransactions) {
-      _transactions = [...(widget.initialTransactions ?? SampleData.transactions())];
+      _transactions = [...(widget.initialTransactions ?? const [])];
     }
   }
 
@@ -57,7 +83,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     super.dispose();
   }
 
-  // Any filter change starts again from the newest transactions.
+  // Any filter or month change starts again from the newest transactions.
   void _changeFilter(VoidCallback change) {
     setState(() {
       change();
@@ -71,7 +97,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
       _query = '';
       _type = null;
       _categoryId = null;
-      _dateRange = null;
+      _selectedDay = null;
+    });
+  }
+
+  void _onMonthChanged(DateTime newMonth) {
+    _changeFilter(() {
+      _selectedMonth = DateTime(newMonth.year, newMonth.month);
+      _selectedDay = null;
     });
   }
 
@@ -81,7 +114,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (index < 0) return;
     setState(() => _transactions.removeAt(index));
 
-    final String name = transaction.description.isEmpty ? CategoryDisplay.name(l10n, transaction.categoryId) : transaction.description;
+    final String name = transaction.description.isEmpty
+        ? CategoryDisplay.name(l10n, transaction.categoryId)
+        : transaction.description;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
@@ -101,7 +136,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<bool> _confirmDelete(TransactionRecord transaction) {
     final l10n = AppLocalizations.of(context)!;
     final bool isIncome = transaction.type == TransactionTypes.income;
-    final String name = transaction.description.isEmpty ? CategoryDisplay.name(l10n, transaction.categoryId) : transaction.description;
+    final String name = transaction.description.isEmpty
+        ? CategoryDisplay.name(l10n, transaction.categoryId)
+        : transaction.description;
     return showConfirmDialog(
       context,
       title: l10n.txDeleteTitle,
@@ -151,17 +188,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Future<void> _pickType() async {
-    final l10n = AppLocalizations.of(context)!;
-    final String? picked = await _pickOption(
-      l10n.detailType,
-      {_allValue: l10n.filterAllTypes, TransactionTypes.expense: l10n.filterExpense, TransactionTypes.income: l10n.filterIncome},
-      _type ?? _allValue,
-    );
-    if (picked == null) return;
-    _changeFilter(() => _type = picked == _allValue ? null : picked);
-  }
-
   Future<void> _pickCategory() async {
     final l10n = AppLocalizations.of(context)!;
     final List<String> categoryIds = [...CategoryKeys.selectableExpense, CategoryKeys.savings, ...CategoryKeys.income];
@@ -174,16 +200,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
     _changeFilter(() => _categoryId = picked == _allValue ? null : picked);
   }
 
-  Future<void> _pickDateRange() async {
-    final DateTime today = DateTime.now();
-    final DateTimeRange? picked = await showDateRangePicker(
+  Future<void> _pickDay() async {
+    final DateTime start = TransactionFilter.monthStart(_selectedMonth);
+    final DateTime end = TransactionFilter.monthEnd(_selectedMonth);
+    final DateTime now = DateTime.now();
+    DateTime initial = _selectedDay ?? (_isCurrentMonth ? now : start);
+    if (initial.isBefore(start)) initial = start;
+    if (initial.isAfter(end)) initial = end;
+
+    final DateTime? picked = await showDatePicker(
       context: context,
-      firstDate: DateTime(today.year - 5),
-      lastDate: today,
-      initialDateRange: _dateRange,
+      initialDate: initial,
+      firstDate: start,
+      lastDate: end,
     );
     if (picked == null) return;
-    _changeFilter(() => _dateRange = picked);
+    _changeFilter(() => _selectedDay = picked);
   }
 
   String _dayLabel(AppLocalizations l10n, DateTime day) {
@@ -200,56 +232,55 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final String languageCode = Localizations.localeOf(context).languageCode;
+
+    final DateTime start = _selectedDay ?? TransactionFilter.monthStart(_selectedMonth);
+    final DateTime end = _selectedDay ?? TransactionFilter.monthEnd(_selectedMonth);
+
     final List<TransactionRecord> filtered = TransactionFilter.apply(
       _transactions,
       query: _query,
       type: _type,
       categoryId: _categoryId,
-      from: _dateRange?.start,
-      to: _dateRange?.end,
+      from: start,
+      to: end,
     );
+
     final List<DayGroup> groups = TransactionFilter.firstGroups(TransactionFilter.groupByDay(filtered), _visibleCount);
     final int hiddenCount = filtered.length - TransactionFilter.countTransactions(groups);
-    final String typeLabel = switch (_type) {
-      TransactionTypes.expense => l10n.filterExpense,
-      TransactionTypes.income => l10n.filterIncome,
-      _ => l10n.filterAllTypes,
-    };
-    final DateTimeRange? range = _dateRange;
-    final String dateLabel = range == null
-        ? l10n.filterAllDates
-        : '${DateFormat('dd/MM').format(range.start)} – ${DateFormat('dd/MM').format(range.end)}';
+
+    final String dayLabel = _selectedDay == null
+        ? l10n.historyAllDays
+        : DateFormat('dd/MM').format(_selectedDay!);
+
+    final String monthText = DateFormat.yMMMM(languageCode).format(_selectedMonth);
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Header Bar
+            _buildHeader(l10n),
+
+            // Month Navigation Bar
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.navTransactions,
-                      style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 32, fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                  IconButton.filled(
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.textPrimary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(52, 52),
-                    ),
-                    tooltip: l10n.historyAddTransaction,
-                    onPressed: _openAddForm,
-                    icon: const Icon(Icons.add),
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+              child: MonthPicker(
+                month: _selectedMonth,
+                onChanged: _onMonthChanged,
               ),
             ),
+
+            // Month Overview Summary Card (Clickable to filter income/expense)
+            _buildMonthSummaryCard(l10n),
+
+            // Direct Buttons for All / Expense / Income
+            _buildTypeSegmentedButtons(l10n),
+
+            // Search Box
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
               child: TextField(
                 controller: _searchController,
                 onChanged: (value) => _changeFilter(() => _query = value),
@@ -272,13 +303,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               ),
             ),
+
+            // Filter Chips (Category, Day in month, Clear filters if active)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+              padding: const EdgeInsets.fromLTRB(20, 6, 20, 4),
               child: Row(
                 children: [
-                  _FilterButton(icon: Icons.expand_more, label: typeLabel, isActive: _type != null, onTap: _pickType),
-                  const SizedBox(width: 8),
+                  if (_hasActiveFilters) ...[
+                    ActionChip(
+                      avatar: const Icon(Icons.close, size: 16, color: AppColors.expense),
+                      label: Text(
+                        l10n.commonClearFilter,
+                        style: const TextStyle(fontSize: 13, color: AppColors.expense, fontWeight: FontWeight.w600),
+                      ),
+                      backgroundColor: AppColors.expenseSoft,
+                      side: BorderSide.none,
+                      shape: const StadiumBorder(),
+                      onPressed: _clearFilters,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   _FilterButton(
                     icon: Icons.sell_outlined,
                     label: _categoryId == null ? l10n.txCategory : CategoryDisplay.name(l10n, _categoryId!),
@@ -286,20 +331,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     onTap: _pickCategory,
                   ),
                   const SizedBox(width: 8),
-                  _FilterButton(icon: Icons.calendar_today_outlined, label: dateLabel, isActive: range != null, onTap: _pickDateRange),
+                  _FilterButton(
+                    icon: Icons.calendar_today_outlined,
+                    label: dayLabel,
+                    isActive: _selectedDay != null,
+                    onTap: _pickDay,
+                  ),
                 ],
               ),
             ),
+
+            // Day Groups / Transaction List
             Expanded(
               child: groups.isEmpty
                   ? EmptyState(
-                      icon: Icons.search_off,
-                      message: l10n.historyEmpty,
-                      actionLabel: l10n.commonClearFilter,
-                      onAction: _clearFilters,
+                      icon: Icons.receipt_long_outlined,
+                      message: _hasActiveFilters ? l10n.historyEmpty : l10n.historyMonthEmpty(monthText),
+                      actionLabel: _hasActiveFilters ? l10n.commonClearFilter : l10n.historyAddTransaction,
+                      onAction: _hasActiveFilters ? _clearFilters : _openAddForm,
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                       itemCount: hiddenCount > 0 ? groups.length + 1 : groups.length,
                       itemBuilder: (context, index) {
                         if (index < groups.length) return _buildDayGroup(l10n, groups[index]);
@@ -309,6 +361,302 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 2),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              l10n.navTransactions,
+              style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 32, fontWeight: FontWeight.w800),
+            ),
+          ),
+          if (!_isCurrentMonth) ...[
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                backgroundColor: AppColors.fill,
+                foregroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              icon: const Icon(Icons.today, size: 16),
+              label: Text(
+                l10n.historyThisMonth,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
+              onPressed: () => _onMonthChanged(DateTime(DateTime.now().year, DateTime.now().month)),
+            ),
+            const SizedBox(width: 8),
+          ],
+          IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: AppColors.textPrimary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(48, 48),
+            ),
+            tooltip: l10n.historyAddTransaction,
+            onPressed: _openAddForm,
+            icon: const Icon(Icons.add),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMonthSummaryCard(AppLocalizations l10n) {
+    final double income = _monthIncome;
+    final double expense = _monthExpense;
+    final double net = _monthNet;
+    final int count = _monthTransactions.length;
+
+    final bool isIncomeSelected = _type == TransactionTypes.income;
+    final bool isExpenseSelected = _type == TransactionTypes.expense;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 4, 20, 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              // Income box - Tappable
+              Expanded(
+                child: Material(
+                  color: isIncomeSelected ? AppColors.mintSoft : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      _changeFilter(() {
+                        _type = isIncomeSelected ? null : TransactionTypes.income;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isIncomeSelected ? AppColors.primary : Colors.transparent,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: isIncomeSelected ? AppColors.surface : AppColors.mintSoft,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.arrow_downward_rounded, size: 18, color: AppColors.primary),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.dashMonthIncome,
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                ),
+                                const SizedBox(height: 2),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    '+${Formatters.money(income)}',
+                                    style: const TextStyle(
+                                      fontFamily: AppFonts.heading,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(width: 1, height: 38, color: AppColors.border),
+              const SizedBox(width: 6),
+              // Expense box - Tappable
+              Expanded(
+                child: Material(
+                  color: isExpenseSelected ? AppColors.expenseSoft : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      _changeFilter(() {
+                        _type = isExpenseSelected ? null : TransactionTypes.expense;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isExpenseSelected ? AppColors.expense : Colors.transparent,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: isExpenseSelected ? AppColors.surface : AppColors.expenseSoft,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.arrow_upward_rounded, size: 18, color: AppColors.expense),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.dashMonthExpense,
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                ),
+                                const SizedBox(height: 2),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    '-${Formatters.money(expense)}',
+                                    style: const TextStyle(
+                                      fontFamily: AppFonts.heading,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.expense,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Material(
+            color: AppColors.fill,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                if (_type != null) _changeFilter(() => _type = null);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              '${l10n.reportsBalance}: ',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                            ),
+                          ),
+                          Text(
+                            Formatters.signedMoney(net.abs(), isIncome: net >= 0),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: net >= 0 ? AppColors.primary : AppColors.expense,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.historyTxCount(count),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeSegmentedButtons(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+      child: SegmentedButton<String?>(
+        showSelectedIcon: false,
+        style: ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.selected)) {
+              if (_type == TransactionTypes.expense) return AppColors.expenseSoft;
+              if (_type == TransactionTypes.income) return AppColors.mintSoft;
+              return AppColors.textPrimary;
+            }
+            return AppColors.surface;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.selected)) {
+              if (_type == TransactionTypes.expense) return AppColors.expense;
+              if (_type == TransactionTypes.income) return AppColors.primary;
+              return Colors.white;
+            }
+            return AppColors.textSecondary;
+          }),
+          side: WidgetStateProperty.all(const BorderSide(color: AppColors.border)),
+        ),
+        segments: [
+          ButtonSegment<String?>(
+            value: null,
+            label: Text(l10n.filterAllTypes, style: const TextStyle(fontWeight: FontWeight.w700)),
+            icon: const Icon(Icons.list_alt_rounded, size: 16),
+          ),
+          ButtonSegment<String?>(
+            value: TransactionTypes.expense,
+            label: Text(l10n.filterExpense, style: const TextStyle(fontWeight: FontWeight.w700)),
+            icon: const Icon(Icons.arrow_upward_rounded, size: 16),
+          ),
+          ButtonSegment<String?>(
+            value: TransactionTypes.income,
+            label: Text(l10n.filterIncome, style: const TextStyle(fontWeight: FontWeight.w700)),
+            icon: const Icon(Icons.arrow_downward_rounded, size: 16),
+          ),
+        ],
+        selected: {_type},
+        onSelectionChanged: (selected) {
+          _changeFilter(() => _type = selected.first);
+        },
       ),
     );
   }

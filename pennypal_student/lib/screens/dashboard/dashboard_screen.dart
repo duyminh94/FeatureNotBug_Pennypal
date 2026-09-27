@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/budget.dart';
+import '../../models/dashboard_data.dart';
 import '../../models/savings_goal.dart';
 import '../../models/transaction_record.dart';
 import '../../models/user_profile.dart';
@@ -13,7 +14,6 @@ import '../../utils/category_display.dart';
 import '../../utils/formatters.dart';
 import '../../utils/goal_calculator.dart';
 import '../../utils/report_calculator.dart';
-import '../../utils/sample_data.dart';
 import '../../widgets/month_picker.dart';
 import '../../widgets/summary_card.dart';
 import '../../widgets/transaction_tile.dart';
@@ -144,7 +144,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   DashboardData _buildData() {
     final List<TransactionRecord>? transactions = widget.transactions;
-    if (transactions == null) return widget.data ?? DashboardData.sample();
+    if (transactions == null) {
+      return widget.data ?? DashboardData.empty(userName: widget.userName);
+    }
 
     final MonthSummary summary = ReportCalculator.summary(transactions, _month);
     return DashboardData(

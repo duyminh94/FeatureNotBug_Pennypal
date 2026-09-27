@@ -261,11 +261,10 @@
   "commonUndo": "Undo",
   "historySearchHint": "Search by description, e.g. lunch",
   "historyAddTransaction": "Add transaction",
-  "filterAllTypes": "All types",
+  "filterAllTypes": "All",
   "filterExpense": "Expense",
   "filterIncome": "Income",
   "filterAllCategories": "All categories",
-  "filterAllDates": "All dates",
   "historyEmpty": "No transactions match your filters",
   "historyShowMore": "Show more ({count} left)",
   "@historyShowMore": {
@@ -275,6 +274,24 @@
       }
     }
   },
+  "historyMonthEmpty": "No transactions in {month}",
+  "@historyMonthEmpty": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "historyTxCount": "{count, plural, =1{1 transaction} other{{count} transactions}}",
+  "@historyTxCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyAllDays": "All days",
+  "historyThisMonth": "This month",
   "historyDeletedNamed": "Deleted \"{name}\"",
   "@historyDeletedNamed": {
     "placeholders": {

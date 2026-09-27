@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/user_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
+import '../../utils/formatters.dart';
 import '../../widgets/profile_avatar.dart';
 import '../categories/categories_screen.dart';
 import '../chatbot/chatbot_screen.dart';
@@ -63,6 +64,7 @@ class _MoreScreenState extends State<MoreScreen> {
       ),
     );
     if (saved == null || !mounted) return;
+    Formatters.setCurrency(saved.currency);
     setState(() => _profile = saved);
     // MainShell needs the new "notifications on/off" setting for the bell badge.
     widget.onProfileChanged?.call(saved);
@@ -143,7 +145,7 @@ class _MoreScreenState extends State<MoreScreen> {
                 label: l10n.dashSupport,
                 color: AppColors.teal,
                 background: AppColors.tealSoft,
-                onTap: () => _openScreen(const SupportScreen()),
+                onTap: () => _openScreen(SupportScreen(profile: _profile)),
               ),
             ]),
             const SizedBox(height: 16),

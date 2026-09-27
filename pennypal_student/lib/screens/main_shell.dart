@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../models/app_notification.dart';
 import '../models/budget.dart';
@@ -21,6 +21,7 @@ import '../services/transaction_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/category_display.dart';
 import '../utils/constants.dart';
+import '../utils/formatters.dart';
 import '../utils/notification_builder.dart';
 import '../utils/notification_display.dart';
 import '../widgets/error_state.dart';
@@ -79,6 +80,7 @@ class _MainShellState extends State<MainShell> {
   @override
   void initState() {
     super.initState();
+    Formatters.setCurrency(widget.profile.currency);
     // Old accounts sign in without passing the S01 permission screen, so they are asked once here.
     PushNotificationService.requestPermissionIfNeverAsked();
     _listenCategories();
@@ -103,6 +105,15 @@ class _MainShellState extends State<MainShell> {
       );
     } catch (e) {
       debugPrint('MainShell custom categories failed: $e');
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant MainShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.profile.currency != oldWidget.profile.currency) {
+      Formatters.setCurrency(widget.profile.currency);
+      _profile = widget.profile;
     }
   }
 
@@ -272,7 +283,10 @@ class _MainShellState extends State<MainShell> {
           profile: _profile,
           unreadCount: unreadCount,
           onOpenNotifications: () => _openNotifications(notifications, readIds),
-          onProfileChanged: (profile) => setState(() => _profile = profile),
+          onProfileChanged: (profile) {
+            Formatters.setCurrency(profile.currency);
+            setState(() => _profile = profile);
+          },
         ),
       ],
     );

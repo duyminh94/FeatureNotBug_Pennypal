@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/app_settings.dart';
@@ -233,11 +233,12 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
               },
               validator: (value) => _validateLimit(value, l10n),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.account_balance_wallet_outlined, color: AppColors.textMuted),
-                suffixText: '₫',
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.account_balance_wallet_outlined, color: AppColors.textMuted),
+                prefixText: Formatters.isUsd ? '\$ ' : null,
+                suffixText: Formatters.isUsd ? null : '₫',
                 hintText: '0',
-                errorStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                errorStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
             ),
             const SizedBox(height: 16),

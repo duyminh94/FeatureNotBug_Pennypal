@@ -12,6 +12,19 @@ class DayGroup {
 
 /// Search, filter and group logic of the History screen (no Flutter code, easy to test).
 class TransactionFilter {
+  /// Start of the given month (1st day 00:00:00).
+  static DateTime monthStart(DateTime month) => DateTime(month.year, month.month, 1);
+
+  /// End of the given month (last day 23:59:59.999).
+  static DateTime monthEnd(DateTime month) => DateTime(month.year, month.month + 1, 0, 23, 59, 59, 999);
+
+  /// Returns only transactions belonging to the given month. O(n).
+  static List<TransactionRecord> forMonth(List<TransactionRecord> transactions, DateTime month) {
+    final int start = monthStart(month).millisecondsSinceEpoch;
+    final int end = monthEnd(month).millisecondsSinceEpoch;
+    return transactions.where((t) => t.date >= start && t.date <= end).toList();
+  }
+
   /// Keeps transactions that match every filter; null filters are ignored. O(n).
   static List<TransactionRecord> apply(
     List<TransactionRecord> transactions, {
