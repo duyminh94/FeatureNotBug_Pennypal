@@ -733,20 +733,26 @@ class _BudgetPlanProposalCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    plan.isDeficit ? Icons.warning_amber_rounded : Icons.auto_awesome,
-                    color: plan.isDeficit ? AppColors.expense : AppColors.primary,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Kế hoạch tháng ${plan.month}',
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
-                  ),
-                ],
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      plan.isDeficit ? Icons.warning_amber_rounded : Icons.auto_awesome,
+                      color: plan.isDeficit ? AppColors.expense : AppColors.primary,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Kế hoạch tháng ${plan.month}',
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -875,7 +881,9 @@ class _BudgetPlanProposalCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Tổng ngân sách dự kiến:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              const Expanded(
+                child: Text('Tổng ngân sách dự kiến:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              ),
               Text(
                 Formatters.money(plan.totalPlanned),
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary),
