@@ -15,6 +15,7 @@ class ChatMessage {
   final ChatProgress? progress;
   final bool showAddExpense;
   final BudgetPlanProposal? budgetPlan;
+  final String? pendingMonth;
   final int sentAt;
 
   const ChatMessage({
@@ -24,6 +25,7 @@ class ChatMessage {
     this.progress,
     this.showAddExpense = false,
     this.budgetPlan,
+    this.pendingMonth,
     required this.sentAt,
   });
 }

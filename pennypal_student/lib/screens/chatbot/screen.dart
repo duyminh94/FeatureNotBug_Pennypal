@@ -72,6 +72,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   bool _hasError = false;
   bool _isAiTyping = false;
   bool _hasConfiguredGemini = false;
+  String? _pendingPlanMonth;
 
   StreamSubscription<List<TransactionRecord>>? _transactionSubscription;
   StreamSubscription<List<Budget>>? _budgetSubscription;
@@ -203,9 +204,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     final String query = text.trim();
     final bool isPlanning = GeminiAdvisorService.isBudgetPlanningRequest(query);
+    final ChatIntent intent = ChatIntentMatcher.detect(query);
 
-    // If requesting budget planning or Gemini API is configured, run asynchronously
-    if (isPlanning || _hasConfiguredGemini) {
+    // If budget planning or unknown intent with configured Gemini, use async AI
+    final bool shouldUseAi = isPlanning || (_hasConfiguredGemini && intent == ChatIntent.unknown);
+
+    if (shouldUseAi) {
       _sendAsync(query);
       return;
     }
@@ -245,6 +249,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         data: data,
         languageCode: languageCode,
         now: DateTime.now(),
+        pendingMonth: _pendingPlanMonth,
       );
     } catch (e) {
       debugPrint('Chatbot response error, falling back to local engine: $e');
@@ -255,6 +260,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     setState(() {
       _messages.add(answer);
       _isAiTyping = false;
+      if (answer.pendingMonth != null) {
+        _pendingPlanMonth = answer.pendingMonth;
+      } else if (answer.budgetPlan != null) {
+        _pendingPlanMonth = null;
+      }
     });
     _scrollToBottom();
   }
@@ -380,7 +390,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Nhập Google Gemini API Key để kích hoạt AI phân tích tài chính thông minh, tư vấn chi tiêu và lập ngân sách tự động.',
+              'Penny đã tích hợp sẵn Gemini AI từ backend hệ thống. Bạn có thể sử dụng trực tiếp hoặc tùy chọn cấu hình khóa API riêng nếu cần:',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 14),
@@ -388,7 +398,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               controller: controller,
               decoration: const InputDecoration(
                 labelText: 'Gemini API Key',
-                hintText: 'AIzaSy...',
+                hintText: 'AQ...',
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
@@ -396,8 +406,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Ghi chú: Nếu để trống, Penny vẫn tự động lập ngân sách và tư vấn chi tiêu thông minh bằng công cụ quy tắc 50/30/20 offline.',
-              style: TextStyle(fontSize: 11, color: AppColors.textMuted, fontStyle: FontStyle.italic),
+              'Trạng thái: Đã sẵn sàng hoạt động với Gemini AI backend.',
+              style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -725,7 +735,11 @@ class _BudgetPlanProposalCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.auto_awesome, color: AppColors.primary, size: 18),
+                  Icon(
+                    plan.isDeficit ? Icons.warning_amber_rounded : Icons.auto_awesome,
+                    color: plan.isDeficit ? AppColors.expense : AppColors.primary,
+                    size: 18,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Kế hoạch tháng ${plan.month}',
@@ -736,18 +750,56 @@ class _BudgetPlanProposalCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.mintSoft,
+                  color: plan.isDeficit ? AppColors.expenseSoft : AppColors.mintSoft,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   '+${Formatters.money(plan.estimatedIncome)}',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: plan.isDeficit ? AppColors.expense : AppColors.primary,
+                  ),
                 ),
               ),
             ],
           ),
+          if (plan.isDeficit) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.expenseSoft,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.expense, width: 1.2),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.error_outline_rounded, color: AppColors.expense, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'CẢNH BÁO: THÂM HỤT NGÂN SÁCH',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.expense),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Khoản chi cố định (${Formatters.money(plan.fixedExpensesTotal)}) vượt thu nhập dự kiến (${Formatters.money(plan.estimatedIncome)}) là -${Formatters.money(plan.deficitAmount)}. Đã chuyển sang kế hoạch sinh tồn và cắt giảm mua sắm, giải trí.',
+                          style: const TextStyle(fontSize: 11, color: AppColors.expense, height: 1.3),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
-          if (plan.fixedExpensesTotal > 0 || plan.savingsTotal > 0)
+          if (plan.fixedExpensesTotal > 0 || plan.savingsTotal > 0 || plan.isDeficit)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Wrap(
@@ -766,6 +818,12 @@ class _BudgetPlanProposalCard extends StatelessWidget {
                       AppColors.honeySoft,
                       Colors.orange.shade800,
                     ),
+                  if (plan.isDeficit)
+                    _pill(
+                      'Thâm hụt: -${Formatters.money(plan.deficitAmount)}',
+                      AppColors.expenseSoft,
+                      AppColors.expense,
+                    ),
                 ],
               ),
             ),
@@ -782,13 +840,24 @@ class _BudgetPlanProposalCard extends StatelessWidget {
                         children: [
                           Text(item.categoryName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                           if (item.note != null && item.note!.isNotEmpty)
-                            Text(item.note!, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                            Text(
+                              item.note!,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: item.amount == 0 ? AppColors.expense : AppColors.textSecondary,
+                                fontStyle: item.amount == 0 ? FontStyle.italic : FontStyle.normal,
+                              ),
+                            ),
                         ],
                       ),
                     ),
                     Text(
                       Formatters.money(item.amount),
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: item.amount == 0 ? AppColors.textMuted : AppColors.textPrimary,
+                      ),
                     ),
                     if (!plan.isApplied)
                       InkWell(

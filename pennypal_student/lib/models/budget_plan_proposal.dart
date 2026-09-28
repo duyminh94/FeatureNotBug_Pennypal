@@ -44,6 +44,8 @@ class BudgetPlanProposal {
   });
 
   double get totalPlanned => items.fold(0.0, (sum, item) => sum + item.amount);
+  bool get isDeficit => estimatedIncome > 0 && estimatedIncome < fixedExpensesTotal;
+  double get deficitAmount => (fixedExpensesTotal - estimatedIncome).clamp(0.0, double.infinity);
 
   Map<String, dynamic> toMap() => {
     'month': month,
