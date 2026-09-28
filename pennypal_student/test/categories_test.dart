@@ -4,6 +4,7 @@ import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:pennypal_student/models/budget.dart';
 import 'package:pennypal_student/models/category.dart';
 import 'package:pennypal_student/models/transaction_record.dart';
+import 'package:pennypal_student/screens/categories/form_sheet.dart';
 import 'package:pennypal_student/screens/categories/screen.dart';
 import 'package:pennypal_student/utils/app_theme.dart';
 import 'package:pennypal_student/utils/category_display.dart';
@@ -120,7 +121,11 @@ void main() {
       await tester.tap(find.byTooltip('Add category'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextFormField), 'Coffee');
-      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Save category'));
+      await tester.scrollUntilVisible(
+        find.widgetWithText(FilledButton, 'Save category'),
+        100,
+        scrollable: find.descendant(of: find.byType(CategoryFormSheet), matching: find.byType(Scrollable)).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Save category'));
       await tester.pumpAndSettle();
