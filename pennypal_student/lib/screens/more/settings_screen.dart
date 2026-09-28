@@ -38,7 +38,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late final TextEditingController _nameController = TextEditingController(text: widget.profile.fullName);
   late final TextEditingController _mobileController = TextEditingController(text: widget.profile.mobileNumber);
   late String? _studentStatus = widget.profile.studentStatus;
-  late String _currency = widget.profile.currency;
   late bool _notificationsEnabled = widget.profile.notificationsEnabled;
   bool _hasTriedToSave = false;
   bool _isSaving = false;
@@ -64,7 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       studentStatus: _studentStatus,
       role: old.role,
       isActive: old.isActive,
-      currency: _currency,
+      currency: old.currency,
       notificationsEnabled: _notificationsEnabled,
       createdAt: old.createdAt,
       lastLogin: old.lastLogin,
@@ -165,29 +164,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
               selected: {languageCode},
               onSelectionChanged: (selected) => LocaleService.change(selected.first),
-            ),
-            const SizedBox(height: 20),
-            _Label(icon: Icons.payments_outlined, text: l10n.settingsCurrency),
-            SegmentedButton<String>(
-              showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(value: Currencies.vnd, label: Text('VND · ₫')),
-                ButtonSegment(value: Currencies.usd, label: Text('USD · \$')),
-              ],
-              selected: {_currency},
-              onSelectionChanged: (selected) => setState(() => _currency = selected.first),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline, size: 16, color: AppColors.textSecondary),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(l10n.settingsCurrencyNote, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                  ),
-                ],
-              ),
             ),
             const SizedBox(height: 16),
             Card(
