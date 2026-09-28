@@ -3,7 +3,7 @@ import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pennypal_student/models/recurring_item.dart';
 import 'package:pennypal_student/models/savings_goal.dart';
-import 'package:pennypal_student/screens/goals/goal_form_screen.dart';
+import 'package:pennypal_student/screens/goals/form_screen.dart';
 import 'package:pennypal_student/utils/app_theme.dart';
 import 'package:pennypal_student/utils/constants.dart';
 

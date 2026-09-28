@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pennypal_student/models/recurring_item.dart';
-import 'package:pennypal_student/screens/recurring/recurring_screen.dart';
+import 'package:pennypal_student/screens/recurring/screen.dart';
 import 'package:pennypal_student/utils/app_theme.dart';
 import 'package:pennypal_student/utils/constants.dart';
 import 'package:pennypal_student/utils/recurring_calculator.dart';

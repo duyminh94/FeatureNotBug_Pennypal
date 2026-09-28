@@ -1578,6 +1578,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryIcon => 'Icon';
 
   @override
+  String get categoryColor => 'Color';
+
+  @override
   String get categorySave => 'Save category';
 
   @override

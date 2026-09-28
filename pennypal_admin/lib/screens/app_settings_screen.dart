@@ -3,7 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../models/app_settings.dart';
-import '../services/settings_service.dart';
+import '../controllers/settings_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/lesson_editor.dart';
 import '../utils/settings_validator.dart';

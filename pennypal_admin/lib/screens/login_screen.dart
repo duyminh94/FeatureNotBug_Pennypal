@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../services/admin_auth_service.dart';
+import '../controllers/admin_auth_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 import '../models/admin_data.dart';

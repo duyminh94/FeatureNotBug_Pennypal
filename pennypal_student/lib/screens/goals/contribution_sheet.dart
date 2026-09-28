@@ -3,7 +3,7 @@ import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/savings_goal.dart';
 import '../../models/transaction_record.dart';
-import '../../services/transaction_service.dart';
+import '../../controllers/transaction_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';

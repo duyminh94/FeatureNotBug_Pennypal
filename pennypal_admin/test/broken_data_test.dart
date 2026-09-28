@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pennypal_admin/services/admin_data_service.dart';
-import 'package:pennypal_admin/services/feedback_service.dart';
-import 'package:pennypal_admin/services/learning_service.dart';
-import 'package:pennypal_admin/services/support_service.dart';
-import 'package:pennypal_admin/services/user_service.dart';
+import 'package:pennypal_admin/controllers/admin_data_service.dart';
+import 'package:pennypal_admin/controllers/feedback_service.dart';
+import 'package:pennypal_admin/controllers/learning_service.dart';
+import 'package:pennypal_admin/controllers/support_service.dart';
+import 'package:pennypal_admin/controllers/user_service.dart';
 
 // One good record and one record with a wrong type in each node: the good one must still load.
 void main() {

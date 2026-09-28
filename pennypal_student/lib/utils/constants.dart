@@ -42,6 +42,7 @@ class DbFields {
 
   // categories
   static const String isSelectable = 'isSelectable';
+  static const String color = 'color';
 
   // transactions
   static const String amount = 'amount';
@@ -257,6 +258,11 @@ class CustomCategoryIcons {
     'volunteer_activism',
     'category',
   ];
+}
+
+/// The 8 colors a student can pick for a custom category.
+class CustomCategoryColors {
+  static const List<String> values = ['orange', 'pink', 'purple', 'teal', 'gold', 'info', 'honey', 'mint'];
 }
 
 /// Default values used when a field is missing.

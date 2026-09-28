@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pennypal_student/l10n/app_localizations.dart';
 
-import '../../services/auth_service.dart';
+import '../../controllers/auth_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/auth_messages.dart';
 import '../../utils/category_display.dart';

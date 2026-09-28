@@ -9,7 +9,7 @@ import 'package:pennypal_student/models/support_query.dart';
 import 'package:pennypal_student/models/transaction_record.dart';
 import 'package:pennypal_student/models/user_profile.dart';
 import 'package:pennypal_student/screens/main_shell.dart';
-import 'package:pennypal_student/services/recurring_service.dart';
+import 'package:pennypal_student/controllers/recurring_service.dart';
 import 'package:pennypal_student/utils/app_theme.dart';
 import 'package:pennypal_student/utils/constants.dart';
 import 'package:pennypal_student/utils/recurring_calculator.dart';

@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/transaction_record.dart';
-import '../../services/transaction_service.dart';
+import '../../controllers/transaction_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/constants.dart';
@@ -13,8 +13,8 @@ import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/month_picker.dart';
 import '../../widgets/transaction_tile.dart';
-import 'transaction_detail_screen.dart';
-import 'transaction_form_screen.dart';
+import 'detail_screen.dart';
+import 'form_screen.dart';
 
 /// S06 Transaction history: month-scoped navigation, monthly financial summary,
 /// direct buttons for Income / Expense / All types, search, category & day filters,
@@ -377,19 +377,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ),
           if (!_isCurrentMonth) ...[
-            TextButton.icon(
+            TextButton(
               style: TextButton.styleFrom(
                 backgroundColor: AppColors.fill,
                 foregroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
-              icon: const Icon(Icons.today, size: 16),
-              label: Text(
+              onPressed: () => _onMonthChanged(DateTime(DateTime.now().year, DateTime.now().month)),
+              child: Text(
                 l10n.historyThisMonth,
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
               ),
-              onPressed: () => _onMonthChanged(DateTime(DateTime.now().year, DateTime.now().month)),
             ),
             const SizedBox(width: 8),
           ],
@@ -664,10 +663,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildShowMore(AppLocalizations l10n, int hiddenCount) {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
-      child: OutlinedButton.icon(
+      child: OutlinedButton(
         onPressed: () => setState(() => _visibleCount += _pageSize),
-        icon: const Icon(Icons.expand_more),
-        label: Text(l10n.historyShowMore(hiddenCount)),
+        child: Text(l10n.historyShowMore(hiddenCount)),
       ),
     );
   }

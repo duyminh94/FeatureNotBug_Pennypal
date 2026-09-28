@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pennypal_admin/models/feedback_entry.dart';
-import 'package:pennypal_admin/screens/feedbacks/feedbacks_screen.dart';
+import 'package:pennypal_admin/screens/feedbacks/screen.dart';
 import 'package:pennypal_admin/utils/app_theme.dart';
 import 'package:pennypal_admin/utils/pager.dart';
 

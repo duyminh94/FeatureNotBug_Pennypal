@@ -4,7 +4,7 @@ import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:pennypal_student/models/budget.dart';
 import 'package:pennypal_student/models/savings_goal.dart';
 import 'package:pennypal_student/models/transaction_record.dart';
-import 'package:pennypal_student/screens/dashboard/dashboard_screen.dart';
+import 'package:pennypal_student/screens/dashboard/screen.dart';
 import 'package:pennypal_student/utils/app_theme.dart';
 import 'package:pennypal_student/utils/budget_calculator.dart';
 import 'package:pennypal_student/utils/constants.dart';

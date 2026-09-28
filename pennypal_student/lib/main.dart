@@ -6,8 +6,8 @@ import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import 'firebase_options.dart';
 import 'screens/auth/splash_screen.dart';
-import 'services/locale_service.dart';
-import 'services/push_notification_service.dart';
+import 'controllers/locale_service.dart';
+import 'controllers/push_notification_service.dart';
 import 'utils/app_theme.dart';
 
 /// Starts Firebase, loads the saved language, prepares phone notifications, then shows the app.

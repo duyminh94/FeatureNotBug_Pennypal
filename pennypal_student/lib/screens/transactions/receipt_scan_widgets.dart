@@ -103,10 +103,9 @@ Future<PermissionChoice?> showCameraPermissionSheet(BuildContext context) {
                   style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),
-                FilledButton.icon(
+                FilledButton(
                   onPressed: () => Navigator.of(sheetContext).pop(PermissionChoice.gallery),
-                  icon: const Icon(Icons.photo_library_outlined),
-                  label: Text(l10n.scanFromGallery),
+                  child: Text(l10n.scanFromGallery),
                 ),
                 const SizedBox(height: 8),
                 TextButton(

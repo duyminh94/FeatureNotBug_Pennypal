@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pennypal_student/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pennypal_student/models/transaction_record.dart';
-import 'package:pennypal_student/screens/transactions/transaction_form_screen.dart';
+import 'package:pennypal_student/screens/transactions/form_screen.dart';
 import 'package:pennypal_student/utils/app_theme.dart';
 import 'package:pennypal_student/utils/constants.dart';
 

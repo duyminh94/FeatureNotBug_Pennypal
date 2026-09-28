@@ -8,7 +8,7 @@ import '../models/chat_message.dart';
 import '../models/recurring_item.dart';
 import '../models/savings_goal.dart';
 import '../models/transaction_record.dart';
-import '../services/gemini_advisor_service.dart';
+import '../controllers/gemini_advisor_service.dart';
 import 'budget_calculator.dart';
 import 'category_display.dart';
 import 'category_keywords.dart';

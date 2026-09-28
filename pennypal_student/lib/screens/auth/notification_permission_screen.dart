@@ -2,7 +2,7 @@
 import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/user_profile.dart';
-import '../../services/push_notification_service.dart';
+import '../../controllers/push_notification_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../main_shell.dart';
@@ -92,10 +92,9 @@ class NotificationPermissionScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              FilledButton.icon(
+              FilledButton(
                 onPressed: () => _allow(context),
-                icon: const Icon(Icons.notifications_none),
-                label: Text(l10n.notifAllow),
+                child: Text(l10n.notifAllow),
               ),
               const SizedBox(height: 12),
               OutlinedButton(

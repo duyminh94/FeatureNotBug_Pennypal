@@ -1,6 +1,6 @@
 ﻿import 'package:pennypal_student/l10n/app_localizations.dart';
 
-import '../services/auth_service.dart';
+import '../controllers/auth_service.dart';
 
 class AuthMessages {
   static String text(AppLocalizations l10n, AuthProblem problem) {

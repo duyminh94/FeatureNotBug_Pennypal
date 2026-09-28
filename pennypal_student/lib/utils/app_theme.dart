@@ -37,6 +37,9 @@ class AppColors {
   static const Color purpleSoft = Color(0xFFE9E4FF);
   static const Color teal = Color(0xFF2F6F63);
   static const Color tealSoft = Color(0xFFE3F2EF);
+
+  static const Color gold = Color(0xFFB8860B);
+  static const Color goldSoft = Color(0xFFFDF1D6);
 }
 
 /// Font family names declared in pubspec.yaml.

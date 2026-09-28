@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/app_settings.dart';
-import '../../services/app_settings_service.dart';
+import '../../controllers/app_settings_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 

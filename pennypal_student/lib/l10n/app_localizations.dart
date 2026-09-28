@@ -2789,6 +2789,12 @@ abstract class AppLocalizations {
   /// **'Icon'**
   String get categoryIcon;
 
+  /// No description provided for @categoryColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get categoryColor;
+
   /// No description provided for @categorySave.
   ///
   /// In en, this message translates to:

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/user_profile.dart';
-import '../../services/feedback_service.dart';
+import '../../controllers/feedback_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../../utils/formatters.dart';
@@ -190,7 +190,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             decoration: InputDecoration(hintText: l10n.feedbackCommentsHint),
           ),
           const SizedBox(height: 12),
-          FilledButton.icon(onPressed: _send, icon: const Icon(Icons.send_outlined), label: Text(l10n.feedbackSend)),
+          FilledButton(onPressed: _send, child: Text(l10n.feedbackSend)),
         ],
       ),
     );

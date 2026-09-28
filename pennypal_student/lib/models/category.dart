@@ -10,6 +10,7 @@ class Category {
   final bool isDefault;
   final String? name;
   final int? createdAt;
+  final String? color;
 
   Category({
     required this.id,
@@ -20,6 +21,7 @@ class Category {
     required this.isDefault,
     this.name,
     this.createdAt,
+    this.color,
   });
 
   /// Builds a default category from categories/{key}.
@@ -44,6 +46,7 @@ class Category {
       isDefault: false,
       name: map[DbFields.name],
       createdAt: map[DbFields.createdAt],
+      color: map[DbFields.color],
     );
   }
 
@@ -63,6 +66,7 @@ class Category {
       DbFields.icon: icon,
       DbFields.sortOrder: sortOrder,
       DbFields.createdAt: createdAt,
+      DbFields.color: color,
     };
   }
 }

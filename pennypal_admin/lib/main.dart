@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'firebase_options.dart';
 import 'screens/login_screen.dart';
-import 'services/locale_service.dart';
+import 'controllers/locale_service.dart';
 import 'utils/app_theme.dart';
 
 Future<void> main() async {

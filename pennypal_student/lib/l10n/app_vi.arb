@@ -449,6 +449,7 @@
   "categoryType": "Loại",
   "categoryTypeLocked": "Danh mục đã có giao dịch nên không đổi được loại.",
   "categoryIcon": "Biểu tượng",
+  "categoryColor": "Màu sắc",
   "categorySave": "Lưu danh mục",
   "categorySaved": "Đã lưu danh mục",
   "categoryDeleteTitle": "Xoá \"{name}\"?",

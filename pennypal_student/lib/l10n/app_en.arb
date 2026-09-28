@@ -1024,6 +1024,7 @@
   "categoryType": "Type",
   "categoryTypeLocked": "This category already has transactions, so its type can't change.",
   "categoryIcon": "Icon",
+  "categoryColor": "Color",
   "categorySave": "Save category",
   "categorySaved": "Category saved",
   "categoryDeleteTitle": "Delete \"{name}\"?",

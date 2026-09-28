@@ -27,10 +27,9 @@ class ErrorState extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 16),
-            OutlinedButton.icon(
+            OutlinedButton(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.commonRetry),
+              child: Text(l10n.commonRetry),
             ),
           ],
         ),

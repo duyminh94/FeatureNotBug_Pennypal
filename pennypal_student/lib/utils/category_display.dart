@@ -139,8 +139,39 @@ class CategoryDisplay {
     };
   }
 
+  /// Main color of a custom category's chosen color key (see [CustomCategoryColors.values]).
+  static Color customColor(String colorKey) {
+    return switch (colorKey) {
+      'orange' => AppColors.orange,
+      'pink' => AppColors.expense,
+      'purple' => AppColors.purple,
+      'teal' => AppColors.teal,
+      'gold' => AppColors.gold,
+      'info' => AppColors.info,
+      'honey' => AppColors.honeyText,
+      _ => AppColors.primary,
+    };
+  }
+
+  /// Soft (background) color matching [customColor].
+  static Color customSoftColor(String colorKey) {
+    return switch (colorKey) {
+      'orange' => AppColors.orangeSoft,
+      'pink' => AppColors.expenseSoft,
+      'purple' => AppColors.purpleSoft,
+      'teal' => AppColors.tealSoft,
+      'gold' => AppColors.goldSoft,
+      'info' => AppColors.infoSoft,
+      'honey' => AppColors.honeySoft,
+      _ => AppColors.mintSoft,
+    };
+  }
+
   /// Icon color of the category; the tile background uses [softColor].
   static Color color(String categoryId) {
+    final Category? custom = findCustom(categoryId);
+    if (custom?.color != null) return customColor(custom!.color!);
+
     return switch (categoryId) {
       CategoryKeys.food => AppColors.orange,
       CategoryKeys.transport => AppColors.info,
@@ -148,11 +179,15 @@ class CategoryDisplay {
       CategoryKeys.shopping => AppColors.expense,
       CategoryKeys.entertainment => AppColors.honeyText,
       CategoryKeys.bills || CategoryKeys.miscellaneous => AppColors.teal,
+      CategoryKeys.savings => AppColors.gold,
       _ => AppColors.primary,
     };
   }
 
   static Color chartColor(String categoryId) {
+    final Category? custom = findCustom(categoryId);
+    if (custom?.color != null) return customColor(custom!.color!);
+
     return switch (categoryId) {
       CategoryKeys.food => const Color(0xFFFF9A52),
       CategoryKeys.entertainment => const Color(0xFFFFC53D),
@@ -160,11 +195,15 @@ class CategoryDisplay {
       CategoryKeys.shopping => const Color(0xFFFF8FAB),
       CategoryKeys.education => const Color(0xFF8B7CF6),
       CategoryKeys.bills => const Color(0xFF3BB4A1),
+      CategoryKeys.savings => AppColors.gold,
       _ => const Color(0xFFA39BA8),
     };
   }
 
   static Color softColor(String categoryId) {
+    final Category? custom = findCustom(categoryId);
+    if (custom?.color != null) return customSoftColor(custom!.color!);
+
     return switch (categoryId) {
       CategoryKeys.food => AppColors.orangeSoft,
       CategoryKeys.transport => AppColors.infoSoft,
@@ -172,6 +211,7 @@ class CategoryDisplay {
       CategoryKeys.shopping => AppColors.expenseSoft,
       CategoryKeys.entertainment => AppColors.honeySoft,
       CategoryKeys.bills || CategoryKeys.miscellaneous => AppColors.tealSoft,
+      CategoryKeys.savings => AppColors.goldSoft,
       _ => AppColors.mintSoft,
     };
   }

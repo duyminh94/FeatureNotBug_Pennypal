@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../services/locale_service.dart';
+import '../controllers/locale_service.dart';
 import '../utils/app_theme.dart';
 
 /// Small EN / VI pill switch shown on the login screen.

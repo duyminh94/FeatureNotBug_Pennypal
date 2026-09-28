@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../../models/user_profile.dart';
-import '../../services/auth_service.dart';
-import '../../services/locale_service.dart';
-import '../../services/user_service.dart';
+import '../../controllers/auth_service.dart';
+import '../../controllers/locale_service.dart';
+import '../../controllers/user_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/category_display.dart';
 import '../../utils/constants.dart';
@@ -208,11 +208,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 20),
             FilledButton(onPressed: _isSaving ? null : _save, child: Text(l10n.txSaveChanges)),
             const SizedBox(height: 12),
-            FilledButton.icon(
+            FilledButton(
               style: FilledButton.styleFrom(backgroundColor: AppColors.expenseSoft, foregroundColor: AppColors.expense),
               onPressed: _logout,
-              icon: const Icon(Icons.logout),
-              label: Text(l10n.settingsLogout),
+              child: Text(l10n.settingsLogout),
             ),
           ],
         ),

@@ -5,9 +5,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/support_query.dart';
 import '../models/user_profile.dart';
-import '../services/admin_auth_service.dart';
-import '../services/admin_data_service.dart';
-import '../services/support_service.dart';
+import '../controllers/admin_auth_service.dart';
+import '../controllers/admin_data_service.dart';
+import '../controllers/support_service.dart';
 import '../utils/admin_section.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
@@ -18,12 +18,12 @@ import '../widgets/confirm_dialog.dart';
 import '../widgets/language_toggle.dart';
 import 'analytics_screen.dart';
 import 'app_settings_screen.dart';
-import 'feedbacks/feedbacks_screen.dart';
-import 'learning/learning_screen.dart';
+import 'feedbacks/screen.dart';
+import 'learning/screen.dart';
 import 'login_screen.dart';
 import 'overview_screen.dart';
-import 'support/support_screen.dart';
-import 'users/users_screen.dart';
+import 'support/screen.dart';
+import 'users/screen.dart';
 
 class AdminShell extends StatefulWidget {
   /// Null in the real app: the shell loads the data from Firebase. Tests pass ready-made data.

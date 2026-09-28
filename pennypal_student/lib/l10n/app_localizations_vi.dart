@@ -1510,6 +1510,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get categoryIcon => 'Biểu tượng';
 
   @override
+  String get categoryColor => 'Màu sắc';
+
+  @override
   String get categorySave => 'Lưu danh mục';
 
   @override

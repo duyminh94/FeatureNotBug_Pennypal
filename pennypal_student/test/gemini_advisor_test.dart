@@ -3,7 +3,7 @@ import 'package:pennypal_student/models/budget_plan_proposal.dart';
 import 'package:pennypal_student/models/recurring_item.dart';
 import 'package:pennypal_student/models/savings_goal.dart';
 import 'package:pennypal_student/models/transaction_record.dart';
-import 'package:pennypal_student/services/gemini_advisor_service.dart';
+import 'package:pennypal_student/controllers/gemini_advisor_service.dart';
 import 'package:pennypal_student/utils/chat_intent_matcher.dart';
 import 'package:pennypal_student/utils/chatbot_engine.dart';
 import 'package:pennypal_student/utils/constants.dart';
