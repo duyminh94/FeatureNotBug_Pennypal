@@ -22,7 +22,6 @@ ChatbotEngine engineFor(List<TransactionRecord> transactions, DateTime now, {Str
 }
 
 void main() {
-  // Month names ("September 2026", "tháng 9") need the intl date data, which MaterialApp loads in the real app.
   setUpAll(() => initializeDateFormatting());
 
   final DateTime september5 = DateTime(2026, 9, 5, 12);

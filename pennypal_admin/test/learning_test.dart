@@ -84,7 +84,6 @@ void main() {
       expect(find.text('Edit lesson'), findsOneWidget);
     });
 
-    // Opens the form from a button, like the lesson list does, and keeps what the form returns.
     Future<List<bool?>> openForm(WidgetTester tester, Future<bool> Function(LearningContent lesson) saveLesson) async {
       final List<bool?> results = [];
       useScreen(tester, const Size(420, 1600));

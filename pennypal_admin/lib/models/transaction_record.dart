@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// An income or expense, stored at transactions/{uid}/{txId}.
 class TransactionRecord {
   final String id;
   final String type;
@@ -28,7 +27,6 @@ class TransactionRecord {
     this.updatedAt,
   });
 
-  /// Builds a transaction from the map read at transactions/{uid}/{txId}.
   factory TransactionRecord.fromMap(String id, Map<dynamic, dynamic> map) {
     return TransactionRecord(
       id: id,
@@ -45,7 +43,6 @@ class TransactionRecord {
     );
   }
 
-  /// Converts the transaction to a map for writing (null fields are removed by RTDB).
   Map<String, dynamic> toMap() {
     return {
       DbFields.type: type,
@@ -61,12 +58,9 @@ class TransactionRecord {
     };
   }
 
-  /// True for income, false for expense.
   bool get isIncome => type == TransactionTypes.income;
 
-  /// True when the transaction is a contribution to a savings goal.
   bool get isGoalContribution => goalId != null;
 
-  /// The transaction date as a DateTime.
   DateTime get dateTime => DateTime.fromMillisecondsSinceEpoch(date);
 }

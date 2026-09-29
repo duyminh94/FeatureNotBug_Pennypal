@@ -9,7 +9,6 @@ import '../../utils/formatters.dart';
 import '../../widgets/app_progress_bar.dart';
 import '../../widgets/category_icon.dart';
 
-/// Colors of a budget by status: green normal, honey when close to the limit, red when over.
 class BudgetColors {
   static Color bar(BudgetStatus status) {
     return switch (status) {
@@ -28,7 +27,6 @@ class BudgetColors {
   }
 }
 
-/// "X left" or "Over by X" under a budget bar.
 class RemainingText extends StatelessWidget {
   final double spent;
   final double limitAmount;
@@ -47,7 +45,6 @@ class RemainingText extends StatelessWidget {
   }
 }
 
-/// Dark card with the monthly total budget: percent used and money left or over.
 class TotalBudgetCard extends StatelessWidget {
   final Budget budget;
   final double spent;
@@ -145,7 +142,6 @@ class TotalBudgetCard extends StatelessWidget {
   }
 }
 
-/// Shown when the month has category budgets but no total budget yet.
 class NoTotalBudgetCard extends StatelessWidget {
   final VoidCallback onCreate;
 
@@ -166,7 +162,6 @@ class NoTotalBudgetCard extends StatelessWidget {
   }
 }
 
-/// Warning that the category limits add up to more than the total budget.
 class CategoryOverTotalWarning extends StatelessWidget {
   final double categoryLimitsTotal;
 
@@ -196,7 +191,6 @@ class CategoryOverTotalWarning extends StatelessWidget {
   }
 }
 
-/// One category budget: icon, spent / limit, progress bar and a badge when near or over.
 class CategoryBudgetCard extends StatelessWidget {
   final Budget budget;
   final double spent;
@@ -281,7 +275,6 @@ class CategoryBudgetCard extends StatelessWidget {
   }
 }
 
-/// Small "Almost at limit" / "Over budget" badge.
 class _StatusBadge extends StatelessWidget {
   final BudgetStatus status;
 

@@ -10,6 +10,7 @@ import '../models/savings_goal.dart';
 import '../models/support_query.dart';
 import '../models/transaction_record.dart';
 import '../models/user_profile.dart';
+import '../controllers/auth_service.dart';
 import '../controllers/budget_service.dart';
 import '../controllers/category_service.dart';
 import '../controllers/goal_service.dart';
@@ -19,12 +20,14 @@ import '../controllers/push_notification_service.dart';
 import '../controllers/recurring_service.dart';
 import '../controllers/transaction_service.dart';
 import '../utils/app_theme.dart';
+import '../utils/auth_messages.dart';
 import '../utils/category_display.dart';
 import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import '../utils/notification_builder.dart';
 import '../utils/notification_display.dart';
 import '../widgets/error_state.dart';
+import 'auth/login_screen.dart';
 import 'budget/screen.dart';
 import 'dashboard/screen.dart';
 import 'goals/screen.dart';
@@ -32,7 +35,6 @@ import 'more/screen.dart';
 import 'notifications/screen.dart';
 import 'transactions/history_screen.dart';
 
-/// App frame after login: bottom navigation with 5 tabs.
 class MainShell extends StatefulWidget {
   final UserProfile profile;
   final Stream<List<TransactionRecord>> Function(String uid) watchTransactions;
@@ -41,6 +43,8 @@ class MainShell extends StatefulWidget {
   final Stream<Set<String>> Function(String uid) watchReadIds;
   final Stream<List<SupportQuery>> Function(String uid) watchSupport;
   final Stream<List<Category>> Function(String uid) watchCategories;
+  final Stream<bool> Function(String uid) watchIsActive;
+  final Future<void> Function() signOut;
   final void Function(String uid, List<String> ids) markRead;
   final void Function(String uid, String queryId) markSupportNotified;
   final Future<void> Function(String uid) createDueRecurring;
@@ -54,6 +58,8 @@ class MainShell extends StatefulWidget {
     this.watchReadIds = NotificationService.watchReadIds,
     this.watchSupport = SupportService.watch,
     this.watchCategories = CategoryService.watch,
+    this.watchIsActive = AuthService.watchIsActive,
+    this.signOut = AuthService.signOut,
     this.markRead = NotificationService.markRead,
     this.markSupportNotified = SupportService.markNotified,
     this.createDueRecurring = RecurringService.createDue,
@@ -72,30 +78,53 @@ class _MainShellState extends State<MainShell> {
   late Stream<Set<String>> _readIdsStream = _openReadIdsStream();
   late Stream<List<SupportQuery>> _supportStream = _openSupportStream();
   StreamSubscription<List<Category>>? _categorySubscription;
-  // Notification ids already on screen. Null until the first data arrives.
+  StreamSubscription<bool>? _isActiveSubscription;
   Set<String>? _knownNotificationIds;
-  // Help replies announced in this session, so one is not shown twice while studentNotified is being saved.
   final Set<String> _announcedSupportIds = {};
 
   @override
   void initState() {
     super.initState();
     Formatters.setCurrency(widget.profile.currency);
-    // Old accounts sign in without passing the S01 permission screen, so they are asked once here.
     PushNotificationService.requestPermissionIfNeverAsked();
     _listenCategories();
+    _listenIsActive();
     unawaited(widget.createDueRecurring(widget.profile.uid));
   }
 
   @override
   void dispose() {
     _categorySubscription?.cancel();
-    // The next account that signs in must not see these names.
+    _isActiveSubscription?.cancel();
     CategoryDisplay.customCategories = [];
     super.dispose();
   }
 
-  /// Custom categories are extra: if they fail to load, the default ones still work.
+  void _listenIsActive() {
+    try {
+      _isActiveSubscription = widget.watchIsActive(widget.profile.uid).listen(
+        (isActive) {
+          if (!isActive) _leaveBecauseLocked();
+        },
+        onError: (Object error) => debugPrint('MainShell account status failed: $error'),
+      );
+    } catch (e) {
+      debugPrint('MainShell account status failed: $e');
+    }
+  }
+
+  Future<void> _leaveBecauseLocked() async {
+    _isActiveSubscription?.cancel();
+    await widget.signOut();
+    if (!mounted) return;
+
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginScreen(initialMessage: AuthMessages.text(l10n, AuthProblem.locked))),
+      (route) => false,
+    );
+  }
+
   void _listenCategories() {
     _categorySubscription?.cancel();
     try {
@@ -170,7 +199,6 @@ class _MainShellState extends State<MainShell> {
     _listenCategories();
   }
 
-  /// Saves only the notifications that became read on the Notifications screen.
   void _saveReadIds(List<AppNotification> notifications, Set<String> readIds) {
     final List<String> newReadIds = [];
     for (final AppNotification notification in notifications) {
@@ -191,9 +219,6 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  /// Phone notification for alerts that appear while the app is open (SRS: "instant" spending alerts).
-  /// The first time data arrives, the existing alerts are only remembered: they are old and already in the list,
-  /// so opening the app again never shows them twice.
   void _pushNewNotifications(List<AppNotification> notifications) {
     final Set<String> currentIds = {};
     for (final AppNotification notification in notifications) {
@@ -206,7 +231,6 @@ class _MainShellState extends State<MainShell> {
 
     final AppLocalizations l10n = AppLocalizations.of(context)!;
     for (final AppNotification notification in notifications) {
-      // Help replies are announced by _announceSupportReplies, using studentNotified in the database.
       if (notification.type == NotificationTypes.supportReplied) continue;
       final bool isNew = !knownIds.contains(notification.id);
       if (isNew && !notification.isRead) {
@@ -219,8 +243,6 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
-  /// BR-65: each admin reply gives one phone notification, then studentNotified is saved as true,
-  /// so opening the app again does not announce it again. The reply always stays in the in-app list.
   void _announceSupportReplies(List<AppNotification> notifications, List<SupportQuery> supportQueries) {
     final AppLocalizations l10n = AppLocalizations.of(context)!;
     for (final SupportQuery query in NotificationBuilder.supportRepliesToAnnounce(supportQueries)) {
@@ -238,7 +260,6 @@ class _MainShellState extends State<MainShell> {
           );
         }
       }
-      // Saved even when alerts are off, so turning them on later does not bring back old replies.
       widget.markSupportNotified(widget.profile.uid, query.id);
     }
   }
@@ -259,7 +280,6 @@ class _MainShellState extends State<MainShell> {
     );
     _pushNewNotifications(notifications);
     _announceSupportReplies(notifications, supportQueries);
-    // The student can turn alerts off in Settings: the list stays, only the badge is hidden.
     int unreadCount = 0;
     if (_profile.notificationsEnabled) unreadCount = NotificationDisplay.unreadCount(notifications);
 
@@ -300,14 +320,12 @@ class _MainShellState extends State<MainShell> {
       body: StreamBuilder<Set<String>>(
         stream: _readIdsStream,
         builder: (context, readSnapshot) {
-          // Read marks are extra: if they fail to load, every notification just shows as unread.
           if (readSnapshot.hasError) debugPrint('MainShell read notifications failed: ${readSnapshot.error}');
           final Set<String> readIds = readSnapshot.data ?? {};
 
           return StreamBuilder<List<SupportQuery>>(
             stream: _supportStream,
             builder: (context, supportSnapshot) {
-              // Same for help requests: without them only the "admin replied" notifications are missing.
               if (supportSnapshot.hasError) debugPrint('MainShell support requests failed: ${supportSnapshot.error}');
               final List<SupportQuery> supportQueries = supportSnapshot.data ?? [];
 

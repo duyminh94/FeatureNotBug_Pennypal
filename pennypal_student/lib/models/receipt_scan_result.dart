@@ -1,4 +1,3 @@
-/// What the receipt scan found; empty fields mean "not found" (BR-90 to BR-96).
 class ReceiptScanResult {
   final bool hasText;
   final double? amount;

@@ -5,7 +5,6 @@ import '../models/category.dart';
 import 'app_theme.dart';
 import 'constants.dart';
 
-/// Translated name of a payment mode.
 class PaymentModeDisplay {
   static String name(AppLocalizations l10n, String? mode) {
     return switch (mode) {
@@ -74,9 +73,7 @@ class StudentStatusDisplay {
   }
 }
 
-/// Name, icon and colors of a category, used by lists and cards.
 class CategoryDisplay {
-  /// The signed-in student's custom categories, kept up to date by MainShell.
   static List<Category> customCategories = [];
 
   static Category? findCustom(String categoryId) {
@@ -86,7 +83,6 @@ class CategoryDisplay {
     return null;
   }
 
-  /// Ids a student can pick for a transaction or budget: default ones first, then their own.
   static List<String> selectableIds(String type) {
     final List<String> ids = [...(type == TransactionTypes.income ? CategoryKeys.income : CategoryKeys.selectableExpense)];
     for (final Category category in customCategories) {
@@ -139,7 +135,6 @@ class CategoryDisplay {
     };
   }
 
-  /// Main color of a custom category's chosen color key (see [CustomCategoryColors.values]).
   static Color customColor(String colorKey) {
     return switch (colorKey) {
       'orange' => AppColors.orange,
@@ -153,7 +148,6 @@ class CategoryDisplay {
     };
   }
 
-  /// Soft (background) color matching [customColor].
   static Color customSoftColor(String colorKey) {
     return switch (colorKey) {
       'orange' => AppColors.orangeSoft,
@@ -167,7 +161,6 @@ class CategoryDisplay {
     };
   }
 
-  /// Icon color of the category; the tile background uses [softColor].
   static Color color(String categoryId) {
     final Category? custom = findCustom(categoryId);
     if (custom?.color != null) return customColor(custom!.color!);

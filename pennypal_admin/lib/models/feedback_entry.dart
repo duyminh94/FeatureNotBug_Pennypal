@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// App feedback from a student, stored at feedbacks/{feedbackId}.
 class FeedbackEntry {
   final String id;
   final String userId;
@@ -20,7 +19,6 @@ class FeedbackEntry {
     this.submittedAt,
   });
 
-  /// Builds a feedback entry from the map read at feedbacks/{feedbackId}.
   factory FeedbackEntry.fromMap(String id, Map<dynamic, dynamic> map) {
     return FeedbackEntry(
       id: id,
@@ -33,7 +31,6 @@ class FeedbackEntry {
     );
   }
 
-  /// Converts the feedback to a map for writing.
   Map<String, dynamic> toMap() {
     return {
       DbFields.userId: userId,

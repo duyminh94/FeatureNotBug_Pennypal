@@ -7,10 +7,7 @@ import '../../utils/app_theme.dart';
 import '../../utils/support_manager.dart';
 import 'widgets.dart';
 
-/// One support request: the student's message and the admin's reply box.
-/// After replying the request becomes Resolved and can only be read, not edited.
 class SupportDetailScreen extends StatefulWidget {
-  /// Student who sent the request; the reply is saved under this uid.
   final String uid;
   final SupportQuery query;
 
@@ -24,7 +21,6 @@ class _SupportDetailScreenState extends State<SupportDetailScreen> {
   final TextEditingController _replyController = TextEditingController();
   late SupportQuery _query;
 
-  // True while the reply is being saved, so the button cannot send it twice.
   bool _isSending = false;
 
   @override
@@ -39,8 +35,6 @@ class _SupportDetailScreenState extends State<SupportDetailScreen> {
     super.dispose();
   }
 
-  /// Saves the reply to Firebase. The screen only switches to Resolved when the save works,
-  /// otherwise the typed reply stays in the box so the admin can try again.
   Future<void> _sendReply() async {
     final l10n = AppLocalizations.of(context)!;
     final int now = DateTime.now().millisecondsSinceEpoch;
@@ -127,7 +121,6 @@ class _SupportDetailScreenState extends State<SupportDetailScreen> {
     );
   }
 
-  /// Reply box for an open request; the button stays off while the reply is empty or being sent.
   Widget _buildReplyBox(AppLocalizations l10n) {
     final bool canSend = SupportManager.canSendReply(_replyController.text) && !_isSending;
 
@@ -167,7 +160,6 @@ class _SupportDetailScreenState extends State<SupportDetailScreen> {
     );
   }
 
-  /// Read-only view of the answer once the request is resolved.
   Widget _buildResolved(AppLocalizations l10n, String languageCode, String response) {
     String notifyText = l10n.supportStudentPending;
     if (_query.studentNotified) notifyText = l10n.supportStudentNotified;

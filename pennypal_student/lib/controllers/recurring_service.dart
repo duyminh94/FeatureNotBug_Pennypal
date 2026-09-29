@@ -9,8 +9,6 @@ import '../utils/constants.dart';
 import '../utils/recurring_calculator.dart';
 import 'goal_service.dart';
 
-/// Reads and writes fixed monthly items at recurring/{uid}/{itemId}.
-/// Writes are not awaited, same as the other services, so they also work offline.
 class RecurringService {
   static const Duration readTimeout = Duration(seconds: 10);
 
@@ -24,7 +22,6 @@ class RecurringService {
     return items;
   }
 
-  // Runs once when the app opens. Offline or any error: nothing is written, the next opening tries again.
   static Future<void> createDue(String uid) async {
     try {
       final DateTime now = DateTime.now();
@@ -41,7 +38,6 @@ class RecurringService {
       final List<RecurringItem> goalItems = items.where((item) => item.isGoalContribution && item.isActive).toList();
       if (goalItems.isEmpty) return;
 
-      // All goals are read once, not once per item.
       final DataSnapshot goalSnapshot = await FirebaseDatabase.instance.ref('${DbNodes.savingsGoals}/$uid').get().timeout(readTimeout);
       final Map<String, SavingsGoal> goalsById = {};
       for (final SavingsGoal goal in GoalService.listFromValue(goalSnapshot.value)) {
@@ -55,7 +51,6 @@ class RecurringService {
     }
   }
 
-  // The contributions, the goal's saved money and status, and the stop flag are written in one update.
   static Future<void> _createGoalContributions(String uid, RecurringItem item, SavingsGoal? goal, DateTime now) async {
     final GoalAutoContribution result = RecurringCalculator.goalContributions(item, goal, now);
     if (result.lastCreatedMonth == item.lastCreatedMonth) return;
@@ -77,12 +72,9 @@ class RecurringService {
     });
   }
 
-  // increment() is not safe to repeat, so only one phone may add these months: lastCreatedMonth is moved
-  // forward in a database transaction, and only the phone that moved it writes the contributions.
   static Future<bool> _claimMonths(String uid, RecurringItem item, String newMonth) async {
     final DatabaseReference monthRef = FirebaseDatabase.instance.ref('${DbNodes.recurring}/$uid/${item.id}/${DbFields.lastCreatedMonth}');
     final TransactionResult result = await monthRef.runTransaction((Object? current) {
-      // null means the value is not loaded yet; the database calls this again with the real value.
       if (current == null) return Transaction.success(null);
       if (current != item.lastCreatedMonth) return Transaction.abort();
       return Transaction.success(newMonth);
@@ -99,7 +91,6 @@ class RecurringService {
     });
   }
 
-  // One item read once; null when it does not exist, nobody is signed in or the read fails.
   static Future<RecurringItem?> load(String itemId) async {
     try {
       final User? user = FirebaseAuth.instance.currentUser;
@@ -114,7 +105,6 @@ class RecurringService {
     }
   }
 
-  // Writes a whole new item (used when a goal turns on auto contribution for the first time).
   static void save(RecurringItem item) {
     try {
       final User? user = FirebaseAuth.instance.currentUser;
@@ -130,7 +120,6 @@ class RecurringService {
     }
   }
 
-  // Only the given fields change, so the lastCreatedMonth written by the app-open check is never overwritten.
   static void update(String itemId, Map<String, Object?> fields) {
     try {
       final User? user = FirebaseAuth.instance.currentUser;
@@ -146,7 +135,6 @@ class RecurringService {
     }
   }
 
-  // Transactions already created are kept.
   static void delete(String itemId) {
     try {
       final User? user = FirebaseAuth.instance.currentUser;
@@ -173,7 +161,6 @@ class RecurringService {
     }
   }
 
-  // The item and its first transaction are saved in one update: both are saved or neither is.
   static void create(RecurringItem item, TransactionRecord firstTransaction) {
     try {
       final User? user = FirebaseAuth.instance.currentUser;

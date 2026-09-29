@@ -75,7 +75,6 @@ void main() {
     final IconButton nextButton = tester.widget(find.widgetWithIcon(IconButton, Icons.chevron_right));
     expect(nextButton.onPressed, isNull);
 
-    // Changing the star filter goes back to page 1: 10 five-star feedbacks = 2 pages.
     await tester.tap(find.widgetWithText(ChoiceChip, '5★'));
     await tester.pump();
     expect(find.text('Showing 1-8 of 10'), findsOneWidget);

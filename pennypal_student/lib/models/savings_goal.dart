@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// A savings goal, stored at savings_goals/{uid}/{goalId}.
 class SavingsGoal {
   final String id;
   final String name;
@@ -28,7 +27,6 @@ class SavingsGoal {
     this.createdAt,
   });
 
-  /// Builds a goal from the map read at savings_goals/{uid}/{goalId}.
   factory SavingsGoal.fromMap(String id, Map<dynamic, dynamic> map) {
     final Map<dynamic, dynamic> rawMilestones = map[DbFields.milestones] ?? {};
     final Map<String, int> milestones = {};
@@ -52,7 +50,6 @@ class SavingsGoal {
     );
   }
 
-  /// Converts the goal to a map for writing.
   Map<String, dynamic> toMap() {
     return {
       DbFields.name: name,
@@ -68,19 +65,16 @@ class SavingsGoal {
     };
   }
 
-  /// Amount still needed to reach the target (never below 0).
   double get remainingAmount {
     final double remaining = targetAmount - currentAmount;
     return remaining < 0 ? 0 : remaining;
   }
 
-  /// Progress from 0.0 to 1.0.
   double get progress {
     if (targetAmount <= 0) return 0;
     final double value = currentAmount / targetAmount;
     return value > 1 ? 1 : value;
   }
 
-  /// True when the goal is still active.
   bool get isActive => status == GoalStatuses.active;
 }

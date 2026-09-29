@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Material icons for the 13 default categories and the 12 custom-category choices.
 const Map<String, IconData> _iconsByName = {
   'restaurant': Icons.restaurant,
   'directions_bus': Icons.directions_bus,
@@ -29,12 +28,10 @@ const Map<String, IconData> _iconsByName = {
   'category': Icons.category,
 };
 
-/// Converts an icon name stored in the database to IconData (unknown names show a generic icon).
 IconData categoryIconData(String iconName) {
   return _iconsByName[iconName] ?? Icons.category;
 }
 
-/// Rounded square icon used in category lists and transaction rows.
 class CategoryIcon extends StatelessWidget {
   final String iconName;
   final Color? color;

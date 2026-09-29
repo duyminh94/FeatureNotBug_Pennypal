@@ -12,7 +12,6 @@ import '../../widgets/error_state.dart';
 import 'detail_screen.dart';
 import 'widgets.dart';
 
-/// Lessons written by the admin in Firebase; the student only sees lessons that are turned on.
 class LearningScreen extends StatefulWidget {
   const LearningScreen({super.key});
 
@@ -146,7 +145,6 @@ class _LessonCard extends StatelessWidget {
                       foreground: AppColors.textPrimary,
                     ),
                   ),
-                  // SRS: lessons may use simple images. No image, or a broken link, shows the topic icon.
                   Center(
                     child: imageUrl.isEmpty
                         ? topicIcon

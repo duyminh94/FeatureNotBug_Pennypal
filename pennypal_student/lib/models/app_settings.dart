@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// Global settings edited by the admin, stored at app_settings.
 class AppSettings {
   final int defaultAlertThreshold;
   final String supportEmail;
@@ -18,7 +17,6 @@ class AppSettings {
     this.updatedAt,
   });
 
-  /// Builds settings from the map read at app_settings (missing fields use defaults, BR-105).
   factory AppSettings.fromMap(Map<dynamic, dynamic> map) {
     return AppSettings(
       defaultAlertThreshold:
@@ -31,7 +29,6 @@ class AppSettings {
     );
   }
 
-  /// Converts the settings to a map for writing.
   Map<String, dynamic> toMap() {
     return {
       DbFields.defaultAlertThreshold: defaultAlertThreshold,
@@ -43,7 +40,6 @@ class AppSettings {
     };
   }
 
-  /// Announcement text in the given language code, empty when turned off.
   String announcementFor(String languageCode) {
     if (!announcementActive) return '';
     return languageCode == 'vi' ? announcementVi : announcementEn;

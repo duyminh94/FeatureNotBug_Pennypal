@@ -10,7 +10,6 @@ import '../models/receipt_scan_result.dart';
 import '../utils/receipt_parser.dart';
 import '../utils/receipt_text_builder.dart';
 
-/// Result of picking a receipt photo.
 enum PickPhotoStatus { picked, cancelled, permissionDenied, failed }
 
 class PickPhotoResult {
@@ -20,11 +19,9 @@ class PickPhotoResult {
   const PickPhotoResult(this.status, [this.imagePath]);
 }
 
-/// Takes or picks a receipt photo, keeps it on the phone and reads it with ML Kit (BR-90 to BR-97).
 class ReceiptScanService {
   static const Set<String> _deniedCodes = {'camera_access_denied', 'photo_access_denied'};
 
-  /// Receipt scan uses ML Kit, which does not run on Web (A-13).
   static bool get isSupported => !kIsWeb;
 
   static Future<PickPhotoResult> pickPhoto(ImageSource source) async {
@@ -43,7 +40,6 @@ class ReceiptScanService {
     }
   }
 
-  /// BR-97: the photo lives in the app folder on this phone only.
   static Future<String> _copyToAppFolder(XFile photo) async {
     final Directory documents = await getApplicationDocumentsDirectory();
     final Directory receiptFolder = Directory('${documents.path}/receipts');
@@ -53,7 +49,6 @@ class ReceiptScanService {
     return targetPath;
   }
 
-  /// Reads the photo with ML Kit; a reading error counts as "no text" so the form still works (BR-96).
   static Future<ReceiptScanResult> readReceipt(String imagePath) async {
     final TextRecognizer recognizer = TextRecognizer(script: TextRecognitionScript.latin);
     try {
@@ -77,7 +72,6 @@ class ReceiptScanService {
     }
   }
 
-  /// Removes a receipt photo that the student no longer wants.
   static Future<void> deletePhoto(String imagePath) async {
     try {
       final File file = File(imagePath);

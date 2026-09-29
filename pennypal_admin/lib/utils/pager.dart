@@ -1,4 +1,3 @@
-/// Splits a long list into pages of 8 rows (Support and Feedbacks screens).
 class Pager {
   static const int pageSize = 8;
 
@@ -7,7 +6,6 @@ class Pager {
     return (total / pageSize).ceil();
   }
 
-  // A request moved to Resolved can make the last page disappear, so step back to the new last page.
   static int safePage(int pageIndex, int total) {
     final int lastPage = pageCount(total) - 1;
     if (pageIndex > lastPage) return lastPage;

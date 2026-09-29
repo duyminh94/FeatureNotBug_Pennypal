@@ -3,10 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import '../models/learning_content.dart';
 import '../utils/constants.dart';
 
-/// Reads the lessons the admin writes at learning_contents/{lessonId}.
-/// The student app never writes here (Security Rules: only an admin can).
 class LearningService {
-  /// Turns the raw value of learning_contents into a list, newest first.
   static List<LearningContent> listFromValue(Object? value) {
     final List<LearningContent> lessons = [];
     if (value is! Map) return lessons;
@@ -19,7 +16,6 @@ class LearningService {
     return lessons;
   }
 
-  /// Live list: a lesson the admin adds, edits or turns off changes here without reloading.
   static Stream<List<LearningContent>> watch() {
     try {
       final DatabaseReference lessonsRef = FirebaseDatabase.instance.ref(DbNodes.learningContents);

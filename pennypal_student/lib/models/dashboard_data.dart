@@ -2,7 +2,6 @@ import 'budget.dart';
 import 'savings_goal.dart';
 import 'transaction_record.dart';
 
-/// Aggregated data displayed on the Dashboard tab.
 class DashboardData {
   final String userName;
   final String? announcement;

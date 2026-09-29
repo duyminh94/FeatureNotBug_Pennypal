@@ -6,14 +6,7 @@ import '../models/transaction_record.dart';
 import 'budget_calculator.dart';
 import 'constants.dart';
 
-/// Builds the in-app notifications from the student's budgets, goals, transactions and help requests.
-///
-/// Nothing is stored here: the list is worked out again every time the data changes, so deleting
-/// or editing an expense also removes a budget alert that is no longer true. Each notification has
-/// a fixed id (for example "budget_2026-09_food_exceeded"), so the same event never shows twice
-/// and its "read" mark can be saved under that id.
 class NotificationBuilder {
-  /// All notifications, newest first. [readIds] are the ids the student has already opened.
   static List<AppNotification> build({
     required List<TransactionRecord> transactions,
     required List<Budget> budgets,
@@ -29,7 +22,6 @@ class NotificationBuilder {
     for (final SavingsGoal goal in goals) {
       notifications.addAll(_goalNotifications(goal, transactions, readIds));
     }
-    // The admin answered a help request: tell the student once (the "read" mark keeps it quiet after).
     for (final SupportQuery query in supportQueries) {
       final String response = query.adminResponse ?? '';
       if (!query.isResolved || response.isEmpty) continue;
@@ -48,8 +40,6 @@ class NotificationBuilder {
     return notifications;
   }
 
-  /// BR-65: help requests the admin answered and the student was not told about yet (studentNotified false).
-  /// After the phone notification is shown the app sets studentNotified to true, so each reply is announced once.
   static List<SupportQuery> supportRepliesToAnnounce(List<SupportQuery> supportQueries) {
     final List<SupportQuery> result = [];
     for (final SupportQuery query in supportQueries) {
@@ -59,8 +49,6 @@ class NotificationBuilder {
     return result;
   }
 
-  /// One alert per budget, only for its current level:
-  /// spent >= 100% of the limit -> exceeded, spent >= alert threshold -> warning, otherwise nothing.
   static AppNotification? _budgetAlert(Budget budget, List<TransactionRecord> transactions, Set<String> readIds) {
     final List<TransactionRecord> spending = _spendingOf(transactions, budget.month, budget.categoryId);
     double spent = 0;
@@ -84,8 +72,6 @@ class NotificationBuilder {
       return null;
     }
 
-    // Time of the alert = the expense that pushed spending over the level.
-    // A budget created after that (BR-27) alerts at the time it was created.
     final double levelAmount = budget.limitAmount * levelPercent / 100;
     int? createdAt = _timeAmountReached(spending, 0, levelAmount);
     if (createdAt == null && spending.isNotEmpty) createdAt = spending.last.date;
@@ -96,7 +82,6 @@ class NotificationBuilder {
     return AppNotification(id: id, type: type, params: params, isRead: readIds.contains(id), createdAt: createdAt);
   }
 
-  /// Expenses counted by a budget, oldest first (same rule as BudgetCalculator.spent: savings are not spending).
   static List<TransactionRecord> _spendingOf(List<TransactionRecord> transactions, String month, String? categoryId) {
     final List<TransactionRecord> result = [];
     for (final TransactionRecord transaction in transactions) {
@@ -109,7 +94,6 @@ class NotificationBuilder {
     return result;
   }
 
-  /// Milestones 25 / 50 / 75% reached and "completed" at 100%. Cancelled goals send nothing.
   static List<AppNotification> _goalNotifications(SavingsGoal goal, List<TransactionRecord> transactions, Set<String> readIds) {
     final List<AppNotification> result = [];
     if (goal.status == GoalStatuses.cancelled || goal.targetAmount <= 0) return result;
@@ -129,8 +113,6 @@ class NotificationBuilder {
       final String type = isCompleted ? NotificationTypes.goalCompleted : NotificationTypes.goalMilestone;
       final String id = 'goal_${goal.id}_$key';
 
-      // Time: the date the student marked it, otherwise the contribution that reached it,
-      // otherwise the goal's creation (the money saved at the start already covered it).
       int? createdAt = goal.milestones[key];
       if (isCompleted && goal.completedAt != null) createdAt = goal.completedAt;
       createdAt ??= _timeAmountReached(contributions, goal.initialAmount, goal.targetAmount * percent / 100);
@@ -147,8 +129,6 @@ class NotificationBuilder {
     return result;
   }
 
-  /// Date of the first transaction (oldest first) that brings [startAmount] up to [amount].
-  /// Null when [startAmount] already covers it or the transactions never reach it.
   static int? _timeAmountReached(List<TransactionRecord> sortedTransactions, double startAmount, double amount) {
     if (startAmount >= amount) return null;
     double total = startAmount;

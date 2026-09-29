@@ -23,7 +23,6 @@ import '../categories/screen.dart';
 import 'receipt_scan_widgets.dart';
 import 'scan_reading_screen.dart';
 
-/// S07 Add / edit transaction: one form for expense and income (BR-02 to BR-05), with receipt scan (BR-90 to BR-97).
 class TransactionFormScreen extends StatefulWidget {
   final String type;
   final TransactionRecord? initial;
@@ -94,7 +93,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
   Future<void> _pickDate() async {
     final DateTime today = DateTime.now();
-    // Editing a record older than 5 years: the picker must start at its date, or Flutter throws.
     DateTime firstDate = DateTime(today.year - 5);
     if (_date.isBefore(firstDate)) firstDate = DateTime(_date.year, _date.month, _date.day);
     final DateTime? picked = await showDatePicker(
@@ -118,7 +116,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     final String? uid = CategoryService.currentUid();
     if (uid == null) return;
     await Navigator.of(context).push(MaterialPageRoute(builder: (context) => CategoriesScreen(uid: uid)));
-    // A category made there is added to the grid when coming back.
     if (mounted) setState(() {});
   }
 
@@ -153,7 +150,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     if (mounted) _applyScanResult(result);
   }
 
-  /// BR-90: the scan only fills the form; the student still checks and saves it.
   void _applyScanResult(ReceiptScanResult result) {
     _removeOwnPhoto();
     setState(() {
@@ -188,7 +184,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     });
   }
 
-  /// Suggests an expense category from the description; it only picks the category while the student has not picked one.
   void _onDescriptionChanged(String text) {
     if (_isIncome) return;
     final String? categoryId = CategoryKeywords.findCategory(text);
@@ -200,7 +195,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     });
   }
 
-  /// Deletes the current photo only when this form created it (the saved transaction keeps its own photo).
   void _removeOwnPhoto() {
     final String? path = _receiptPath;
     if (path != null && path != widget.initial?.receiptLocalPath) ReceiptScanService.deletePhoto(path);
@@ -248,7 +242,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     Navigator.of(context).pop(FormResults.saved);
   }
 
-  // This month is the transaction being saved now, so the next one is created next month.
   void _saveRecurring() {
     final TransactionRecord transaction = _buildTransaction();
     final RecurringItem item = RecurringItem(

@@ -9,8 +9,6 @@ import '../../utils/user_filter.dart';
 import 'detail_screen.dart';
 import 'widgets.dart';
 
-/// Student accounts: search by name or email, filter active / locked,
-/// lock or unlock an account, and open a student's details.
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
 
@@ -24,7 +22,6 @@ class _UsersScreenState extends State<UsersScreen> {
   String _query = '';
   UserStatusFilter _status = UserStatusFilter.all;
 
-  // Current page of the tablet table, reset to the first page when the search or filter changes.
   int _pageIndex = 0;
 
   @override
@@ -39,8 +36,6 @@ class _UsersScreenState extends State<UsersScreen> {
     super.dispose();
   }
 
-  /// Starts listening to users. If Firebase is not ready the screen
-  /// shows the error box instead of crashing.
   void _openStream() {
     try {
       _userStream = UserService.watch();
@@ -49,15 +44,12 @@ class _UsersScreenState extends State<UsersScreen> {
     }
   }
 
-  /// Tries to load the accounts again after an error.
   void _retry() {
     setState(() {
       _openStream();
     });
   }
 
-  /// Asks first, then locks an active student or unlocks a locked one.
-  /// The list updates by itself from Firebase after the save.
   Future<void> _toggleLock(UserProfile user) async {
     final l10n = AppLocalizations.of(context)!;
     final bool confirmed = await confirmLockChange(context, user);
@@ -98,13 +90,11 @@ class _UsersScreenState extends State<UsersScreen> {
     );
   }
 
-  /// Search box, Active / Locked filter with counts, then a table (tablet) or cards (phone).
   Widget _buildContent(AppLocalizations l10n, List<UserProfile> users) {
     final List<UserProfile> students = UserFilter.students(users);
     final List<UserProfile> searched = UserFilter.apply(students, query: _query);
     final List<UserProfile> shown = UserFilter.apply(students, query: _query, status: _status);
 
-    // The filter counts follow the search, so "Locked 2" means 2 locked students match the search.
     int activeCount = 0;
     for (final UserProfile user in searched) {
       if (user.isActive) activeCount++;
@@ -180,11 +170,9 @@ class _UsersScreenState extends State<UsersScreen> {
     );
   }
 
-  /// Tablet table, 8 students per page with Previous / Next.
   Widget _buildTable(AppLocalizations l10n, List<UserProfile> shown) {
     final String languageCode = Localizations.localeOf(context).languageCode;
     final int pageCount = UserFilter.pageCount(shown.length);
-    // Stay inside the last page when a student disappears from the filtered list.
     int pageIndex = _pageIndex;
     if (pageIndex >= pageCount) pageIndex = pageCount - 1;
     final List<UserProfile> pageUsers = UserFilter.page(shown, pageIndex);
@@ -276,7 +264,6 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 }
 
-/// Phone layout of one student with Lock / Unlock and a tap to open details.
 class _UserCard extends StatelessWidget {
   final UserProfile user;
   final VoidCallback onLock;
@@ -360,7 +347,6 @@ class _Fact extends StatelessWidget {
   }
 }
 
-/// Shown when the accounts cannot be loaded, e.g. no connection or no permission.
 class _LoadError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

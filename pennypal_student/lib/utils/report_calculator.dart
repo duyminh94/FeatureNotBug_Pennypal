@@ -67,7 +67,6 @@ class ReportCalculator {
     return _shares(amounts);
   }
 
-  /// Income of the month grouped by source (allowance, part-time job, scholarship…).
   static List<CategoryTotal> incomeByCategory(List<TransactionRecord> transactions, DateTime month) {
     final String key = BudgetCalculator.monthKey(month);
     final Map<String, double> amounts = {};
@@ -78,7 +77,6 @@ class ReportCalculator {
     return _shares(amounts);
   }
 
-  /// Amount per category -> list with each category's share of the total, biggest first. Empty when total is 0.
   static List<CategoryTotal> _shares(Map<String, double> amounts) {
     double total = 0;
     for (final double amount in amounts.values) {

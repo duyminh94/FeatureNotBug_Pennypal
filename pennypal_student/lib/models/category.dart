@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// A transaction category: default (categories/{key}) or custom (user_categories/{uid}/{catId}).
 class Category {
   final String id;
   final String type;
@@ -24,7 +23,6 @@ class Category {
     this.color,
   });
 
-  /// Builds a default category from categories/{key}.
   factory Category.fromDefaultMap(String key, Map<dynamic, dynamic> map) {
     return Category(
       id: key,
@@ -36,7 +34,6 @@ class Category {
     );
   }
 
-  /// Builds a custom category from user_categories/{uid}/{catId}.
   factory Category.fromCustomMap(String catId, Map<dynamic, dynamic> map) {
     return Category(
       id: catId,
@@ -50,7 +47,6 @@ class Category {
     );
   }
 
-  /// Converts the category to a map for writing (custom and default have different fields).
   Map<String, dynamic> toMap() {
     if (isDefault) {
       return {

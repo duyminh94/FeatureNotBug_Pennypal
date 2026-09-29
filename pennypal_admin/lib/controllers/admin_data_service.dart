@@ -10,15 +10,10 @@ import 'settings_service.dart';
 import 'support_service.dart';
 import 'user_service.dart';
 
-/// Loads the real data the Overview and Analytics screens count and chart.
-///
-/// Realtime Database has no "sum / count / group by", so every node is read once with get()
-/// and grouped in the app with Map (one pass, O(n)). Security Rules let only an admin read them.
 class AdminDataService {
   static const String transactionsNode = 'transactions';
   static const String goalsNode = 'savings_goals';
 
-  // Without a time limit the Overview would spin forever when there is no internet.
   static const Duration readTimeout = Duration(seconds: 15);
 
   static Future<Object?> _read(String node) async {
@@ -26,7 +21,6 @@ class AdminDataService {
     return snapshot.value;
   }
 
-  /// transactions/{uid}/{transactionId} -> list of transactions for each student uid.
   static Map<String, List<TransactionRecord>> transactionsByUserFromValue(Object? value) {
     final Map<String, List<TransactionRecord>> result = {};
     if (value is! Map) return result;
@@ -39,7 +33,6 @@ class AdminDataService {
       for (final id in userTransactions.keys) {
         final item = userTransactions[id];
         if (item is! Map) continue;
-        // One record with a wrong type (e.g. amount "abc") is skipped so the whole Overview still loads.
         try {
           transactions.add(TransactionRecord.fromMap(id.toString(), item));
         } catch (e) {
@@ -51,7 +44,6 @@ class AdminDataService {
     return result;
   }
 
-  /// savings_goals/{uid}/{goalId} -> number of goals for each student uid.
   static Map<String, int> goalCountByUserFromValue(Object? value) {
     final Map<String, int> result = {};
     if (value is! Map) return result;
@@ -63,9 +55,6 @@ class AdminDataService {
     return result;
   }
 
-  /// Reads users, transactions, goals, help requests, feedback, lessons and settings once.
-  /// All reads start together (Future.wait), so the wait is the slowest read, not the 7 reads added up.
-  /// Throws when a read fails, so the screen can show "Try again".
   static Future<AdminData> load() async {
     final Future<AppSettings?> settingsFuture = SettingsService.load();
     final List<Object?> values = await Future.wait([

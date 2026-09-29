@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 
 import '../utils/app_theme.dart';
 
-/// "< September 2026 >" selector; always passes the first day of the chosen month.
 class MonthPicker extends StatelessWidget {
   final DateTime month;
   final ValueChanged<DateTime> onChanged;

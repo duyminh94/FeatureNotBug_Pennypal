@@ -8,8 +8,6 @@ import '../utils/app_theme.dart';
 import '../utils/lesson_editor.dart';
 import '../utils/settings_validator.dart';
 
-/// App Settings page: reads app_settings once from Firebase, then shows the form.
-/// The settings are read once (not live) so a change from elsewhere cannot wipe what the admin is typing.
 class AppSettingsScreen extends StatefulWidget {
   const AppSettingsScreen({super.key});
 
@@ -26,7 +24,6 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
     _settingsFuture = SettingsService.load();
   }
 
-  /// Reads the settings again after a loading error.
   void _retry() {
     setState(() {
       _settingsFuture = SettingsService.load();
@@ -53,8 +50,6 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   }
 }
 
-/// The settings form: budget alert threshold, support email and the announcement banner in EN / VI.
-/// Rules: threshold 50–100%, a valid support email, and an active banner needs both languages.
 class AppSettingsForm extends StatefulWidget {
   final AppSettings settings;
 
@@ -73,15 +68,12 @@ class _AppSettingsFormState extends State<AppSettingsForm> with SingleTickerProv
   bool _announcementActive = false;
   int? _updatedAt;
 
-  // True while saving, so the button cannot save twice.
   bool _isSaving = false;
 
-  /// Fills the form with the saved settings.
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // Rebuild when the tab changes so the message box switches language.
     _tabController.addListener(() {
       setState(() {});
     });
@@ -93,7 +85,6 @@ class _AppSettingsFormState extends State<AppSettingsForm> with SingleTickerProv
     _announcementActive = settings.announcementActive;
     _updatedAt = settings.updatedAt;
 
-    // Old data may hold a value outside 50–100; keep the slider inside its range.
     _threshold = settings.defaultAlertThreshold;
     if (_threshold < SettingsValidator.minThreshold) _threshold = SettingsValidator.minThreshold;
     if (_threshold > SettingsValidator.maxThreshold) _threshold = SettingsValidator.maxThreshold;
@@ -116,7 +107,6 @@ class _AppSettingsFormState extends State<AppSettingsForm> with SingleTickerProv
         announcementVi: _messageViController.text,
       );
 
-  /// Saves to Firebase; "Last updated" only changes when the save works.
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context)!;
     final int now = DateTime.now().millisecondsSinceEpoch;
@@ -148,7 +138,6 @@ class _AppSettingsFormState extends State<AppSettingsForm> with SingleTickerProv
     }
   }
 
-  /// Hint under the message box telling which language is still missing.
   String _missingMessage(AppLocalizations l10n, List<LessonLanguage> missing) {
     if (missing.length == 2) return l10n.settingsMissingBoth;
     if (missing.first == LessonLanguage.en) return l10n.settingsMissingEn;
@@ -164,8 +153,6 @@ class _AppSettingsFormState extends State<AppSettingsForm> with SingleTickerProv
     final bool isEnglishTab = _tabController.index == 0;
     final int? updatedAt = _updatedAt;
 
-    // Hint under the message: green check when both languages are filled,
-    // red warning only when the banner is on (a missing language would then reach students).
     IconData hintIcon = Icons.check;
     Color hintColor = AppColors.primary;
     String hintText = l10n.settingsBothFilled;
@@ -306,7 +293,6 @@ class _AppSettingsFormState extends State<AppSettingsForm> with SingleTickerProv
   }
 }
 
-/// Shown when the settings cannot be loaded, e.g. no connection or no permission.
 class _LoadError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

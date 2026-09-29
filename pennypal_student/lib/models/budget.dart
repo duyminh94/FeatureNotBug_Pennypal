@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// A monthly spending limit, stored at budgets/{uid}/{month}/{budgetKey}.
 class Budget {
   final String month;
   final String? categoryId;
@@ -18,7 +17,6 @@ class Budget {
     this.createdAt,
   });
 
-  /// Builds a budget from budgets/{uid}/{month}/{budgetKey}.
   factory Budget.fromMap(String month, Map<dynamic, dynamic> map) {
     return Budget(
       month: month,
@@ -31,7 +29,6 @@ class Budget {
     );
   }
 
-  /// Converts the budget to a map for writing.
   Map<String, dynamic> toMap() {
     return {
       DbFields.categoryId: categoryId,
@@ -42,9 +39,7 @@ class Budget {
     };
   }
 
-  /// True for the overall budget of the month.
   bool get isTotal => categoryId == null;
 
-  /// Node key under the month: the category id or "total".
   String get budgetKey => categoryId ?? DbNodes.budgetTotalKey;
 }

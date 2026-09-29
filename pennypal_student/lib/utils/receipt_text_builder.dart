@@ -1,4 +1,3 @@
-/// One line of text read by ML Kit, with its position on the photo.
 class TextLinePosition {
   final String text;
   final double top;
@@ -11,10 +10,7 @@ class TextLinePosition {
   double get height => bottom - top;
 }
 
-/// ML Kit returns text by blocks (left column, right column), so "TOTAL" and "125.000" end up far apart.
-/// This joins lines that sit on the same row, left to right, the way a person reads a receipt.
 class ReceiptTextBuilder {
-  /// O(n log n) for the sort, then one pass to build the rows.
   static String buildRows(List<TextLinePosition> lines) {
     if (lines.isEmpty) return '';
 
@@ -36,7 +32,6 @@ class ReceiptTextBuilder {
     }).join('\n');
   }
 
-  /// Two lines are on the same row when their vertical centers are closer than half of the smaller height.
   static bool _isSameRow(TextLinePosition rowStart, TextLinePosition line) {
     final double smallerHeight = rowStart.height < line.height ? rowStart.height : line.height;
     return (line.centerY - rowStart.centerY).abs() <= smallerHeight / 2;

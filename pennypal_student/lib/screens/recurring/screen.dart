@@ -16,7 +16,6 @@ import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 
-/// Fixed monthly incomes and expenses: change the amount, stop / turn back on, delete.
 class RecurringScreen extends StatefulWidget {
   final String uid;
   final Stream<List<RecurringItem>> Function(String uid) watchItems;
@@ -197,7 +196,6 @@ class _RecurringScreenState extends State<RecurringScreen> {
             Wrap(
               alignment: WrapAlignment.end,
               children: [
-                // A goal's monthly amount is changed in the goal form, so both places show the same number.
                 if (!item.isGoalContribution)
                   TextButton(
                     onPressed: () => _editAmount(item),

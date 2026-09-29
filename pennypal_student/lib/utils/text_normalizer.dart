@@ -1,4 +1,3 @@
-/// Lowercases text and removes Vietnamese accents, so "Tổng Cộng" and "tong cong" compare equal.
 class TextNormalizer {
   static const Map<String, String> _accentGroups = {
     'a': 'àáạảãâầấậẩẫăằắặẳẵ',

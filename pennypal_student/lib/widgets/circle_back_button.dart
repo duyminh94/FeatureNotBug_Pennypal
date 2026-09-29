@@ -3,7 +3,6 @@ import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../utils/app_theme.dart';
 
-/// White round back button used at the top of full-screen forms.
 class CircleBackButton extends StatelessWidget {
   const CircleBackButton({super.key});
 

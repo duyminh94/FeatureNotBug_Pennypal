@@ -11,8 +11,6 @@ import '../../widgets/confirm_dialog.dart';
 import 'lesson_form_screen.dart';
 import 'lesson_labels.dart';
 
-/// Learning corner management: the admin adds, edits, hides or deletes the
-/// bilingual lessons that students read in their app.
 class LearningScreen extends StatefulWidget {
   const LearningScreen({super.key});
 
@@ -23,10 +21,8 @@ class LearningScreen extends StatefulWidget {
 class _LearningScreenState extends State<LearningScreen> {
   late Stream<List<LearningContent>> _lessonStream;
 
-  // Selected topic filter, null means all topics.
   String? _topic;
 
-  // Lessons whose show / hide switch is being saved right now.
   final Set<String> _savingIds = {};
 
   @override
@@ -35,8 +31,6 @@ class _LearningScreenState extends State<LearningScreen> {
     _openStream();
   }
 
-  /// Starts listening to learning_contents. If Firebase is not ready the screen
-  /// shows the error box instead of crashing.
   void _openStream() {
     try {
       _lessonStream = LearningService.watch();
@@ -45,7 +39,6 @@ class _LearningScreenState extends State<LearningScreen> {
     }
   }
 
-  /// Opens the lesson stream again after a loading error.
   void _retry() {
     setState(() {
       _openStream();
@@ -57,8 +50,6 @@ class _LearningScreenState extends State<LearningScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
-  /// Shows or hides a lesson for students without deleting it.
-  /// A second tap on the same switch while the first one is still saving is ignored.
   Future<void> _setActive(LearningContent lesson, bool isActive) async {
     if (_savingIds.contains(lesson.id)) return;
     final l10n = AppLocalizations.of(context)!;
@@ -79,8 +70,6 @@ class _LearningScreenState extends State<LearningScreen> {
     }
   }
 
-  /// Opens the form for a new lesson (no [lesson]) or an existing one.
-  /// The form saves by itself and returns true only when the lesson is in Firebase.
   Future<void> _openForm({LearningContent? lesson}) async {
     final l10n = AppLocalizations.of(context)!;
     final String lessonId = lesson?.id ?? LearningService.newId();
@@ -92,7 +81,6 @@ class _LearningScreenState extends State<LearningScreen> {
     _showMessage(l10n.learningSaved);
   }
 
-  /// Deletes a lesson after the admin confirms; students lose it right away.
   Future<void> _delete(LearningContent lesson) async {
     final l10n = AppLocalizations.of(context)!;
     final bool confirmed = await showConfirmDialog(
@@ -133,7 +121,6 @@ class _LearningScreenState extends State<LearningScreen> {
     );
   }
 
-  /// Topic chips, the add button, and the lessons as a table (tablet) or cards (phone).
   Widget _buildContent(AppLocalizations l10n, List<LearningContent> lessons) {
     final List<LearningContent> shown = LessonEditor.filter(lessons, _topic);
 
@@ -200,7 +187,6 @@ class _LearningScreenState extends State<LearningScreen> {
     );
   }
 
-  /// Tablet layout: one row per lesson with an Active switch and edit/delete buttons.
   Widget _buildTable(AppLocalizations l10n, List<LearningContent> shown) {
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -233,7 +219,6 @@ class _LearningScreenState extends State<LearningScreen> {
   }
 }
 
-/// Filter chip for one lesson topic.
 class _TopicChip extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -257,7 +242,6 @@ class _TopicChip extends StatelessWidget {
   }
 }
 
-/// Small colored label for the topic or the level.
 class _Tag extends StatelessWidget {
   final String text;
   final bool isTopic;
@@ -280,7 +264,6 @@ class _Tag extends StatelessWidget {
   }
 }
 
-/// Edit and delete buttons of a lesson.
 class _Actions extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -312,7 +295,6 @@ class _Actions extends StatelessWidget {
   }
 }
 
-/// Phone layout of one lesson; the switch shows or hides it for students.
 class _LessonCard extends StatelessWidget {
   final LearningContent lesson;
   final ValueChanged<bool> onActiveChanged;
@@ -370,7 +352,6 @@ class _LessonCard extends StatelessWidget {
   }
 }
 
-/// Shown when the lessons cannot be loaded, e.g. no connection or no permission.
 class _LoadError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

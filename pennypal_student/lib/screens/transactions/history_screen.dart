@@ -16,9 +16,6 @@ import '../../widgets/transaction_tile.dart';
 import 'detail_screen.dart';
 import 'form_screen.dart';
 
-/// S06 Transaction history: month-scoped navigation, monthly financial summary,
-/// direct buttons for Income / Expense / All types, search, category & day filters,
-/// day-grouped transactions, swipe to delete with undo.
 class HistoryScreen extends StatefulWidget {
   final List<TransactionRecord>? initialTransactions;
   final DateTime? initialMonth;
@@ -50,7 +47,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool get _hasActiveFilters =>
       _query.isNotEmpty || _type != null || _categoryId != null || _selectedDay != null;
 
-  /// All transactions in the currently selected month.
   List<TransactionRecord> get _monthTransactions {
     return TransactionFilter.forMonth(_transactions, _selectedMonth);
   }
@@ -83,7 +79,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     super.dispose();
   }
 
-  // Any filter or month change starts again from the newest transactions.
   void _changeFilter(VoidCallback change) {
     setState(() {
       change();
@@ -260,10 +255,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header Bar
             _buildHeader(l10n),
 
-            // Month Navigation Bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
               child: MonthPicker(
@@ -272,13 +265,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
 
-            // Month Overview Summary Card (Clickable to filter income/expense)
             _buildMonthSummaryCard(l10n),
 
-            // Direct Buttons for All / Expense / Income
             _buildTypeSegmentedButtons(l10n),
 
-            // Search Box
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
               child: TextField(
@@ -304,7 +294,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
 
-            // Filter Chips (Category, Day in month, Clear filters if active)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.fromLTRB(20, 6, 20, 4),
@@ -341,7 +330,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
 
-            // Day Groups / Transaction List
             Expanded(
               child: groups.isEmpty
                   ? EmptyState(
@@ -428,7 +416,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
         children: [
           Row(
             children: [
-              // Income box - Tappable
               Expanded(
                 child: Material(
                   color: isIncomeSelected ? AppColors.mintSoft : Colors.transparent,
@@ -493,7 +480,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
               Container(width: 1, height: 38, color: AppColors.border),
               const SizedBox(width: 6),
-              // Expense box - Tappable
               Expanded(
                 child: Material(
                   color: isExpenseSelected ? AppColors.expenseSoft : Colors.transparent,

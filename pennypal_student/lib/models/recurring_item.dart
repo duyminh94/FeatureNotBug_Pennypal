@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// A fixed monthly income or expense, stored at recurring/{uid}/{itemId}.
 class RecurringItem {
   final String id;
   final String type;

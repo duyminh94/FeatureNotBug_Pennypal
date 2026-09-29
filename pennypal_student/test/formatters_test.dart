@@ -5,7 +5,6 @@ import 'package:pennypal_student/utils/formatters.dart';
 void main() {
   group('Formatters currency support (UI-05)', () {
     tearDown(() {
-      // Restore default currency after each test
       Formatters.setCurrency(AppDefaults.currency);
     });
 

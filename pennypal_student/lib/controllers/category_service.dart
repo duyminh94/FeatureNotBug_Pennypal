@@ -5,8 +5,6 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import '../models/category.dart';
 import '../utils/constants.dart';
 
-/// Custom categories of the student at user_categories/{uid}/{catId} (SRS Categories: IsDefault = false, CreatedBy = uid).
-/// Writes are not awaited, same as the other services, so the app keeps working offline.
 class CategoryService {
   static List<Category> listFromValue(Object? value) {
     final List<Category> categories = [];

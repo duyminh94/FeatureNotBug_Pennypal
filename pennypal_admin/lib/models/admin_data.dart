@@ -5,7 +5,6 @@ import 'support_query.dart';
 import 'transaction_record.dart';
 import 'user_profile.dart';
 
-/// Everything the Overview and Analytics screens count, read once from Firebase by AdminDataService.
 class AdminData {
   final List<UserProfile> users;
   final Map<String, List<TransactionRecord>> transactionsByUser;

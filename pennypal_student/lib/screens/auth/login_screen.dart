@@ -13,7 +13,6 @@ import '../main_shell.dart';
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
-/// S02 Login: email + password form with links to register and forgot password.
 class LoginScreen extends StatefulWidget {
   final Future<AuthResult> Function(String email, String password) signIn;
   final String? initialMessage;

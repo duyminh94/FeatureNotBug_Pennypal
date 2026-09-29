@@ -3,10 +3,7 @@ import 'category_keywords.dart';
 import 'constants.dart';
 import 'text_normalizer.dart';
 
-/// Turns the text read from a receipt into form values (BR-91 to BR-95). Pure Dart, no ML Kit here.
 class ReceiptParser {
-  /// Longer phrases first, compared after removing accents (words.md section 10).
-  /// "tong" alone is left out: on a blurry photo it also matches lines like "Tong so luong hang".
   static const List<String> _totalKeywords = [
     'can thanh toan',
     'grand total',
@@ -19,13 +16,10 @@ class ReceiptParser {
     'amount',
   ];
 
-  /// A line with these words counts items, not money ("Tong so luong hang 1.000"), so it is never a total line.
   static const List<String> _quantityWords = ['so luong', 'sl', 'qty', 'quantity'];
 
-  /// Header words printed on almost every receipt; they are not a description or a category hint.
   static const List<String> _headerWords = ['hoa don', 'receipt', 'invoice', 'phieu tinh tien', 'phieu thanh toan'];
 
-  // The year has 2 or 4 digits; an OCR misread like "202" is not taken as the year 202.
   static final RegExp _datePattern = RegExp(r'\b(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})\b');
   static final RegExp _timePattern = RegExp(r'\b\d{1,2}:\d{2}(:\d{2})?\b');
   static final RegExp _numberPattern = RegExp(r'\d[\d.,]*');
@@ -50,12 +44,10 @@ class ReceiptParser {
     );
   }
 
-  /// BR-93: understands 1.234.000 · 1,234,000 · 1234000đ · 12.50. Returns null for anything that is not an amount.
   static double? parseNumber(String token) {
     final String cleaned = token.replaceAll(RegExp(r'[.,]+$'), '');
     final String digitsOnly = cleaned.replaceAll(RegExp(r'[.,]'), '');
     if (digitsOnly.isEmpty) return null;
-    // BR-92: long digit strings are phone numbers or invoice codes; a leading 0 with 9+ digits is a phone number.
     if (digitsOnly.length > 10) return null;
     final bool hasSeparator = cleaned.contains('.') || cleaned.contains(',');
     if (!hasSeparator && cleaned.length >= 9 && cleaned.startsWith('0')) return null;
@@ -84,7 +76,6 @@ class ReceiptParser {
     return numbers;
   }
 
-  /// Only numbers printed like money (10.200 · 10,200.00); quantities and VAT rates like "1" or "10" are skipped.
   static Set<double> _formattedNumbersInLine(String line) {
     final String withoutDates = line.replaceAll(_datePattern, ' ').replaceAll(_timePattern, ' ');
     final Set<double> numbers = {};
@@ -106,9 +97,6 @@ class ReceiptParser {
     return _hasWord(normalizedLine, _totalKeywords);
   }
 
-  /// BR-91: prefer numbers on a "total" line (or the line right after it);
-  /// then a money amount printed on 2+ lines (total, cash paid… repeat the same value);
-  /// otherwise the largest number.
   static double? _findAmount(List<String> lines) {
     final List<double> totalLineNumbers = [];
     final List<double> allNumbers = [];
@@ -138,7 +126,6 @@ class ReceiptParser {
     return candidates.reduce((largest, amount) => amount > largest ? amount : largest);
   }
 
-  /// BR-94: the first line that is mostly letters and is not a header or a total line.
   static String? _findDescription(List<String> lines) {
     for (final String line in lines) {
       final String normalized = TextNormalizer.normalize(line);
@@ -153,7 +140,6 @@ class ReceiptParser {
     return null;
   }
 
-  /// BR-94: first dd/mm/yyyy date; a future or impossible date counts as "not found".
   static DateTime? _findDate(String text, DateTime today) {
     final RegExpMatch? match = _datePattern.firstMatch(text);
     if (match == null) return null;
@@ -164,7 +150,6 @@ class ReceiptParser {
     final int year = rawYear < 100 ? 2000 + rawYear : rawYear;
     final DateTime date = DateTime(year, month, day);
 
-    // Receipts older than year 2000 are an OCR mistake, not a real purchase.
     final bool isRealDate = year >= 2000 && date.year == year && date.month == month && date.day == day;
     final DateTime endOfToday = DateTime(today.year, today.month, today.day, 23, 59, 59);
     return isRealDate && !date.isAfter(endOfToday) ? date : null;

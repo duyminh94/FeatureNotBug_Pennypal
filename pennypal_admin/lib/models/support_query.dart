@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// A help request from a student, stored at support_queries/{uid}/{queryId}.
 class SupportQuery {
   final String id;
   final String userEmail;
@@ -24,7 +23,6 @@ class SupportQuery {
     this.studentNotified = false,
   });
 
-  /// Builds a query from the map read at support_queries/{uid}/{queryId}.
   factory SupportQuery.fromMap(String id, Map<dynamic, dynamic> map) {
     return SupportQuery(
       id: id,
@@ -39,7 +37,6 @@ class SupportQuery {
     );
   }
 
-  /// Converts the query to a map for writing.
   Map<String, dynamic> toMap() {
     return {
       DbFields.userEmail: userEmail,
@@ -53,6 +50,5 @@ class SupportQuery {
     };
   }
 
-  /// True when the admin has replied.
   bool get isResolved => status == SupportStatuses.resolved;
 }

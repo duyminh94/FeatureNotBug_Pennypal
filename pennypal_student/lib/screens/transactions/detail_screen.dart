@@ -12,8 +12,6 @@ import '../../widgets/circle_back_button.dart';
 import '../../widgets/confirm_dialog.dart';
 import 'form_screen.dart';
 
-/// S06 Transaction details: shows every field, with delete (BR-06 confirm) and edit.
-/// Pops with FormResults.deleted when the transaction was deleted.
 class TransactionDetailScreen extends StatelessWidget {
   final TransactionRecord transaction;
 

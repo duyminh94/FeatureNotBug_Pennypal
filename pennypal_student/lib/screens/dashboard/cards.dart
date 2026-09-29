@@ -12,7 +12,6 @@ import '../../utils/goal_calculator.dart';
 import '../../widgets/app_progress_bar.dart';
 import '../budget/cards.dart';
 
-/// Dark card with the all-time balance and the mascot.
 class BalanceCard extends StatelessWidget {
   final double balance;
   final bool hasData;
@@ -77,14 +76,12 @@ class BalanceCard extends StatelessWidget {
   }
 }
 
-/// White card with the monthly total budget and how much is used.
 class BudgetCard extends StatelessWidget {
   final Budget budget;
   final double spent;
   final DateTime month;
   final VoidCallback onTap;
 
-  /// Category name when the card shows a category budget; null shows "{month} budget" for the total.
   final String? title;
 
   const BudgetCard({super.key, required this.budget, required this.spent, required this.month, required this.onTap, this.title});
@@ -162,7 +159,6 @@ class BudgetCard extends StatelessWidget {
   }
 }
 
-/// Card shown when the month has no budget yet.
 class NoBudgetCard extends StatelessWidget {
   final VoidCallback onCreate;
 
@@ -210,7 +206,6 @@ class NoBudgetCard extends StatelessWidget {
   }
 }
 
-/// Card with the progress ring of one active savings goal.
 class GoalCard extends StatelessWidget {
   final SavingsGoal goal;
   final VoidCallback onTap;
@@ -220,7 +215,6 @@ class GoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Same rounding as the Goals tab (down), so 99.6% is 99% on both screens and 100% only when the goal is done.
     final int percent = GoalCalculator.percentOf(goal.progress);
 
     return Card(
@@ -288,7 +282,6 @@ class GoalCard extends StatelessWidget {
   }
 }
 
-/// One square button of the Shortcuts grid.
 class ShortcutButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -332,7 +325,6 @@ class ShortcutButton extends StatelessWidget {
   }
 }
 
-/// Card shown when the student has no transactions yet.
 class NoTransactionsCard extends StatelessWidget {
   final VoidCallback onAddExpense;
 

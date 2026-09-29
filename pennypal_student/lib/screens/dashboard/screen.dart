@@ -25,7 +25,6 @@ import '../transactions/detail_screen.dart';
 import '../transactions/form_screen.dart';
 import 'cards.dart';
 
-/// S05 Dashboard: balance, month summary, budget, goal, shortcuts and recent transactions.
 class DashboardScreen extends StatefulWidget {
   final DashboardData? data;
   final List<TransactionRecord>? transactions;
@@ -80,7 +79,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _openScreen(ChatbotScreen(uid: profile.uid, userName: widget.userName));
   }
 
-  /// The History tab shows its own "Deleted / Undo" bar; from the dashboard the student still needs a message.
   Future<void> _openDetail(TransactionRecord transaction) async {
     final Object? result = await Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => TransactionDetailScreen(transaction: transaction)),
@@ -92,14 +90,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ..showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.txDeleted)));
   }
 
-  /// Money spent this month in one category (same rule as the Budget tab: savings are not spending).
   double _categorySpent(Budget budget) {
     final String monthKey = BudgetCalculator.monthKey(_month);
     return BudgetCalculator.spent(widget.transactions ?? const [], monthKey, categoryId: budget.categoryId);
   }
 
-  /// Without a total budget the card shows the category budget that is closest to its limit,
-  /// so a warning like "Food 82%" is still on the home screen. Null when the month has no budget at all.
   Budget? _mostUsedCategoryBudget() {
     final List<Budget> categoryBudgets = BudgetCalculator.categoryBudgets(widget.budgets, BudgetCalculator.monthKey(_month));
     Budget? mostUsed;

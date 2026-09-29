@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// An in-app notification, stored at notifications/{uid}/{notificationId}.
 class AppNotification {
   final String id;
   final String type;
@@ -16,7 +15,6 @@ class AppNotification {
     this.createdAt,
   });
 
-  /// Builds a notification from the map read at notifications/{uid}/{notificationId}.
   factory AppNotification.fromMap(String id, Map<dynamic, dynamic> map) {
     final Map<dynamic, dynamic> rawParams = map[DbFields.params] ?? {};
     return AppNotification(
@@ -28,7 +26,6 @@ class AppNotification {
     );
   }
 
-  /// Converts the notification to a map for writing.
   Map<String, dynamic> toMap() {
     return {
       DbFields.type: type,

@@ -68,7 +68,6 @@ void main() {
       final groups = TransactionFilter.groupByDay([txSept1, txSept2]);
       expect(groups.length, 1);
       expect(groups.first.transactions.length, 2);
-      // txSept2 (income 200k) - txSept1 (expense 50k) = net 150k
       expect(groups.first.netTotal, 150000);
     });
   });
@@ -102,14 +101,11 @@ void main() {
       final all = [txSept1, txSept2, txAug, txOct];
       await openHistory(tester, transactions: all, initialMonth: DateTime(2026, 9));
 
-      // Month label for Sept 2026
       expect(find.textContaining('September 2026'), findsOneWidget);
 
-      // Sept transactions visible
       expect(find.text('Pho bo'), findsOneWidget);
       expect(find.text('Tien tieu vat'), findsOneWidget);
 
-      // Aug and Oct transactions NOT visible in Sept view
       expect(find.text('Sach giao khoa'), findsNothing);
       expect(find.text('Xe buyt'), findsNothing);
     });
@@ -120,15 +116,12 @@ void main() {
 
       expect(find.text('Pho bo'), findsOneWidget);
 
-      // Tap previous month (<) button
       await tester.tap(find.byTooltip('Previous month'));
       await tester.pumpAndSettle();
 
-      // Now on August 2026
       expect(find.textContaining('August 2026'), findsOneWidget);
       expect(find.text('Sach giao khoa'), findsOneWidget);
 
-      // Sept transactions gone from view
       expect(find.text('Pho bo'), findsNothing);
       expect(find.text('Tien tieu vat'), findsNothing);
     });
@@ -137,18 +130,15 @@ void main() {
       final all = [txSept1, txSept2, txAug, txOct];
       await openHistory(tester, transactions: all, initialMonth: DateTime(2026, 9));
 
-      // Type a query in search box
       await tester.enterText(find.byType(TextField), 'Pho');
       await tester.pumpAndSettle();
 
       expect(find.text('Pho bo'), findsOneWidget);
       expect(find.text('Tien tieu vat'), findsNothing);
 
-      // Tap clear query button
       await tester.tap(find.byTooltip('Clear filters'));
       await tester.pumpAndSettle();
 
-      // Still in September 2026, both Sept transactions visible, Aug/Oct still excluded
       expect(find.textContaining('September 2026'), findsOneWidget);
       expect(find.text('Pho bo'), findsOneWidget);
       expect(find.text('Tien tieu vat'), findsOneWidget);
@@ -159,28 +149,24 @@ void main() {
       final all = [txSept1, txSept2, txAug, txOct];
       await openHistory(tester, transactions: all, initialMonth: DateTime(2026, 9));
 
-      // Initially both Sept transactions visible
       expect(find.text('Pho bo'), findsOneWidget);
       expect(find.text('Tien tieu vat'), findsOneWidget);
 
       final segmentedFinder = find.byType(SegmentedButton<String?>);
       expect(segmentedFinder, findsOneWidget);
 
-      // Tap 'Expense' segment within SegmentedButton
       await tester.tap(find.descendant(of: segmentedFinder, matching: find.text('Expense')));
       await tester.pumpAndSettle();
 
       expect(find.text('Pho bo'), findsOneWidget);
       expect(find.text('Tien tieu vat'), findsNothing);
 
-      // Tap 'Income' segment within SegmentedButton
       await tester.tap(find.descendant(of: segmentedFinder, matching: find.text('Income')));
       await tester.pumpAndSettle();
 
       expect(find.text('Pho bo'), findsNothing);
       expect(find.text('Tien tieu vat'), findsOneWidget);
 
-      // Tap 'All' segment within SegmentedButton
       await tester.tap(find.descendant(of: segmentedFinder, matching: find.text('All')));
       await tester.pumpAndSettle();
 

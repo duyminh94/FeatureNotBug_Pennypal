@@ -14,7 +14,6 @@ class AboutScreen extends StatefulWidget {
 }
 
 class _AboutScreenState extends State<AboutScreen> {
-  // The support email comes from app_settings, which the admin edits.
   final Future<AppSettings> _settingsFuture = AppSettingsService.load();
 
   @override

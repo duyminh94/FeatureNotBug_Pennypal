@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Colors taken from the PennyPal design (PennyPal_Design/student).
 class AppColors {
   static const Color background = Color(0xFFFFF6F1);
   static const Color surface = Color(0xFFFFFFFF);
@@ -42,13 +41,11 @@ class AppColors {
   static const Color goldSoft = Color(0xFFFDF1D6);
 }
 
-/// Font family names declared in pubspec.yaml.
 class AppFonts {
   static const String heading = 'Baloo2';
   static const String body = 'BeVietnamPro';
 }
 
-/// Material 3 theme of the Student app.
 class AppTheme {
   static ThemeData light() {
     final colorScheme = ColorScheme.fromSeed(

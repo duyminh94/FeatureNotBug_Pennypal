@@ -8,17 +8,11 @@ import '../../utils/constants.dart';
 import '../../utils/lesson_editor.dart';
 import 'lesson_labels.dart';
 
-/// Add / edit form of a lesson with one tab per language (EN / VI).
-/// A lesson can only be saved when both languages have a title and a body,
-/// because students may read the app in either language.
 class LessonFormScreen extends StatefulWidget {
-  /// Id of the lesson being edited, or a new id prepared by the list screen.
   final String lessonId;
 
-  /// The lesson being edited, null when adding a new one.
   final LearningContent? initial;
 
-  /// Writes the lesson to Firebase; returns false when it fails (tests pass a fake one).
   final Future<bool> Function(LearningContent lesson) saveLesson;
 
   const LessonFormScreen({super.key, required this.lessonId, this.initial, this.saveLesson = LearningService.save});
@@ -39,12 +33,10 @@ class _LessonFormScreenState extends State<LessonFormScreen> with SingleTickerPr
   bool _isActive = true;
   bool _isSaving = false;
 
-  /// Fills the form with the lesson being edited; a new lesson keeps the defaults.
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // Rebuild when the tab changes so the fields switch between English and Vietnamese.
     _tabController.addListener(() {
       setState(() {});
     });
@@ -56,7 +48,6 @@ class _LessonFormScreenState extends State<LessonFormScreen> with SingleTickerPr
       _titleViController.text = lesson.titleVi;
       _bodyViController.text = lesson.bodyVi;
       _imageUrlController.text = lesson.imageUrl ?? '';
-      // A topic or level typed by hand in the console is not in the list, and the dropdown would crash on it.
       if (LearningTopics.values.contains(lesson.topic)) _topic = lesson.topic;
       if (LearningLevels.values.contains(lesson.level)) _level = lesson.level;
       _isActive = lesson.isActive;
@@ -74,7 +65,6 @@ class _LessonFormScreenState extends State<LessonFormScreen> with SingleTickerPr
     super.dispose();
   }
 
-  /// Languages that still miss a title or a body; each one gets a red dot on its tab.
   List<LessonLanguage> get _missing => LessonEditor.missingLanguages(
         titleEn: _titleEnController.text,
         bodyEn: _bodyEnController.text,
@@ -82,12 +72,8 @@ class _LessonFormScreenState extends State<LessonFormScreen> with SingleTickerPr
         bodyVi: _bodyViController.text,
       );
 
-  /// The image link is optional, but when filled it must be a web link.
   bool get _isImageUrlValid => LessonEditor.isValidImageUrl(_imageUrlController.text);
 
-  /// Saves the lesson to Firebase and only closes the form when it worked.
-  /// When saving fails the form stays open with everything typed, so the admin can press Save again.
-  /// createdAt is kept when editing so the lesson keeps its place in the list.
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context)!;
     final LearningContent? initial = widget.initial;
@@ -125,7 +111,6 @@ class _LessonFormScreenState extends State<LessonFormScreen> with SingleTickerPr
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.learningSaveFailed)));
   }
 
-  /// Hint under the tabs telling which language is still missing.
   String _missingMessage(AppLocalizations l10n, List<LessonLanguage> missing) {
     if (missing.length == 2) return l10n.learningMissingBoth;
     return missing.first == LessonLanguage.en ? l10n.learningMissingEn : l10n.learningMissingVi;

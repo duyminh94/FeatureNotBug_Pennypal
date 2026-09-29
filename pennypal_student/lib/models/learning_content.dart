@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// A bilingual financial lesson, stored at learning_contents/{contentId}.
 class LearningContent {
   final String id;
   final String titleEn;
@@ -28,7 +27,6 @@ class LearningContent {
     this.updatedAt,
   });
 
-  /// Builds a lesson from the map read at learning_contents/{contentId}.
   factory LearningContent.fromMap(String id, Map<dynamic, dynamic> map) {
     return LearningContent(
       id: id,
@@ -45,7 +43,6 @@ class LearningContent {
     );
   }
 
-  /// Converts the lesson to a map for writing.
   Map<String, dynamic> toMap() {
     return {
       DbFields.titleEn: titleEn,
@@ -61,13 +58,10 @@ class LearningContent {
     };
   }
 
-  /// Title in the given language code ("vi" or "en"); if that language is empty the other one is used.
   String titleFor(String languageCode) => _pick(languageCode, titleVi, titleEn);
 
-  /// Body in the given language code ("vi" or "en"); if that language is empty the other one is used.
   String bodyFor(String languageCode) => _pick(languageCode, bodyVi, bodyEn);
 
-  /// A lesson typed in only one language still shows text instead of an empty card.
   String _pick(String languageCode, String vietnamese, String english) {
     final String wanted = languageCode == 'vi' ? vietnamese : english;
     final String other = languageCode == 'vi' ? english : vietnamese;

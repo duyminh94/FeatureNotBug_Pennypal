@@ -11,8 +11,6 @@ import '../../utils/support_manager.dart';
 import '../../widgets/page_controls.dart';
 import '../../widgets/star_rating.dart';
 
-/// Feedbacks page: loads every rating students gave the app from Firebase.
-/// The admin can only read them, there is nothing to edit here.
 class FeedbacksScreen extends StatefulWidget {
   const FeedbacksScreen({super.key});
 
@@ -29,8 +27,6 @@ class _FeedbacksScreenState extends State<FeedbacksScreen> {
     _openStream();
   }
 
-  /// Starts listening to feedbacks. If Firebase is not ready the screen
-  /// shows the error box instead of crashing.
   void _openStream() {
     try {
       _feedbackStream = FeedbackService.watch();
@@ -39,7 +35,6 @@ class _FeedbacksScreenState extends State<FeedbacksScreen> {
     }
   }
 
-  /// Tries to load the feedback again after an error.
   void _retry() {
     setState(() {
       _openStream();
@@ -65,8 +60,6 @@ class _FeedbacksScreenState extends State<FeedbacksScreen> {
   }
 }
 
-/// Shows the average rating, the star filter and one card per feedback.
-/// It only draws the list it is given, so it can be tested without Firebase.
 class FeedbackListView extends StatefulWidget {
   final List<FeedbackEntry> feedbacks;
 
@@ -80,7 +73,6 @@ class _FeedbackListViewState extends State<FeedbackListView> {
   RatingFilter _filter = RatingFilter.all;
   int _pageIndex = 0;
 
-  /// Chip text of each star filter; 1 and 2 stars are grouped as the lowest.
   String _filterLabel(AppLocalizations l10n, RatingFilter filter) {
     return switch (filter) {
       RatingFilter.all => l10n.feedbackAll,
@@ -132,7 +124,6 @@ class _FeedbackListViewState extends State<FeedbackListView> {
             const SizedBox(height: 12),
             Wrap(spacing: 8, runSpacing: 8, children: filterChips),
             const SizedBox(height: 12),
-            // Only say "no feedback with this rating" when there is feedback but the filter hides it.
             if (shown.isEmpty && widget.feedbacks.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.all(24),
@@ -155,7 +146,6 @@ class _FeedbackListViewState extends State<FeedbackListView> {
     );
   }
 
-  /// Average of all ratings with its stars; shows "No feedback yet" when the list is empty.
   Widget _buildAverageCard(AppLocalizations l10n, String languageCode) {
     final double? average = OverviewCalculator.averageRating(widget.feedbacks);
 
@@ -194,7 +184,6 @@ class _FeedbackListViewState extends State<FeedbackListView> {
   }
 }
 
-/// One feedback: student name, date, stars and the comment (if any).
 class _FeedbackCard extends StatelessWidget {
   final FeedbackEntry feedback;
   final String languageCode;
@@ -241,7 +230,6 @@ class _FeedbackCard extends StatelessWidget {
   }
 }
 
-/// Shown when the feedback cannot be loaded, e.g. no connection or no permission.
 class _LoadError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

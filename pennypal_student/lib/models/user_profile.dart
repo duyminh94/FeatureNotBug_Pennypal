@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// Profile of a user, stored at users/{uid}.
 class UserProfile {
   final String uid;
   final String fullName;
@@ -28,7 +27,6 @@ class UserProfile {
     this.lastLogin,
   });
 
-  /// Builds a profile from the map read at users/{uid}.
   factory UserProfile.fromMap(String uid, Map<dynamic, dynamic> map) {
     return UserProfile(
       uid: uid,
@@ -45,7 +43,6 @@ class UserProfile {
     );
   }
 
-  /// Converts the profile to a map for writing to users/{uid}.
   Map<String, dynamic> toMap() {
     return {
       DbFields.fullName: fullName,
@@ -61,9 +58,7 @@ class UserProfile {
     };
   }
 
-  /// First letter of the name, used as the avatar (A-21).
   String get initial => fullName.isEmpty ? '?' : fullName[0].toUpperCase();
 
-  /// True when the user is an admin.
   bool get isAdmin => role == UserRoles.admin;
 }

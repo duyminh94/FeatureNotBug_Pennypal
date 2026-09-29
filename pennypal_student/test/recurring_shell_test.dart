@@ -88,7 +88,6 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    // Switching tabs rebuilds the screen but must not run the check again.
     await tester.tap(find.byIcon(Icons.flag_outlined).first);
     await tester.pumpAndSettle();
     expect(calledFor, ['student1']);

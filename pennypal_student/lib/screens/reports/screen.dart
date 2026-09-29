@@ -22,8 +22,6 @@ import '../../widgets/month_picker.dart';
 import '../../widgets/summary_card.dart';
 import '../transactions/form_screen.dart';
 
-/// Reports for one month: totals, balance, spending or income by category, 6-month trend and budget vs actual.
-/// Listens to Firebase while open, so a transaction added from here shows up right away.
 class ReportsScreen extends StatefulWidget {
   final String uid;
   final Stream<List<TransactionRecord>> Function(String uid) watchTransactions;
@@ -51,7 +49,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
   StreamSubscription<List<TransactionRecord>>? _transactionSubscription;
   StreamSubscription<List<Budget>>? _budgetSubscription;
   DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
-  // Filter by transaction type: false = spending by category, true = income by source.
   bool _showIncome = false;
 
   @override
@@ -204,7 +201,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
   }
 
-  /// Balance of the month = income − (spending + money put into savings goals).
   Widget _buildBalanceRow(AppLocalizations l10n, MonthSummary summary) {
     final double balance = summary.income - summary.spending - summary.savings;
     String sign = '';
@@ -227,7 +223,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
   }
 
-  /// Budget vs actual for every budget of the month (the monthly total first, then each category).
   Widget _buildBudgetCard(AppLocalizations l10n) {
     final String monthKey = BudgetCalculator.monthKey(_month);
     final List<Budget> budgets = [];
@@ -255,7 +250,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
               children: [
                 Expanded(child: Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600))),
                 const SizedBox(width: 8),
-                // Big amounts ("100.000.000 ₫ of 200.000.000 ₫") wrap to a second line instead of overflowing on 320dp.
                 Flexible(
                   child: Text(
                     l10n.reportsBudgetUsed(Formatters.money(spent), Formatters.money(budget.limitAmount), percent),

@@ -19,7 +19,6 @@ void main() {
   }
 
   Future<void> openDashboard(WidgetTester tester, List<TransactionRecord> transactions, List<Budget> budgets) async {
-    // Tests draw every letter as a 16px box (Ahem font), so the month bar needs a wider screen than a real phone.
     tester.view.physicalSize = const Size(600, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);

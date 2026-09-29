@@ -7,12 +7,9 @@ import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../../utils/goal_calculator.dart';
 
-/// The 25% / 50% / 75% / 100% milestones of a goal.
-/// The student marks a milestone by hand once the saved money reaches it; the mark date is shown after.
 class GoalMilestones extends StatelessWidget {
   final SavingsGoal goal;
 
-  /// Called with the milestone key ("m25", "m50"…) when the student presses Mark.
   final ValueChanged<String> onMark;
 
   const GoalMilestones({super.key, required this.goal, required this.onMark});
@@ -40,8 +37,6 @@ class GoalMilestones extends StatelessWidget {
   }
 }
 
-/// One milestone circle with what is under it:
-/// the mark date (already marked), a Mark button (reached) or just the percent (not reached yet, locked).
 class _MilestoneItem extends StatelessWidget {
   final int percent;
   final int? markedAt;
@@ -57,7 +52,6 @@ class _MilestoneItem extends StatelessWidget {
     final bool isMarked = date != null;
     final bool isLocked = !isMarked && !canMark;
 
-    // Circle colors: honey when marked, light honey when it can be marked, grey when locked.
     Color circleColor = AppColors.fill;
     Color borderColor = AppColors.border;
     double borderWidth = 2;
@@ -112,7 +106,6 @@ class _MilestoneItem extends StatelessWidget {
       below = Text('$percent%', style: const TextStyle(fontSize: 14, color: AppColors.textSecondary));
     }
 
-    // Screen readers say "locked" for a milestone that is not reached yet.
     String? semanticsLabel;
     if (isLocked) semanticsLabel = l10n.goalMilestoneLocked(percent);
 

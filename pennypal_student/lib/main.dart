@@ -10,7 +10,6 @@ import 'controllers/locale_service.dart';
 import 'controllers/push_notification_service.dart';
 import 'utils/app_theme.dart';
 
-/// Starts Firebase, loads the saved language, prepares phone notifications, then shows the app.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -18,7 +17,6 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    // Offline cache only works on Android / iOS (database.md section 8).
     if (!kIsWeb) {
       try {
         FirebaseDatabase.instance.setPersistenceEnabled(true);
@@ -33,7 +31,6 @@ Future<void> main() async {
   runApp(const PennyPalApp());
 }
 
-/// Root widget: theme, language and localization delegates.
 class PennyPalApp extends StatelessWidget {
   const PennyPalApp({super.key});
 

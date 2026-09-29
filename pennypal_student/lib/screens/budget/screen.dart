@@ -11,14 +11,9 @@ import '../../widgets/month_picker.dart';
 import 'cards.dart';
 import 'form_screen.dart';
 
-/// Budget tab: the monthly total budget and one card per category budget for the chosen month.
-/// Budgets and transactions come from MainShell, which listens to Firebase;
-/// the form screen saves the changes.
 class BudgetScreen extends StatefulWidget {
-  /// Budgets of every month; null only in old tests, then sample data is shown.
   final List<Budget>? initialBudgets;
 
-  /// All transactions, used to work out how much was spent against each budget.
   final List<TransactionRecord>? transactions;
 
   const BudgetScreen({super.key, this.initialBudgets, this.transactions});
@@ -30,7 +25,6 @@ class BudgetScreen extends StatefulWidget {
 class _BudgetScreenState extends State<BudgetScreen> {
   List<Budget> _budgets = [];
 
-  // Month being viewed, starts at the current month.
   DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
 
   @override
@@ -39,7 +33,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
     _budgets = _copyBudgets();
   }
 
-  /// When Firebase sends new budgets, MainShell rebuilds this screen with a new list; take a copy of it.
   @override
   void didUpdateWidget(covariant BudgetScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -48,7 +41,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
     }
   }
 
-  /// Own copy of the budget list, so updating the screen right after saving does not change MainShell's list.
   List<Budget> _copyBudgets() {
     final List<Budget>? budgets = widget.initialBudgets;
     if (budgets == null) return [];
@@ -63,13 +55,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
     return BudgetCalculator.monthKey(_month);
   }
 
-  /// Money spent in the budget's month (and category, unless it is the total budget).
   double _spentFor(Budget budget) {
     return BudgetCalculator.spent(_transactions, budget.month, categoryId: budget.categoryId);
   }
 
-  /// Opens the form to add a budget ([budget] null) or edit / delete one.
-  /// The screen is updated at once with the result, the saved data also comes back from Firebase.
   Future<void> _openForm({Budget? budget}) async {
     final Object? result = await Navigator.of(context).push(
       MaterialPageRoute(
@@ -89,13 +78,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
       } else if (result is Budget) {
         _removeSameKey(result);
         _budgets.add(result);
-        // Jump to the month of the saved budget, the student may have picked another month in the form.
         _month = BudgetCalculator.monthFromKey(result.month);
       }
     });
   }
 
-  /// Removes the budget with the same month and category, so a saved budget replaces the old one.
   void _removeSameKey(Budget target) {
     final List<Budget> kept = [];
     for (final Budget item in _budgets) {
@@ -114,7 +101,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
     for (final Budget budget in categoryBudgets) {
       spentByBudget[budget] = _spentFor(budget);
     }
-    // Most used budget first, so the student sees the risky categories at the top.
     categoryBudgets.sort((a, b) {
       final int percentA = BudgetCalculator.percent(spentByBudget[a]!, a.limitAmount);
       final int percentB = BudgetCalculator.percent(spentByBudget[b]!, b.limitAmount);
@@ -122,7 +108,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
     });
     final bool isEmpty = totalBudget == null && categoryBudgets.isEmpty;
 
-    // Card at the top: the total budget, or an invite to create one when there is none.
     Widget totalCard;
     if (totalBudget == null) {
       totalCard = NoTotalBudgetCard(onCreate: () => _openForm());
@@ -190,7 +175,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
               )
             else ...[
               totalCard,
-              // Warn when the category limits add up to more than the total budget.
               if (BudgetCalculator.isCategoryTotalOverLimit(_budgets, _monthKey)) ...[
                 const SizedBox(height: 12),
                 CategoryOverTotalWarning(categoryLimitsTotal: BudgetCalculator.categoryLimitsTotal(_budgets, _monthKey)),

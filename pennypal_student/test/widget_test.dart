@@ -9,7 +9,6 @@ import 'package:pennypal_student/widgets/empty_state.dart';
 import 'package:pennypal_student/widgets/error_state.dart';
 import 'package:pennypal_student/widgets/month_picker.dart';
 
-/// Wraps a widget with the app theme and localizations for testing.
 Widget buildTestApp(Widget child, {Locale locale = const Locale('en')}) {
   return MaterialApp(
     theme: AppTheme.light(),

@@ -1,6 +1,5 @@
 import '../utils/constants.dart';
 
-/// A bilingual financial lesson, stored at learning_contents/{contentId}.
 class LearningContent {
   final String id;
   final String titleEn;
@@ -28,7 +27,6 @@ class LearningContent {
     this.updatedAt,
   });
 
-  /// Builds a lesson from the map read at learning_contents/{contentId}.
   factory LearningContent.fromMap(String id, Map<dynamic, dynamic> map) {
     return LearningContent(
       id: id,
@@ -45,7 +43,6 @@ class LearningContent {
     );
   }
 
-  /// Converts the lesson to a map for writing.
   Map<String, dynamic> toMap() {
     return {
       DbFields.titleEn: titleEn,
@@ -61,10 +58,8 @@ class LearningContent {
     };
   }
 
-  /// Title in the given language code ("vi" or "en").
   String titleFor(String languageCode) =>
       languageCode == 'vi' ? titleVi : titleEn;
 
-  /// Body in the given language code ("vi" or "en").
   String bodyFor(String languageCode) => languageCode == 'vi' ? bodyVi : bodyEn;
 }

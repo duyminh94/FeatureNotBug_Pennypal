@@ -10,7 +10,6 @@ class CsvExporter {
     try {
       final Uint8List bytes = utf8.encode(content);
 
-      // Web has no temp folder: the file is made in memory, and the browser downloads it when it can't share files.
       if (kIsWeb) {
         final XFile webFile = XFile.fromData(bytes, mimeType: 'text/csv', name: fileName);
         await Share.shareXFiles([webFile], subject: fileName, fileNameOverrides: [fileName]);

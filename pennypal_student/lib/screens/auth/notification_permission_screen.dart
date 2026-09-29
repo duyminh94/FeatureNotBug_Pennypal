@@ -7,19 +7,16 @@ import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 import '../main_shell.dart';
 
-/// S01 Notification permission: explains why reminders help, shown after sign up.
 class NotificationPermissionScreen extends StatelessWidget {
   final UserProfile profile;
 
   const NotificationPermissionScreen({super.key, required this.profile});
 
-  /// "Allow": shows the system permission dialog, then opens the app.
   Future<void> _allow(BuildContext context) async {
     await PushNotificationService.requestPermission();
     if (context.mounted) _continue(context);
   }
 
-  /// "Later": the app will not ask again on its own; the student can still allow it in phone settings.
   Future<void> _later(BuildContext context) async {
     await PushNotificationService.markAsked();
     if (context.mounted) _continue(context);

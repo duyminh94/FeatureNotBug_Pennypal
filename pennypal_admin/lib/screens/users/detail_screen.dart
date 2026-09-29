@@ -9,8 +9,6 @@ import '../../utils/formatters.dart';
 import '../../utils/user_filter.dart';
 import 'widgets.dart';
 
-/// Details of one student: profile, how many transactions and goals they have,
-/// and the Lock / Unlock button. The admin never sees the amounts, only counts.
 class UserDetailScreen extends StatefulWidget {
   final UserProfile user;
 
@@ -23,11 +21,9 @@ class UserDetailScreen extends StatefulWidget {
 class _UserDetailScreenState extends State<UserDetailScreen> {
   late UserProfile _user;
 
-  // Null while loading or when the count could not be read; the card then shows "–".
   int? _transactionCount;
   int? _goalCount;
 
-  // True while the lock change is being saved, so the button cannot be pressed twice.
   bool _isSaving = false;
 
   @override
@@ -37,7 +33,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     _loadCounts();
   }
 
-  /// Reads the two counts once when the screen opens.
   Future<void> _loadCounts() async {
     final int? transactionCount = await UserService.countTransactions(_user.uid);
     final int? goalCount = await UserService.countGoals(_user.uid);
@@ -49,7 +44,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     });
   }
 
-  /// Asks first, then saves the new lock state. The screen only changes when the save works.
   Future<void> _toggleLock() async {
     final l10n = AppLocalizations.of(context)!;
     final bool confirmed = await confirmLockChange(context, _user);
@@ -72,7 +66,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     }
   }
 
-  /// Count as text for the current language, or "–" when it is not available.
   String _countText(int? count, String languageCode) {
     if (count == null) return '–';
     return Formatters.count(count, languageCode);
@@ -172,7 +165,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   }
 }
 
-/// One line of the profile card: label on the left, value on the right.
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
@@ -200,7 +192,6 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-/// Small card with one number, e.g. the transaction count.
 class _CountCard extends StatelessWidget {
   final String label;
   final String value;

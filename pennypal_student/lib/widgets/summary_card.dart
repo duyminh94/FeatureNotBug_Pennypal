@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../utils/app_theme.dart';
 
-/// Small colored tile with an icon, a title and an amount (Dashboard income / expense / savings).
 class SummaryCard extends StatelessWidget {
   final String title;
   final String value;

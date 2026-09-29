@@ -24,7 +24,6 @@ class GeminiAdvisorService {
   ];
   static const String _envApiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
 
-  /// Retrieves the active Gemini API key. Defaults to built-in backend API key.
   static Future<String> getApiKey() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -37,23 +36,19 @@ class GeminiAdvisorService {
     return _defaultBackendApiKey;
   }
 
-  /// Saves the user-provided Gemini API key to SharedPreferences.
   static Future<void> saveApiKey(String apiKey) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefApiKey, apiKey.trim());
   }
 
-  /// Checks if Gemini API key is configured.
   static Future<bool> isConfigured() async {
     final key = await getApiKey();
     return key.isNotEmpty;
   }
 
-  /// Parses the target planning month (e.g. "2026-10") from the user's query.
   static String parseTargetMonth(String query, DateTime now, {String? fallbackMonth}) {
     final q = query.toLowerCase();
 
-    // 1. "tháng sau", "tháng tới", "tháng tiếp", "next month"
     if (q.contains('tháng sau') ||
         q.contains('thang sau') ||
         q.contains('tháng tới') ||
@@ -67,7 +62,6 @@ class GeminiAdvisorService {
       return '${next.year}-${next.month.toString().padLeft(2, '0')}';
     }
 
-    // 2. Specific month with year: "tháng 10/2026", "thang 10-2026", "tháng 10.2026"
     final monthYearPattern = RegExp(r'(?:tháng|thang|month)\s*([0-9]{1,2})[\/\-\.]([0-9]{4})');
     final myMatch = monthYearPattern.firstMatch(q);
     if (myMatch != null) {
@@ -78,7 +72,6 @@ class GeminiAdvisorService {
       }
     }
 
-    // 3. Month number only: "tháng 10", "thang 10", "month 10"
     final monthPattern = RegExp(r'(?:tháng|thang|month)\s*([0-9]{1,2})\b');
     final mMatch = monthPattern.firstMatch(q);
     if (mMatch != null) {
@@ -93,15 +86,12 @@ class GeminiAdvisorService {
       return fallbackMonth;
     }
 
-    // Default to current month
     return '${now.year}-${now.month.toString().padLeft(2, '0')}';
   }
 
-  /// Parses expected income amount from user query if provided.
   static double? parseIncomeFromQuery(String query) {
     final q = query.toLowerCase();
 
-    // 1. Check compound "XtrY" or "X triệu Y" (e.g. "5tr5", "5 triệu 5")
     final trPatternCompound = RegExp(r'(\d+)\s*(?:tr|triệu|trieu)\s*(\d+)');
     final compoundMatch = trPatternCompound.firstMatch(q);
     if (compoundMatch != null) {
@@ -120,7 +110,6 @@ class GeminiAdvisorService {
       return major * 1000000 + minor;
     }
 
-    // 2. Check "X.Y triệu", "X.Y tr", "X triệu", "X tr", "Xm"
     final trPattern = RegExp(r'(\d+(?:[\.,]\d+)?)\s*(?:triệu|trieu|tr\b|m\b)');
     final trMatch = trPattern.firstMatch(q);
     if (trMatch != null) {
@@ -131,7 +120,6 @@ class GeminiAdvisorService {
       }
     }
 
-    // 3. Check "Xk", "X nghìn", "X ngàn"
     final kPattern = RegExp(r'(\d+(?:[\.,]\d+)?)\s*(?:k\b|nghìn|ngàn|nghin|ngan)');
     final kMatch = kPattern.firstMatch(q);
     if (kMatch != null) {
@@ -142,7 +130,6 @@ class GeminiAdvisorService {
       }
     }
 
-    // 4. Check full formatted or plain number: "5.000.000", "5,000,000", "5000000"
     final fullNumberPattern = RegExp(r'(?:thu nhập|lương|dự kiến|khoảng|có|là)?\s*(\d{1,3}(?:[\.,]\d{3}){1,3}|\d{6,10})\s*(?:đ|vnd|đồng|dong)?');
     for (final match in fullNumberPattern.allMatches(q)) {
       final raw = match.group(1);
@@ -158,7 +145,6 @@ class GeminiAdvisorService {
     return null;
   }
 
-  /// Checks if the user's message is asking for a budget plan or answering an income prompt.
   static bool isBudgetPlanningRequest(String query) {
     final q = query.toLowerCase();
     final bool hasPlanningKeyword = q.contains('kế hoạch') ||
@@ -176,7 +162,6 @@ class GeminiAdvisorService {
 
     if (hasPlanningKeyword) return true;
 
-    // Answering an expected income prompt (e.g. "Thu nhập 5 triệu", "Lương 6tr")
     final bool isQuestioning = q.contains('bao nhiêu') || q.contains('bao nhieu') || q.contains('how much');
     if (!isQuestioning && (q.contains('thu nhập') || q.contains('thu nhap') || q.contains('lương') || q.contains('luong'))) {
       if (parseIncomeFromQuery(query) != null) {
@@ -187,7 +172,6 @@ class GeminiAdvisorService {
     return false;
   }
 
-  /// Calculates total recorded income for a specific month string (e.g. "2026-10").
   static double calculateMonthIncomeForMonth(List<TransactionRecord> transactions, String monthStr) {
     try {
       final parts = monthStr.split('-');
@@ -208,8 +192,6 @@ class GeminiAdvisorService {
     }
   }
 
-  /// Calls Gemini API to get advice or a structured budget plan.
-  /// Falls back to offline heuristic plan if no key, offline, or request fails.
   static Future<ChatMessage> generateResponse({
     required String query,
     required ChatbotData data,
@@ -226,7 +208,6 @@ class GeminiAdvisorService {
       final double recordedIncome = calculateMonthIncomeForMonth(data.transactions, targetMonth);
       final double targetIncome = explicitIncome ?? recordedIncome;
 
-      // Missing income scenario: target month has no recorded income and user did not specify one
       if (targetIncome <= 0) {
         final targetParts = targetMonth.split('-');
         final displayMonth = '${targetParts[1]}/${targetParts[0]}';
@@ -253,7 +234,6 @@ class GeminiAdvisorService {
         );
       }
 
-      // We have targetIncome > 0
       final apiKey = await getApiKey();
       if (apiKey.isEmpty) {
         return _buildHeuristicBudgetPlanMessage(
@@ -310,7 +290,6 @@ class GeminiAdvisorService {
       }
     }
 
-    // General AI chat query
     final apiKey = await getApiKey();
     if (apiKey.isEmpty) {
       return ChatMessage(
@@ -558,8 +537,6 @@ Hãy trả lời thân thiện, súc tích, mang tính khuyến khích, có emoj
         : '🐷 Penny has analyzed your income and fixed expenses to design an optimal budget for month ${plan.month}! Review and tap "Apply to Budget" below:';
   }
 
-  /// Fallback offline heuristic budget plan generator.
-  /// Handles both standard 50/30/20 rule and deficit survival mode when income < fixedExpenses.
   static BudgetPlanProposal generateHeuristicPlan({
     required ChatbotData data,
     required String month,
@@ -575,7 +552,6 @@ Hãy trả lời thân thiện, súc tích, mang tính khuyến khích, có emoj
     final bool isDeficit = income < fixedExpenses;
 
     if (isDeficit) {
-      // Deficit mode: Survival budget allocation
       final List<BudgetPlanItem> items = [
         BudgetPlanItem(
           categoryId: CategoryKeys.food,
@@ -624,7 +600,6 @@ Hãy trả lời thân thiện, súc tích, mang tính khuyến khích, có emoj
       );
     }
 
-    // Normal mode: 50/30/20 rule
     double available = income - fixedExpenses - savingsGoal;
     if (available <= 0) available = income * 0.5;
 

@@ -79,7 +79,6 @@ void main() {
 
       support.add([query('q1')]);
       await tester.pumpAndSettle();
-      // Same data again before Firebase saved studentNotified: no second announcement.
       support.add([query('q1')]);
       await tester.pumpAndSettle();
 

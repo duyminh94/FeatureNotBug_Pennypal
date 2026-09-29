@@ -98,7 +98,6 @@ void main() {
       expect(plan.items, isNotEmpty);
       expect(plan.totalPlanned, greaterThan(0));
 
-      // Check category items contain food, transport, etc.
       final categories = plan.items.map((i) => i.categoryId).toSet();
       expect(categories.contains(CategoryKeys.food), isTrue);
       expect(categories.contains(CategoryKeys.transport), isTrue);
@@ -162,7 +161,7 @@ void main() {
       final now = DateTime(2026, 9, 28);
       final data = ChatbotData(
         userName: 'Khoa',
-        transactions: [], // No income recorded for October
+        transactions: [],
         budgets: [],
         goals: [],
         customCategories: [],
@@ -217,7 +216,6 @@ void main() {
         recurringItems: recurringItems,
       );
 
-      // Expected income 2,000,000 is lower than fixed expenses 3,000,000
       final plan = GeminiAdvisorService.generateHeuristicPlan(
         data: data,
         month: '2026-10',
@@ -226,9 +224,8 @@ void main() {
 
       expect(plan.isDeficit, isTrue);
       expect(plan.deficitAmount, 1000000.0);
-      expect(plan.savingsTotal, 0.0); // No savings during deficit
+      expect(plan.savingsTotal, 0.0);
 
-      // Shopping and entertainment should be 0.0 in survival mode
       final shoppingItem = plan.items.firstWhere((i) => i.categoryId == CategoryKeys.shopping);
       final entertainmentItem = plan.items.firstWhere((i) => i.categoryId == CategoryKeys.entertainment);
       expect(shoppingItem.amount, 0.0);

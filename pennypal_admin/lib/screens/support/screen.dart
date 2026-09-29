@@ -11,8 +11,6 @@ import '../../widgets/page_controls.dart';
 import 'detail_screen.dart';
 import 'widgets.dart';
 
-/// Support inbox: every help request students send, split into Open and Resolved.
-/// The admin opens a request to read it and write a reply.
 class SupportScreen extends StatefulWidget {
   const SupportScreen({super.key});
 
@@ -23,7 +21,6 @@ class SupportScreen extends StatefulWidget {
 class _SupportScreenState extends State<SupportScreen> {
   late Stream<Map<String, List<SupportQuery>>> _supportStream;
 
-  // Tab being shown: open requests first because they need an answer.
   String _status = SupportStatuses.open;
   int _pageIndex = 0;
 
@@ -33,8 +30,6 @@ class _SupportScreenState extends State<SupportScreen> {
     _openStream();
   }
 
-  /// Starts listening to support_queries. If Firebase is not ready the screen
-  /// shows the error box instead of crashing.
   void _openStream() {
     try {
       _supportStream = SupportService.watch();
@@ -43,14 +38,12 @@ class _SupportScreenState extends State<SupportScreen> {
     }
   }
 
-  /// Tries to load the requests again after an error.
   void _retry() {
     setState(() {
       _openStream();
     });
   }
 
-  /// Opens a request. The student's uid is passed along so the reply is saved in the right place.
   void _openDetail(Map<String, List<SupportQuery>> supportByUser, SupportQuery query) {
     final String? uid = SupportManager.ownerOf(supportByUser, query.id);
     if (uid == null) return;
@@ -78,7 +71,6 @@ class _SupportScreenState extends State<SupportScreen> {
     );
   }
 
-  /// Open / Resolved switch with a counter, then the requests of the selected tab.
   Widget _buildList(AppLocalizations l10n, Map<String, List<SupportQuery>> supportByUser) {
     final String languageCode = Localizations.localeOf(context).languageCode;
     final List<SupportQuery> open = SupportManager.withStatus(supportByUser, SupportStatuses.open);
@@ -136,7 +128,6 @@ class _SupportScreenState extends State<SupportScreen> {
     );
   }
 
-  /// Message shown when the selected tab has no requests.
   Widget _buildEmpty(AppLocalizations l10n) {
     IconData icon = Icons.mark_email_read_outlined;
     String message = l10n.supportEmptyOpen;
@@ -164,7 +155,6 @@ class _SupportScreenState extends State<SupportScreen> {
   }
 }
 
-/// One request in the list: subject, student email, time sent and its status.
 class _RequestCard extends StatelessWidget {
   final SupportQuery query;
   final String languageCode;
@@ -208,7 +198,6 @@ class _RequestCard extends StatelessWidget {
   }
 }
 
-/// Shown when the requests cannot be loaded, e.g. no connection or no permission.
 class _LoadError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

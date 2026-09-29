@@ -5,7 +5,6 @@ import 'package:pennypal_admin/controllers/learning_service.dart';
 import 'package:pennypal_admin/controllers/support_service.dart';
 import 'package:pennypal_admin/controllers/user_service.dart';
 
-// One good record and one record with a wrong type in each node: the good one must still load.
 void main() {
   test('a transaction with amount "abc" is skipped, the others still load', () {
     final result = AdminDataService.transactionsByUserFromValue({

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Colors taken from the PennyPal design (PennyPal_Design/admin).
 class AppColors {
   static const Color background = Color(0xFFF4F5F7);
   static const Color surface = Color(0xFFFFFFFF);
@@ -23,12 +22,10 @@ class AppColors {
   static const Color infoSoft = Color(0xFFE3EEFA);
 }
 
-/// Font family name declared in pubspec.yaml.
 class AppFonts {
   static const String main = 'Manrope';
 }
 
-/// Material 3 theme of the Admin app.
 class AppTheme {
   static ThemeData light() {
     final colorScheme = ColorScheme.fromSeed(

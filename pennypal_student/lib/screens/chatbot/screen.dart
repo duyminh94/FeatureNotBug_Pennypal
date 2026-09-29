@@ -24,8 +24,6 @@ import '../../widgets/app_progress_bar.dart';
 import '../../widgets/category_icon.dart';
 import '../transactions/form_screen.dart';
 
-/// Answers from live Firebase data and optional Gemini AI.
-/// If data fails or Gemini is unavailable, falls back gracefully to offline engine.
 class ChatbotScreen extends StatefulWidget {
   final String uid;
   final String userName;
@@ -206,7 +204,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     final bool isPlanning = GeminiAdvisorService.isBudgetPlanningRequest(query);
     final ChatIntent intent = ChatIntentMatcher.detect(query);
 
-    // If budget planning or unknown intent with configured Gemini, use async AI
     final bool shouldUseAi = isPlanning || (_hasConfiguredGemini && intent == ChatIntent.unknown);
 
     if (shouldUseAi) {
@@ -214,7 +211,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       return;
     }
 
-    // Default fast synchronous flow for offline / local engine (preserves exact test semantics)
     final ChatMessage question = ChatMessage(
       isUser: true,
       text: query,
@@ -287,7 +283,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   void _applyBudgetPlan(BudgetPlanProposal plan) {
-    // Save each category budget to Firebase
     for (final item in plan.items) {
       if (item.amount > 0) {
         BudgetService.save(Budget(
@@ -298,11 +293,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       }
     }
 
-    // Also update/save total monthly budget
     if (plan.totalPlanned > 0) {
       BudgetService.save(Budget(
         month: plan.month,
-        categoryId: null, // Total month budget
+        categoryId: null,
         limitAmount: plan.totalPlanned,
       ));
     }

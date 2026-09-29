@@ -14,15 +14,9 @@ import '../../utils/validators.dart';
 import '../../widgets/labeled_text_field.dart';
 import 'cards.dart';
 
-/// Create or edit a savings goal.
-/// Rules: a name, a target above 0, money already saved must be below the target,
-/// the target date must be after today. The monthly amount is optional: it gives the estimate and can be
-/// contributed automatically every month.
 class GoalFormScreen extends StatefulWidget {
-  /// The goal being edited, null when creating.
   final SavingsGoal? initial;
 
-  /// True when the edited goal already has contributions (the target cannot go below the money saved).
   final bool hasContributions;
 
   final Future<RecurringItem?> Function(String itemId) loadRecurringItem;
@@ -44,10 +38,8 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
   final TextEditingController _dateController = TextEditingController();
   DateTime? _targetDate;
 
-  // Errors appear only after the first Save press.
   bool _hasTriedToSave = false;
 
-  // The goal's monthly auto contribution (recurring/{uid}/goal_{goalId}), null when there is none.
   RecurringItem? _autoItem;
   bool _isAutoContribute = false;
 
@@ -55,7 +47,6 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     return widget.initial != null;
   }
 
-  /// Money added by contributions after the goal was created (saved money minus the starting amount).
   double get _contributedAmount {
     final SavingsGoal? initial = widget.initial;
     if (initial == null) return 0;
@@ -66,23 +57,19 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     return Validators.parseAmount(_targetController.text);
   }
 
-  /// Money the student already had when creating the goal (0 when empty).
   double get _currentSavings {
     return Validators.parseAmount(_currentSavingsController.text) ?? 0;
   }
 
-  /// Planned amount per month (0 when empty, then no estimate is shown).
   double get _monthlyContribution {
     return Validators.parseAmount(_monthlyController.text) ?? 0;
   }
 
-  /// Amount for a text field: empty for null or 0, otherwise with thousand separators.
   String _amountText(double? amount) {
     if (amount == null || amount == 0) return '';
     return Formatters.groupDigits(amount);
   }
 
-  /// An edited goal loads its saved values; a new goal starts empty.
   @override
   void initState() {
     super.initState();
@@ -108,7 +95,6 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     });
   }
 
-  // Auto contribution only makes sense for a running goal with a monthly amount.
   bool get _canAutoContribute {
     final bool isGoalActive = widget.initial?.isActive ?? true;
     return isGoalActive && _monthlyContribution > 0;
@@ -129,8 +115,6 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     return null;
   }
 
-  /// Target above 0 and below the app maximum. When the goal already has contributions,
-  /// the new target must stay above the money saved, otherwise the goal would be over 100%.
   String? _validateTarget(String? value, AppLocalizations l10n) {
     final double? amount = Validators.parseAmount(value);
     if (!Validators.isPositiveAmount(amount)) return l10n.validationAmountPositive;
@@ -142,7 +126,6 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     return null;
   }
 
-  /// Money already saved must be 0 or more and below the target (checked only once the target is valid).
   String? _validateCurrentSavings(AppLocalizations l10n) {
     final double? target = _targetAmount;
     if (target == null || target <= 0) return null;
@@ -150,7 +133,6 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     return l10n.goalValidationInitial;
   }
 
-  /// A target date is required and must be after today.
   String? _validateDate(AppLocalizations l10n) {
     final DateTime? date = _targetDate;
     if (date == null) return l10n.validationRequired;
@@ -158,7 +140,6 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     return l10n.goalValidationDate;
   }
 
-  /// Date picker from tomorrow up to 10 years ahead.
   Future<void> _pickDate() async {
     final DateTime today = DateTime.now();
     final DateTime tomorrow = DateTime(today.year, today.month, today.day + 1);
@@ -180,8 +161,6 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     });
   }
 
-  /// Saves the goal and goes back with it. When editing, money from contributions is kept:
-  /// saved money = new starting amount + contributions. Status, milestones and dates stay the same.
   void _save() {
     final l10n = AppLocalizations.of(context)!;
     setState(() {
@@ -363,7 +342,6 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     );
   }
 
-  /// Live estimate under the form: months needed at the monthly amount and whether the date is realistic.
   Widget _buildEstimate(AppLocalizations l10n) {
     final double? target = _targetAmount;
     final double current = _currentSavings + _contributedAmount;
@@ -419,7 +397,6 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
   }
 }
 
-/// Bold label above a field.
 class _FieldLabel extends StatelessWidget {
   final String text;
 
@@ -434,7 +411,6 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
-/// Money field with a "₫" suffix; shows a lock when the value cannot be changed.
 class _AmountField extends StatelessWidget {
   final String label;
   final IconData icon;

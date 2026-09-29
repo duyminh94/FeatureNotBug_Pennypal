@@ -19,23 +19,15 @@ import '../../widgets/confirm_dialog.dart';
 import '../../widgets/month_picker.dart';
 import 'cards.dart';
 
-/// Add / edit / delete a budget. A budget is either the month's total or one expense category.
-/// Rules: limit above 0 and below the app maximum, one budget per category (and one total) per month,
-/// warning threshold 50–100%. When editing, the month and category are locked, only the limit changes.
 class BudgetFormScreen extends StatefulWidget {
-  /// Month shown when adding a budget.
   final DateTime month;
 
-  /// All budgets, used to block a second budget for the same month and category.
   final List<Budget> budgets;
 
-  /// All transactions, used for the "already spent" preview.
   final List<TransactionRecord> transactions;
 
-  /// The budget being edited, null when adding.
   final Budget? initial;
 
-  /// Reads app_settings; a new budget starts at the admin's default threshold (BR-22).
   final Future<AppSettings> Function() loadSettings;
 
   const BudgetFormScreen({
@@ -52,7 +44,6 @@ class BudgetFormScreen extends StatefulWidget {
 }
 
 class _BudgetFormScreenState extends State<BudgetFormScreen> {
-  // The warning slider goes from 50% to 100%.
   static const int _minThreshold = 50;
   static const int _maxThreshold = 100;
 
@@ -64,14 +55,12 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
   int _threshold = AppDefaults.alertThreshold;
   bool _isThresholdMovedByUser = false;
 
-  // Errors appear only after the first Save press, not while the student is still typing.
   bool _hasTriedToSave = false;
 
   bool get _isEditing {
     return widget.initial != null;
   }
 
-  /// A new budget starts on the month being viewed; an edited one loads its saved values.
   @override
   void initState() {
     super.initState();
@@ -89,8 +78,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     }
   }
 
-  /// BR-22: a new budget uses app_settings.defaultAlertThreshold; if it can't be read the 80% default stays.
-  /// A value the student already picked on the slider is never replaced.
   Future<void> _loadDefaultThreshold() async {
     final AppSettings settings = await widget.loadSettings();
     if (!mounted || _isThresholdMovedByUser) return;
@@ -108,12 +95,10 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     super.dispose();
   }
 
-  /// The typed limit as a number ("1.500.000" -> 1500000), null when it is not a number.
   double? get _limitAmount {
     return Validators.parseAmount(_limitController.text);
   }
 
-  /// The limit must be above 0 and not above the app's maximum amount.
   String? _validateLimit(String? value, AppLocalizations l10n) {
     final double? amount = Validators.parseAmount(value);
     if (!Validators.isPositiveAmount(amount)) return l10n.validationAmountPositive;
@@ -126,8 +111,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
-  /// Checks the form, blocks a duplicate budget, saves it and goes back with the new budget.
-  /// The alert level already reached is kept when editing, so the same warning is not sent twice.
   void _save() {
     final l10n = AppLocalizations.of(context)!;
     setState(() {
@@ -136,7 +119,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final String month = BudgetCalculator.monthKey(_month);
-    // A total budget has no category.
     String? categoryId = _categoryId;
     if (_isTotal) categoryId = null;
     if (BudgetCalculator.isDuplicate(widget.budgets, month, categoryId, editing: widget.initial)) {
@@ -157,7 +139,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     Navigator.of(context).pop(budget);
   }
 
-  /// Asks first, then deletes the budget. Transactions are not touched, only the limit is removed.
   Future<void> _delete() async {
     final l10n = AppLocalizations.of(context)!;
     final Budget initial = widget.initial!;
@@ -227,7 +208,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
               controller: _limitController,
               keyboardType: TextInputType.number,
               inputFormatters: [ThousandsInputFormatter()],
-              // Rebuild so the "already spent" preview follows the typed limit.
               onChanged: (_) {
                 setState(() {});
               },
@@ -302,7 +282,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     );
   }
 
-  /// Expense categories the student can budget (income categories and savings are not listed).
   List<DropdownMenuItem<String>> _categoryItems(AppLocalizations l10n) {
     final List<DropdownMenuItem<String>> items = [];
     for (final String categoryId in CategoryDisplay.selectableIds(TransactionTypes.expense)) {
@@ -325,7 +304,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     return items;
   }
 
-  /// Adding: choose "total" or "by category"; by category also needs the category.
   List<Widget> _buildTypeAndCategory(AppLocalizations l10n) {
     return [
       _FieldLabel(text: l10n.budgetType),
@@ -363,7 +341,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     ];
   }
 
-  /// Editing: the category is shown but locked; to change it the student deletes and adds again.
   List<Widget> _buildLockedCategory(AppLocalizations l10n) {
     final String? categoryId = widget.initial!.categoryId;
 
@@ -384,7 +361,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     ];
   }
 
-  /// Preview of how much of the new limit is already used this month.
   Widget _buildSpentPreview(AppLocalizations l10n, String languageCode, double limitAmount) {
     final Budget initial = widget.initial!;
     final double spent = BudgetCalculator.spent(widget.transactions, initial.month, categoryId: initial.categoryId);
@@ -421,7 +397,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     );
   }
 
-  /// Save button, plus Delete when editing.
   Widget _buildBottomButtons(AppLocalizations l10n) {
     if (!_isEditing) return FilledButton(onPressed: _save, child: Text(l10n.budgetSave));
 
@@ -445,7 +420,6 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
   }
 }
 
-/// Bold label above a field.
 class _FieldLabel extends StatelessWidget {
   final String text;
 
@@ -460,7 +434,6 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
-/// Grey read-only box for a value that cannot change while editing.
 class _LockedBox extends StatelessWidget {
   final IconData icon;
   final String text;

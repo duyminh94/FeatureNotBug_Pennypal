@@ -33,7 +33,6 @@ class _SupportFormScreenState extends State<SupportFormScreen> {
     return (value ?? '').trim().length < min ? l10n.validationMinLength(min) : l10n.validationMaxLength(max);
   }
 
-  /// Sends the request to Firebase (status "open"); the admin sees it in the Admin app.
   void _send() {
     setState(() => _hasTriedToSend = true);
     if (!_formKey.currentState!.validate()) return;

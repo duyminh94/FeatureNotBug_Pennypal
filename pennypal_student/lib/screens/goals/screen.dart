@@ -13,13 +13,9 @@ import 'cards.dart';
 import 'detail_screen.dart';
 import 'form_screen.dart';
 
-/// Goals tab: active goals on the first tab, completed and cancelled goals under History.
-/// Goals and transactions come from MainShell, which listens to Firebase.
 class GoalsScreen extends StatefulWidget {
-  /// The student's goals; null only in old tests, then sample data is shown.
   final List<SavingsGoal>? initialGoals;
 
-  /// All transactions; a goal's contributions are the ones linked to it by goalId.
   final List<TransactionRecord>? transactions;
 
   const GoalsScreen({super.key, this.initialGoals, this.transactions});
@@ -40,7 +36,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
     _transactions = _copyTransactions();
   }
 
-  /// When Firebase sends new data, MainShell rebuilds this screen with new lists; take copies of them.
   @override
   void didUpdateWidget(covariant GoalsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -64,13 +59,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
     return List.of(transactions);
   }
 
-  /// Number of contributions of a goal, shown on a cancelled goal's card.
   int _contributionCount(SavingsGoal goal) {
     return GoalCalculator.contributionsOf(goal.id, _transactions).length;
   }
 
-  /// Applies a change made on the detail screen right away (the same data also comes back from Firebase):
-  /// the goal is replaced, or removed when it was deleted, and its contributions are replaced.
   void _applyChange(GoalChange change) {
     setState(() {
       final SavingsGoal? changedGoal = change.goal;
@@ -93,8 +85,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
     });
   }
 
-  /// Opens a goal. The detail screen may ask to show History (after completing)
-  /// or to create a new goal (from the "goal reached" screen).
   Future<void> _openDetail(SavingsGoal goal) async {
     final GoalDetailAction? action = await Navigator.of(context).push<GoalDetailAction>(
       MaterialPageRoute(
@@ -117,7 +107,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
     }
   }
 
-  /// Opens the new goal form; the new goal is put at the top of the Active tab.
   Future<void> _openForm() async {
     final SavingsGoal? saved = await Navigator.of(context).push<SavingsGoal>(
       MaterialPageRoute(builder: (context) => const GoalFormScreen()),
@@ -196,7 +185,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
     );
   }
 
-  /// Active tab: one card per active goal and a button to create another one.
   List<Widget> _buildActive(AppLocalizations l10n, List<SavingsGoal> activeGoals) {
     if (activeGoals.isEmpty) {
       return [
@@ -227,13 +215,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
     return widgets;
   }
 
-  /// History tab: completed goals, then cancelled goals, then a banner with the total money saved.
   List<Widget> _buildHistory(AppLocalizations l10n, List<SavingsGoal> completedGoals, List<SavingsGoal> cancelledGoals) {
     if (completedGoals.isEmpty && cancelledGoals.isEmpty) {
       return [EmptyState(icon: Icons.history, message: l10n.goalEmptyHistory)];
     }
 
-    // Only completed goals count as saved money; cancelled goals do not.
     double totalSaved = 0;
     for (final SavingsGoal goal in completedGoals) {
       totalSaved += goal.currentAmount;
@@ -286,7 +272,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
   }
 }
 
-/// Heading above the Completed / Cancelled lists.
 class _SectionTitle extends StatelessWidget {
   final String text;
 

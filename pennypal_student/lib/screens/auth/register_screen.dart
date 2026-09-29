@@ -12,7 +12,6 @@ import '../../widgets/error_banner.dart';
 import '../../widgets/labeled_text_field.dart';
 import 'notification_permission_screen.dart';
 
-/// S03 Register: profile fields, optional student status and password check.
 class RegisterScreen extends StatefulWidget {
   final Future<AuthResult> Function(RegisterForm form) register;
 

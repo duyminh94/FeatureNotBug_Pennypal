@@ -7,7 +7,6 @@ import '../models/transaction_record.dart';
 import '../models/user_profile.dart';
 import 'constants.dart';
 
-/// Temporary demo data for the static UI; replaced by Firebase data later.
 class DashboardData {
   final String userName;
   final String? announcement;
@@ -59,7 +58,6 @@ class DashboardData {
   }
 }
 
-/// Temporary list of transactions for the History screen, newest first.
 class SampleData {
   static UserProfile profile() {
     return UserProfile(

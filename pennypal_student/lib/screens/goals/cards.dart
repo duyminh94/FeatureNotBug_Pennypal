@@ -8,7 +8,6 @@ import '../../utils/formatters.dart';
 import '../../utils/goal_calculator.dart';
 import '../../widgets/app_progress_bar.dart';
 
-/// Round progress ring with the percent saved in the middle.
 class GoalProgressRing extends StatelessWidget {
   final double progress;
   final double size;
@@ -54,7 +53,6 @@ class GoalProgressRing extends StatelessWidget {
   }
 }
 
-/// "On track" / "Behind" / "No estimate" badge, from the planned monthly amount and the target date.
 class GoalPaceBadge extends StatelessWidget {
   final GoalPace pace;
 
@@ -88,7 +86,6 @@ class GoalPaceBadge extends StatelessWidget {
   }
 }
 
-/// Card of an active goal: ring, saved / target, target date and pace.
 class ActiveGoalCard extends StatelessWidget {
   final SavingsGoal goal;
   final VoidCallback onTap;
@@ -162,7 +159,6 @@ class ActiveGoalCard extends StatelessWidget {
   }
 }
 
-/// Card of a completed goal in History, with the date and the milestones that were marked.
 class CompletedGoalCard extends StatelessWidget {
   final SavingsGoal goal;
   final VoidCallback? onTap;
@@ -176,7 +172,6 @@ class CompletedGoalCard extends StatelessWidget {
     String doneDate = '';
     if (completedAt != null) doneDate = Formatters.fullDate(DateTime.fromMillisecondsSinceEpoch(completedAt));
 
-    // One chip per milestone with a small gap between them (no gap after the last one).
     final List<Widget> milestoneChips = [];
     for (final String key in MilestoneKeys.values) {
       final bool isReached = goal.milestones.containsKey(key);
@@ -221,7 +216,6 @@ class CompletedGoalCard extends StatelessWidget {
   }
 }
 
-/// Card of a cancelled goal in History ("keep history" choice), with how many contributions it had.
 class CancelledGoalCard extends StatelessWidget {
   final SavingsGoal goal;
   final int contributionCount;
@@ -273,7 +267,6 @@ class CancelledGoalCard extends StatelessWidget {
   }
 }
 
-/// Flag icon of a goal; grey when the goal is cancelled.
 class _GoalIcon extends StatelessWidget {
   final bool isMuted;
 
@@ -293,7 +286,6 @@ class _GoalIcon extends StatelessWidget {
   }
 }
 
-/// Small 25% / 50% / 75% / 100% chip, honey when that milestone was marked.
 class _MilestoneChip extends StatelessWidget {
   final String label;
   final bool isReached;
@@ -317,7 +309,6 @@ class _MilestoneChip extends StatelessWidget {
   }
 }
 
-/// Rounded status badge with an icon.
 class _Badge extends StatelessWidget {
   final String label;
   final IconData icon;

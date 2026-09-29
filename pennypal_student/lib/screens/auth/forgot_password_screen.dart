@@ -12,7 +12,6 @@ import '../../widgets/circle_back_button.dart';
 import '../../widgets/error_banner.dart';
 import '../../widgets/labeled_text_field.dart';
 
-/// S04 Forgot password: asks for the email, then waits 45 seconds before resending.
 class ForgotPasswordScreen extends StatefulWidget {
   final Future<AuthProblem> Function(String email) sendReset;
 

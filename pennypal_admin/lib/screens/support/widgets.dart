@@ -4,13 +4,11 @@ import 'package:intl/intl.dart';
 
 import '../../utils/app_theme.dart';
 
-/// Date and time a request was sent or answered, e.g. "26 Sep, 14:20".
 String supportDate(int? millis, String languageCode) {
   if (millis == null) return '';
   return DateFormat('dd MMM, HH:mm', languageCode).format(DateTime.fromMillisecondsSinceEpoch(millis));
 }
 
-/// Small Open / Resolved label shown on each request.
 class SupportStatusBadge extends StatelessWidget {
   final bool isResolved;
 

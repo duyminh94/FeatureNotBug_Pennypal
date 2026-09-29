@@ -26,7 +26,6 @@ import 'support/screen.dart';
 import 'users/screen.dart';
 
 class AdminShell extends StatefulWidget {
-  /// Null in the real app: the shell loads the data from Firebase. Tests pass ready-made data.
   final AdminData? data;
   final UserProfile admin;
   final Future<void> Function() signOut;
@@ -62,7 +61,6 @@ class _AdminShellState extends State<AdminShell> {
     super.dispose();
   }
 
-  /// Keeps the menu badge live: after a reply the count goes down without opening the Overview again.
   void _listenSupport() {
     try {
       _supportSubscription = widget.watchSupport().listen(
@@ -74,7 +72,6 @@ class _AdminShellState extends State<AdminShell> {
     }
   }
 
-  /// Reads the data once; the support badge is updated when it arrives.
   Future<AdminData> _loadData() {
     final AdminData? readyData = widget.data;
     final Future<AdminData> future = readyData != null ? Future.value(readyData) : AdminDataService.load();
@@ -110,7 +107,6 @@ class _AdminShellState extends State<AdminShell> {
     };
   }
 
-  /// Opening Overview or Analytics reads the data again, so the numbers are never old.
   void _open(AdminSection section) {
     setState(() {
       _section = section;
@@ -121,10 +117,8 @@ class _AdminShellState extends State<AdminShell> {
   Widget _withData(Widget Function(AdminData data) buildPage) {
     return FutureBuilder<AdminData>(
       future: _dataFuture,
-      // Data passed in (tests) is shown at once instead of waiting one frame.
       initialData: widget.data,
       builder: (context, snapshot) {
-        // After Retry the builder still holds the old error while the new read runs, so waiting is checked first.
         final bool isFirstLoad = snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData;
         if (isFirstLoad) return const Center(child: CircularProgressIndicator());
         if (snapshot.hasError) {

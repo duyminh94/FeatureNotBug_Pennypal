@@ -14,8 +14,6 @@ import 'cards.dart';
 import 'form_screen.dart';
 import 'milestones.dart';
 
-/// What changed on the detail screen, sent back to the Goals list so it updates at once.
-/// [goal] is null when the goal was deleted.
 class GoalChange {
   final String goalId;
   final SavingsGoal? goal;
@@ -24,24 +22,17 @@ class GoalChange {
   const GoalChange({required this.goalId, required this.goal, required this.contributions});
 }
 
-/// What the Goals list should do after the detail screen closes.
 enum GoalDetailAction { createGoal, openHistory }
 
-/// The two ways to delete a goal that already has contributions.
 enum _DeleteChoice { refund, keepHistory }
 
-/// One goal: progress, milestones, stats, contributions and the actions
-/// (contribute, edit, delete). A completed goal shows a "goal reached" header instead.
 class GoalDetailScreen extends StatefulWidget {
   final SavingsGoal goal;
 
-  /// This goal's contributions (savings transactions with its goalId).
   final List<TransactionRecord> contributions;
 
-  /// Current balance, used for the "more than your balance" warning when contributing.
   final double balance;
 
-  /// Called after every change so the Goals list stays in step.
   final ValueChanged<GoalChange> onChanged;
 
   const GoalDetailScreen({
@@ -60,7 +51,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
   late SavingsGoal _goal;
   List<TransactionRecord> _contributions = [];
 
-  // Balance before this goal's contributions; the live balance is this minus the current contributions.
   double _balanceWithoutGoal = 0;
 
   @override
@@ -72,12 +62,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     _balanceWithoutGoal = widget.balance + GoalCalculator.contributedTotal(widget.contributions);
   }
 
-  /// Newest contribution first.
   void _sortContributions() {
     _contributions.sort((a, b) => b.date.compareTo(a.date));
   }
 
-  /// Balance after the contributions made on this screen.
   double get _balance {
     return _balanceWithoutGoal - GoalCalculator.contributedTotal(_contributions);
   }
@@ -94,7 +82,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     return DateTime.now().millisecondsSinceEpoch;
   }
 
-  /// Sends the current goal and contributions back to the Goals list.
   void _notify() {
     widget.onChanged(GoalChange(goalId: _goal.id, goal: _goal, contributions: List.of(_contributions)));
   }
@@ -104,7 +91,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
-  /// Opens the edit form; the form saves the goal itself.
   Future<void> _openEditForm() async {
     final SavingsGoal? saved = await Navigator.of(context).push<SavingsGoal>(
       MaterialPageRoute(builder: (context) => GoalFormScreen(initial: _goal, hasContributions: _contributions.isNotEmpty)),
@@ -116,8 +102,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     _notify();
   }
 
-  /// Adds, edits or deletes a contribution. The goal's saved money changes by the difference,
-  /// which may complete the goal (100%) or reopen it. The contribution and the goal are saved together.
   Future<void> _openContributionSheet({TransactionRecord? contribution}) async {
     final l10n = AppLocalizations.of(context)!;
     final Object? result = await showContributionSheet(context, goal: _goal, balance: _balance, contribution: contribution);
@@ -125,7 +109,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
 
     final double oldAmount = contribution?.amount ?? 0;
 
-    // Delete: take the old amount back out of the goal.
     if (result == FormResults.deleted && contribution != null) {
       setState(() {
         _contributions.remove(contribution);
@@ -142,7 +125,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
 
     setState(() {
       if (contribution != null) {
-        // Edit: only the difference between the new and old amount changes the goal.
         final int index = _contributions.indexOf(contribution);
         _contributions[index] = saved;
         _goal = GoalCalculator.changeCurrentAmount(_goal, saved.amount - oldAmount, _now);
@@ -162,7 +144,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     }
   }
 
-  /// Marks a reached milestone with today's date.
   void _markMilestone(String key) {
     final l10n = AppLocalizations.of(context)!;
     setState(() {
@@ -173,10 +154,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     _showMessage(l10n.goalMilestoneMarked(int.parse(key.substring(1))));
   }
 
-  /// Deleting a goal:
-  /// - no contributions: simple confirm, then the goal is deleted;
-  /// - with contributions, "refund": the goal and its contributions are deleted, the money goes back to the balance;
-  /// - with contributions, "keep history": the goal becomes cancelled and its transactions stay.
   Future<void> _deleteGoal() async {
     final l10n = AppLocalizations.of(context)!;
     if (_contributions.isEmpty) {
@@ -218,14 +195,12 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     }
   }
 
-  /// Tells the list, shows the result and closes the detail screen.
   void _finishDelete(GoalChange change, String message) {
     widget.onChanged(change);
     _showMessage(message);
     Navigator.of(context).pop();
   }
 
-  /// Dialog with the two choices (refund or keep history); returns null on Cancel.
   Future<_DeleteChoice?> _showDeleteChoices(AppLocalizations l10n, double contributed) {
     return showDialog<_DeleteChoice>(
       context: context,
@@ -333,7 +308,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     );
   }
 
-  /// Ring, saved / target and pace for an active or cancelled goal.
   Widget _buildProgressHeader(AppLocalizations l10n) {
     return Column(
       children: [
@@ -392,13 +366,11 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     );
   }
 
-  /// On track / behind, from the estimated finish date and the target date.
   GoalPace _pace() {
     final int? months = GoalCalculator.monthsLeft(_goal.remainingAmount, _goal.monthlyContribution);
     return GoalCalculator.pace(GoalCalculator.estimatedDate(months), DateTime.fromMillisecondsSinceEpoch(_goal.targetDate));
   }
 
-  /// "Goal reached" header of a completed goal, with the completion date.
   Widget _buildCompletedHeader(AppLocalizations l10n) {
     final int? completedAt = _goal.completedAt;
     String doneDate = '';
@@ -441,8 +413,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     );
   }
 
-  /// Three numbers: money left, months left at the monthly amount, estimated finish month.
-  /// Without a monthly amount the last two say "No estimate".
   Widget _buildStats(AppLocalizations l10n) {
     final int? months = GoalCalculator.monthsLeft(_goal.remainingAmount, _goal.monthlyContribution);
     final DateTime? estimated = GoalCalculator.estimatedDate(months);
@@ -470,7 +440,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     );
   }
 
-  /// List of contributions, newest first.
   Widget _buildContributions(AppLocalizations l10n) {
     if (_contributions.isEmpty) {
       return Card(
@@ -488,7 +457,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     return Card(child: Column(children: rows));
   }
 
-  /// One contribution; tapping it opens the edit sheet (not for a cancelled goal, which is read-only).
   Widget _buildContributionRow(AppLocalizations l10n, TransactionRecord contribution) {
     VoidCallback? onTap;
     if (!_isCancelled) {
@@ -515,7 +483,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     );
   }
 
-  /// Bottom buttons: Contribute for an active goal, "new goal" / History for a completed one, none when cancelled.
   Widget? _buildBottomBar(AppLocalizations l10n) {
     if (_isCancelled) return null;
 
@@ -558,7 +525,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
   }
 }
 
-/// Heading of a section on the detail screen.
 class _SectionTitle extends StatelessWidget {
   final String text;
 
@@ -573,7 +539,6 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-/// One small stat box: label and value.
 class _StatTile extends StatelessWidget {
   final String label;
   final String value;

@@ -1,8 +1,6 @@
 import 'constants.dart';
 import 'text_normalizer.dart';
 
-/// Keywords of the default categories (words.md section 8), used by the transaction form, receipt scan and the chatbot.
-/// English and Vietnamese words are kept in two lists; Vietnamese words are written with accents and compared without them.
 class CategoryKeywords {
   static const Map<String, List<String>> _englishKeywords = {
     CategoryKeys.food: ['food', 'eat', 'meal', 'lunch', 'coffee', 'tea', 'dinner', 'breakfast', 'snack', 'drink'],
@@ -22,8 +20,6 @@ class CategoryKeywords {
     CategoryKeys.bills: ['hóa đơn', 'tiền nhà', 'điện thoại', 'điện', 'nước', 'mạng'],
   };
 
-  /// Returns the first category whose keyword appears as a whole word, or null when nothing matches.
-  /// [ignoredKeywords] lets the receipt parser skip words printed on every receipt, such as "hoa don".
   static String? findCategory(String text, {Set<String> ignoredKeywords = const {}}) {
     final String normalized = TextNormalizer.normalize(text);
     for (final String categoryId in _englishKeywords.keys) {

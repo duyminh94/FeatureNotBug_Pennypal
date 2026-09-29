@@ -18,7 +18,6 @@ import '../../widgets/confirm_dialog.dart';
 import '../../widgets/error_state.dart';
 import 'form_sheet.dart';
 
-/// Default categories are locked. Custom ones are saved in Firebase and can only be deleted when nothing uses them.
 class CategoriesScreen extends StatefulWidget {
   final String uid;
   final Stream<List<Category>> Function(String uid) watchCategories;

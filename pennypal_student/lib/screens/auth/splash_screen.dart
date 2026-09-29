@@ -8,7 +8,6 @@ import '../../utils/constants.dart';
 import '../main_shell.dart';
 import 'login_screen.dart';
 
-/// S01 Splash: signed-in users go straight to the app; new users read the intro and tap Get started.
 class SplashScreen extends StatefulWidget {
   static const Duration minimumShowTime = Duration(milliseconds: 1500);
 

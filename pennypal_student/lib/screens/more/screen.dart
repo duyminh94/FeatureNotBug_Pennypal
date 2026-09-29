@@ -66,7 +66,6 @@ class _MoreScreenState extends State<MoreScreen> {
     if (saved == null || !mounted) return;
     Formatters.setCurrency(saved.currency);
     setState(() => _profile = saved);
-    // MainShell needs the new "notifications on/off" setting for the bell badge.
     widget.onProfileChanged?.call(saved);
   }
 

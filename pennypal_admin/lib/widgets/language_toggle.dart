@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../controllers/locale_service.dart';
 import '../utils/app_theme.dart';
 
-/// Small EN / VI pill switch shown on the login screen.
 class LanguageToggle extends StatelessWidget {
   const LanguageToggle({super.key});
 

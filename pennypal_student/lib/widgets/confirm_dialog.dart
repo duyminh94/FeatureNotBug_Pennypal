@@ -3,7 +3,6 @@ import 'package:pennypal_student/l10n/app_localizations.dart';
 
 import '../utils/app_theme.dart';
 
-/// Shows a Yes / Cancel dialog and returns true only when the user confirms.
 Future<bool> showConfirmDialog(
   BuildContext context, {
   required String message,
@@ -68,6 +67,5 @@ Future<bool> showConfirmDialog(
     },
   );
 
-  // Tapping outside the dialog returns null, which means "not confirmed".
   return result ?? false;
 }

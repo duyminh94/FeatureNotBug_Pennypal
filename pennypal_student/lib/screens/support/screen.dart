@@ -13,7 +13,6 @@ import 'form_screen.dart';
 import 'sent_screen.dart';
 import 'widgets.dart';
 
-/// The student's help requests from Firebase; the admin's reply shows up here live.
 class SupportScreen extends StatefulWidget {
   final UserProfile? profile;
 
@@ -34,7 +33,6 @@ class _SupportScreenState extends State<SupportScreen> {
     );
     if (sent == null || !mounted) return;
 
-    // No need to add it to the list by hand: the stream already contains the new request.
     await Navigator.of(context).push(MaterialPageRoute(builder: (context) => SupportSentScreen(query: sent)));
   }
 

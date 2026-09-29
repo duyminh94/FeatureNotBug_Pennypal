@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Shown when a list has no data: icon, message and an optional action button.
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String message;

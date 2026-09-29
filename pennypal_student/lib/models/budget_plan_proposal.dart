@@ -27,7 +27,7 @@ class BudgetPlanItem {
 }
 
 class BudgetPlanProposal {
-  final String month; // e.g. "2026-09"
+  final String month;
   final double estimatedIncome;
   final double fixedExpensesTotal;
   final double savingsTotal;

@@ -7,8 +7,6 @@ import '../../models/receipt_scan_result.dart';
 import '../../controllers/receipt_scan_service.dart';
 import '../../utils/app_theme.dart';
 
-/// S07 "Reading receipt…": shows the photo while ML Kit reads it, then pops with the result.
-/// Pops with null when the student cancels.
 class ScanReadingScreen extends StatefulWidget {
   final String imagePath;
 

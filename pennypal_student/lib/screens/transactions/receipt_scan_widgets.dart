@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
 
-/// Bottom sheet "Scan receipt": camera or gallery. Returns null when cancelled.
 Future<ImageSource?> showScanSourceSheet(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
 
@@ -61,10 +60,8 @@ Future<ImageSource?> showScanSourceSheet(BuildContext context) {
   );
 }
 
-/// What the student chose after the camera permission was refused.
 enum PermissionChoice { gallery, manual }
 
-/// Bottom sheet shown when camera access is refused; the form keeps working by hand.
 Future<PermissionChoice?> showCameraPermissionSheet(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
 
@@ -179,7 +176,6 @@ class _SourceOption extends StatelessWidget {
   }
 }
 
-/// Receipt thumbnail card: tap to see it full screen, bin button to remove it.
 class ReceiptPhotoCard extends StatelessWidget {
   final String imagePath;
   final VoidCallback onRemove;
@@ -262,10 +258,8 @@ class ReceiptPhotoCard extends StatelessWidget {
   }
 }
 
-/// Which banner the form shows after a scan.
 enum ScanNoticeType { none, filled, noText, noAmount }
 
-/// Banner at the top of the form after a scan (BR-96).
 class ScanNotice extends StatelessWidget {
   final ScanNoticeType type;
 

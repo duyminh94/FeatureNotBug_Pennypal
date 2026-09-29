@@ -3,12 +3,10 @@ import 'package:flutter/foundation.dart';
 
 import '../models/app_settings.dart';
 
-/// Reads the global app settings at app_settings (support email, announcement banner, budget threshold).
 class SettingsService {
   static const String node = 'app_settings';
   static const Duration readTimeout = Duration(seconds: 10);
 
-  /// Loads global settings once, or returns default AppSettings on error.
   static Future<AppSettings> load() async {
     try {
       final DataSnapshot snapshot = await FirebaseDatabase.instance.ref(node).get().timeout(readTimeout);
@@ -21,7 +19,6 @@ class SettingsService {
     }
   }
 
-  /// Live stream of app settings.
   static Stream<AppSettings> watch() {
     final DatabaseReference ref = FirebaseDatabase.instance.ref(node);
     return ref.onValue.map((event) {

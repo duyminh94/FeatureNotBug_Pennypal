@@ -5,10 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../models/feedback_entry.dart';
 import '../utils/constants.dart';
 
-/// Sends app feedback to feedbacks/{feedbackId}; only the Admin app can read this node.
-/// Security Rules allow a student to create a new entry with their own userId, never to change one.
 class FeedbackService {
-  /// Returns false when nobody is signed in. The write is not awaited so it also works offline.
   static bool send(String name, String email, int rating, String comments) {
     try {
       final User? user = FirebaseAuth.instance.currentUser;

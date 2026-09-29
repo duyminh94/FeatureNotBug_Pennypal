@@ -39,7 +39,6 @@ class CategoryManager {
     return budgets.where((budget) => budget.categoryId == categoryId).length;
   }
 
-  /// An income budget or transaction must never point at an expense category, so the type is locked once it is used.
   static bool canChangeType(String categoryId, List<TransactionRecord> transactions, List<Budget> budgets) {
     return transactionCount(categoryId, transactions) == 0 && budgetCount(categoryId, budgets) == 0;
   }

@@ -8,7 +8,6 @@ import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import 'category_icon.dart';
 
-/// One transaction row: category icon, description, "category · date" (or payment mode) and the signed amount.
 class TransactionTile extends StatelessWidget {
   final TransactionRecord transaction;
   final VoidCallback? onTap;

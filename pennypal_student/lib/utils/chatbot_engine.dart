@@ -98,7 +98,6 @@ class ChatbotEngine {
     final int? askedMonth = _mentionedMonth(message);
     final bool usesThisMonthData =
         intent == ChatIntent.topSpending || intent == ChatIntent.monthSummary || intent == ChatIntent.budgetRemaining;
-    // The answers below only read the current month, so asking about another month must not show this month's numbers.
     final bool asksOtherMonth = (askedMonth != null && askedMonth != now.month) || _mentionsLastMonth(message);
     if (usesThisMonthData && asksOtherMonth) {
       return _botMessage(l10n.chatOnlyThisMonth(_monthLabel));
@@ -120,7 +119,6 @@ class ChatbotEngine {
     };
   }
 
-  /// "thang 8", "month 8" -> 8; null when no valid month number (1-12) is written.
   int? _mentionedMonth(String message) {
     final RegExpMatch? match = RegExp(r'\b(?:thang|month)\s+(\d{1,2})\b').firstMatch(TextNormalizer.normalize(message));
     if (match == null) return null;
@@ -128,7 +126,6 @@ class ChatbotEngine {
     return month >= 1 && month <= 12 ? month : null;
   }
 
-  /// "last month" / "tháng trước" (written with or without accents).
   bool _mentionsLastMonth(String message) {
     final String text = TextNormalizer.normalize(message);
     return RegExp(r'\b(last month|thang truoc)\b').hasMatch(text);
@@ -164,7 +161,6 @@ class ChatbotEngine {
     return _botMessage('$text\n\n${l10n.chatTopTip}', progress: progress);
   }
 
-  /// "How much did I spend on food?" answers for that category; without a category it sums up the whole month.
   ChatMessage _monthSummary(String message) {
     final MonthSummary summary = ReportCalculator.summary(data.transactions, _month);
     if (summary.isEmpty) return _botMessage(l10n.chatNoSpending(_monthLabel), showAddExpense: true);
@@ -180,12 +176,10 @@ class ChatbotEngine {
     ));
   }
 
-  /// Spending of one category this month and its share of all spending (savings are not spending).
   ChatMessage _categorySpending(String categoryId) {
     final String month = BudgetCalculator.monthKey(_month);
     final double categorySpent = BudgetCalculator.spent(data.transactions, month, categoryId: categoryId);
     final double totalSpent = BudgetCalculator.spent(data.transactions, month);
-    // Only income this month: nothing spent yet, so the share would divide by zero.
     if (totalSpent == 0) return _botMessage(l10n.chatNoSpending(_monthLabel), showAddExpense: true);
 
     final String share = _percentText(categorySpent / totalSpent * 100);
@@ -236,8 +230,6 @@ class ChatbotEngine {
     );
   }
 
-  /// This month so far against the same days of last month (day 1 to today's day),
-  /// so on the 5th it compares 5 days with 5 days, not 5 days with a whole month.
   ChatMessage _compareLastMonth() {
     final DateTime lastMonth = DateTime(_month.year, _month.month - 1);
     final double current = _spendingUntilDay(_month, now.day);
@@ -252,8 +244,6 @@ class ChatbotEngine {
         : l10n.chatCompareLess(Formatters.money(current), Formatters.money(last), percent));
   }
 
-  /// Spending of [month] from day 1 to [lastDay]. A day past the month's end (31 in a 30-day month) counts the whole month.
-  /// Same rule as BudgetCalculator.spent: only expenses, money put into goals is not spending.
   double _spendingUntilDay(DateTime month, int lastDay) {
     double total = 0;
     for (final TransactionRecord transaction in data.transactions) {

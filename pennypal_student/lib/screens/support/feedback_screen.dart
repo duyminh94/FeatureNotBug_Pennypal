@@ -49,7 +49,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     };
   }
 
-  /// Rating 1-5 is required; the feedback goes to Firebase and only the admin can read it.
   void _send() {
     setState(() => _hasTriedToSend = true);
     final bool isFormValid = _formKey.currentState!.validate();
@@ -126,7 +125,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     style: const TextStyle(fontFamily: AppFonts.heading, fontSize: 20, fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 8),
-                  // Five 56px buttons need 280px; on a narrower screen the row shrinks a little instead of overflowing.
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Row(

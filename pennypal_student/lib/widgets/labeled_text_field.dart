@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../utils/app_theme.dart';
 
-/// Text field with a label above it and an icon inside, as in the design forms.
 class LabeledTextField extends StatelessWidget {
   final String label;
   final IconData icon;

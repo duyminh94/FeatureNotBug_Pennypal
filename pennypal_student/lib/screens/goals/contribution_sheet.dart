@@ -12,8 +12,6 @@ import '../../utils/validators.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/labeled_text_field.dart';
 
-/// Opens the contribution sheet from the bottom of the screen.
-/// Returns the new / edited contribution, FormResults.deleted, or null when closed.
 Future<Object?> showContributionSheet(
   BuildContext context, {
   required SavingsGoal goal,
@@ -29,16 +27,11 @@ Future<Object?> showContributionSheet(
   );
 }
 
-/// Add or edit money put into a goal. A contribution is saved as a "savings" expense linked to the goal,
-/// so the balance goes down but budgets do not count it as spending.
-/// Rule: more than 0 and not more than what the goal still needs. Going above the balance only warns.
 class ContributionSheet extends StatefulWidget {
   final SavingsGoal goal;
 
-  /// Current balance, used for the "more than your balance" warning.
   final double balance;
 
-  /// The contribution being edited, null when adding.
   final TransactionRecord? contribution;
 
   const ContributionSheet({super.key, required this.goal, required this.balance, this.contribution});
@@ -48,7 +41,6 @@ class ContributionSheet extends StatefulWidget {
 }
 
 class _ContributionSheetState extends State<ContributionSheet> {
-  // Quick buttons that add 200k / 500k / 1M to the typed amount.
   static const List<double> _quickAmounts = [200000, 500000, 1000000];
 
   final _formKey = GlobalKey<FormState>();
@@ -61,17 +53,14 @@ class _ContributionSheetState extends State<ContributionSheet> {
     return widget.contribution != null;
   }
 
-  /// Amount before editing (0 when adding); it is given back to the goal before checking the new amount.
   double get _oldAmount {
     return widget.contribution?.amount ?? 0;
   }
 
-  /// The typed amount as a number, 0 when empty or not a number.
   double get _amount {
     return Validators.parseAmount(_amountController.text) ?? 0;
   }
 
-  /// A new contribution starts today; an edited one loads its saved values.
   @override
   void initState() {
     super.initState();
@@ -92,7 +81,6 @@ class _ContributionSheetState extends State<ContributionSheet> {
     super.dispose();
   }
 
-  /// Amount must be above 0 and not above what the goal still needs.
   String? _validateAmount(AppLocalizations l10n) {
     if (_amount <= 0) return l10n.validationAmountPositive;
 
@@ -102,17 +90,14 @@ class _ContributionSheetState extends State<ContributionSheet> {
     return l10n.goalContributionTooMuch(Formatters.money(maxAmount));
   }
 
-  /// Adds a quick amount to what is already typed.
   void _addQuickAmount(double value) {
     setState(() {
       _amountController.text = Formatters.groupDigits(_amount + value);
     });
   }
 
-  /// Date picker limited to the last 5 years up to today; a contribution cannot be in the future.
   Future<void> _pickDate() async {
     final DateTime today = DateTime.now();
-    // Editing a contribution older than 5 years: the picker must start at its date, or Flutter throws.
     DateTime firstDate = DateTime(today.year - 5);
     if (_date.isBefore(firstDate)) firstDate = DateTime(_date.year, _date.month, _date.day);
     final DateTime? picked = await showDatePicker(
@@ -128,8 +113,6 @@ class _ContributionSheetState extends State<ContributionSheet> {
     });
   }
 
-  /// Builds the contribution and returns it to the goal screen, which saves it together with the goal.
-  /// When editing, the id and creation time stay the same and updatedAt is set.
   void _save() {
     if (!_formKey.currentState!.validate()) return;
 
@@ -164,7 +147,6 @@ class _ContributionSheetState extends State<ContributionSheet> {
     Navigator.of(context).pop(contribution);
   }
 
-  /// Asks first, then tells the goal screen to delete this contribution.
   Future<void> _delete() async {
     final l10n = AppLocalizations.of(context)!;
     final bool confirmed = await showConfirmDialog(
@@ -181,7 +163,6 @@ class _ContributionSheetState extends State<ContributionSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Only the extra money counts against the balance when editing.
     final bool isOverBalance = _amount - _oldAmount > widget.balance;
 
     String saveLabel = l10n.goalContribute;
@@ -191,7 +172,6 @@ class _ContributionSheetState extends State<ContributionSheet> {
       saveLabel = l10n.goalContributeButton(Formatters.money(_amount));
     }
 
-    // Warn (but still allow) when the contribution is more than the balance.
     IconData noticeIcon = Icons.info_outline;
     String noticeText = l10n.goalContributionInfo;
     if (isOverBalance) {
@@ -237,7 +217,6 @@ class _ContributionSheetState extends State<ContributionSheet> {
                       textAlign: TextAlign.center,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       validator: (_) => _validateAmount(l10n),
-                      // Rebuild so the button text and the balance warning follow the typed amount.
                       onChanged: (_) {
                         setState(() {});
                       },
@@ -323,7 +302,6 @@ class _ContributionSheetState extends State<ContributionSheet> {
   }
 }
 
-/// Honey box with an info or warning message.
 class _Notice extends StatelessWidget {
   final IconData icon;
   final String text;

@@ -9,7 +9,6 @@ import 'package:pennypal_student/utils/transaction_filter.dart';
 
 final DateTime testMonth = DateTime(2026, 3);
 
-// 3 expenses a day inside testMonth, day 0 is 28/03, day 11 is 17/03: 36 transactions.
 List<TransactionRecord> threePerDay(int days) {
   final List<TransactionRecord> transactions = [];
   for (int day = 0; day < days; day++) {

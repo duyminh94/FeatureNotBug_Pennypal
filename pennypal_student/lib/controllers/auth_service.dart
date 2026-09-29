@@ -61,6 +61,10 @@ class AuthService {
     return profile.isActive ? AuthProblem.none : AuthProblem.locked;
   }
 
+  static Stream<bool> watchIsActive(String uid) {
+    return _userRef(uid).child(DbFields.isActive).onValue.map((event) => event.snapshot.value != false);
+  }
+
   static Map<String, Object?> newProfileMap({
     required String fullName,
     required String email,
